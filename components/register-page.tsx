@@ -67,6 +67,20 @@ export function RegisterPage({ store }: RegisterPageProps) {
             </label>
 
             <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-brand-muted">Email</span>
+              <div className="flex items-center gap-3 rounded-lg border border-brand-border/70 bg-white px-4 py-3 shadow-sm">
+                <Mail className="h-5 w-5 text-brand-outline" />
+                <input
+                  type="email"
+                  name="email"
+                  className="w-full bg-transparent outline-none placeholder:text-brand-outline"
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+            </label>
+
+            <label className="block">
               <span className="mb-2 block text-sm font-semibold text-brand-muted">Password</span>
               <div className="flex items-center gap-3 rounded-lg border border-brand-border/70 bg-white px-4 py-3 shadow-sm">
                 <LockKeyhole className="h-5 w-5 text-brand-outline" />

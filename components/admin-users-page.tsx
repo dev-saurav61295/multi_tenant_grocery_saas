@@ -93,7 +93,7 @@ export function AdminUsersPage({ store, currentRole, userName, staff }: AdminUse
 
           {showAddStaff ? (
             <div className="panel rounded-xl p-5">
-              <form action={staffFormAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <form action={staffFormAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                 <label className="block">
                   <span className="mb-2 block text-sm font-semibold text-brand-ink">Name</span>
                   <input name="name" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
@@ -101,6 +101,10 @@ export function AdminUsersPage({ store, currentRole, userName, staff }: AdminUse
                 <label className="block">
                   <span className="mb-2 block text-sm font-semibold text-brand-ink">Username</span>
                   <input name="username" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Email</span>
+                  <input name="email" type="email" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
                 </label>
                 <label className="block">
                   <span className="mb-2 block text-sm font-semibold text-brand-ink">Password</span>

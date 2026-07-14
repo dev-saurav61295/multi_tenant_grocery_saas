@@ -24,16 +24,31 @@ export async function findUserByUsername(storeId: string, username: string): Pro
   return prisma.user.findUnique({ where: { storeId_username: { storeId, username } } });
 }
 
-export async function registerCustomer(input: { storeId: string; username: string; password: string; name: string }): Promise<AppUser> {
+export async function findUserByEmail(storeId: string, email: string): Promise<AppUser | null> {
+  return prisma.user.findUnique({ where: { storeId_email: { storeId, email } } });
+}
+
+export async function registerCustomer(input: {
+  storeId: string;
+  username: string;
+  email: string;
+  password: string;
+  name: string;
+  emailVerifyToken?: string;
+  emailVerifyExpires?: Date;
+}): Promise<AppUser> {
   const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
 
   return prisma.user.create({
     data: {
       storeId: input.storeId,
       username: input.username,
+      email: input.email,
       passwordHash,
       name: input.name,
       role: "customer",
+      emailVerifyToken: input.emailVerifyToken,
+      emailVerifyExpires: input.emailVerifyExpires,
     },
   });
 }
@@ -41,6 +56,7 @@ export async function registerCustomer(input: { storeId: string; username: strin
 export async function createStaffUser(input: {
   storeId: string;
   username: string;
+  email: string;
   password: string;
   name: string;
   role: Exclude<Role, "customer">;
@@ -51,6 +67,7 @@ export async function createStaffUser(input: {
     data: {
       storeId: input.storeId,
       username: input.username,
+      email: input.email,
       passwordHash,
       name: input.name,
       role: input.role,

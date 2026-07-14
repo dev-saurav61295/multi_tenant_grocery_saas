@@ -6,6 +6,7 @@ const SALT_ROUNDS = 10;
 
 type DemoUser = {
   username: string;
+  email: string;
   password: string;
   name: string;
   role: "admin" | "staff" | "delivery" | "customer";
@@ -46,13 +47,13 @@ const stores = [
     closingTime: "20:00",
     hourlyCapacity: 40,
     users: [
-      { username: "admin_user", password: "password123", name: "Bhagwandas Admin", role: "admin" as const },
-      { username: "staff_user", password: "password123", name: "Packing Staff", role: "staff" as const },
-      { username: "delivery_user", password: "password123", name: "Delivery Rider", role: "delivery" as const },
-      { username: "neha_sharma", password: "password123", name: "Neha Sharma", role: "customer" as const },
-      { username: "mohan_verma", password: "password123", name: "Mohan Verma", role: "customer" as const },
-      { username: "aarav_jain", password: "password123", name: "Aarav Jain", role: "customer" as const },
-      { username: "suhani_gupta", password: "password123", name: "Suhani Gupta", role: "customer" as const },
+      { username: "admin_user", email: "admin.bhagwandas@example.com", password: "password123", name: "Bhagwandas Admin", role: "admin" as const },
+      { username: "staff_user", email: "staff.bhagwandas@example.com", password: "password123", name: "Packing Staff", role: "staff" as const },
+      { username: "delivery_user", email: "delivery.bhagwandas@example.com", password: "password123", name: "Delivery Rider", role: "delivery" as const },
+      { username: "neha_sharma", email: "neha.sharma@example.com", password: "password123", name: "Neha Sharma", role: "customer" as const },
+      { username: "mohan_verma", email: "mohan.verma@example.com", password: "password123", name: "Mohan Verma", role: "customer" as const },
+      { username: "aarav_jain", email: "aarav.jain@example.com", password: "password123", name: "Aarav Jain", role: "customer" as const },
+      { username: "suhani_gupta", email: "suhani.gupta@example.com", password: "password123", name: "Suhani Gupta", role: "customer" as const },
     ] satisfies DemoUser[],
     products: [
       { id: "amul-milk", name: "Amul Gold Milk", brand: "Amul", size: "1L Pouch", price: 72, category: "Dairy", description: "Fresh toned milk for everyday delivery.", comboEligible: false, stock: 84 },
@@ -132,11 +133,11 @@ const stores = [
     closingTime: "21:00",
     hourlyCapacity: 30,
     users: [
-      { username: "admin_user", password: "password123", name: "Fresh Mart Admin", role: "admin" as const },
-      { username: "floor_user", password: "password123", name: "Floor Staff", role: "staff" as const },
-      { username: "rider_user", password: "password123", name: "Fresh Rider", role: "delivery" as const },
-      { username: "rhea_patel", password: "password123", name: "Rhea Patel", role: "customer" as const },
-      { username: "iman_ali", password: "password123", name: "Iman Ali", role: "customer" as const },
+      { username: "admin_user", email: "admin.freshmart@example.com", password: "password123", name: "Fresh Mart Admin", role: "admin" as const },
+      { username: "floor_user", email: "staff.freshmart@example.com", password: "password123", name: "Floor Staff", role: "staff" as const },
+      { username: "rider_user", email: "delivery.freshmart@example.com", password: "password123", name: "Fresh Rider", role: "delivery" as const },
+      { username: "rhea_patel", email: "rhea.patel@example.com", password: "password123", name: "Rhea Patel", role: "customer" as const },
+      { username: "iman_ali", email: "iman.ali@example.com", password: "password123", name: "Iman Ali", role: "customer" as const },
     ] satisfies DemoUser[],
     products: [
       { id: "fme-milk", name: "Fresh Mart Milk", brand: "Farm Fresh", size: "1L Pouch", price: 68, category: "Dairy", description: "Daily milk supply for local households.", comboEligible: false, stock: 55 },
@@ -217,10 +218,19 @@ async function seedUsers(store: (typeof stores)[number]) {
           username: demoUser.username,
         },
       },
-      update: { passwordHash, name: demoUser.name, role: demoUser.role },
+      update: {
+        passwordHash,
+        name: demoUser.name,
+        role: demoUser.role,
+        email: demoUser.email,
+        emailVerifyToken: null,
+        emailVerifyExpires: null,
+        emailVerifiedAt: null,
+      },
       create: {
         storeId: storeRecord.id,
         username: demoUser.username,
+        email: demoUser.email,
         passwordHash,
         name: demoUser.name,
         role: demoUser.role,

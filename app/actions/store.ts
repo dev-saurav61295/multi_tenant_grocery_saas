@@ -1,11 +1,14 @@
 "use server";
 
+import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/session";
 import { RESERVED_STORE_SLUGS } from "@/lib/reserved-slugs";
+import { buildAppUrl, sendMail } from "@/lib/mail";
+import { registrationWelcomeEmail } from "@/lib/emails/registration-welcome-email";
 
 export type StoreActionState = { error: string } | undefined;
 
@@ -39,10 +42,15 @@ export async function createStore(_state: StoreActionState, formData: FormData):
   const storeSlug = String(formData.get("storeSlug") ?? "").trim().toLowerCase();
   const adminName = String(formData.get("adminName") ?? "").trim();
   const adminUsername = String(formData.get("adminUsername") ?? "").trim();
+  const adminEmail = String(formData.get("adminEmail") ?? "").trim().toLowerCase();
   const adminPassword = String(formData.get("adminPassword") ?? "");
 
-  if (!storeName || !storeSlug || !adminName || !adminUsername || !adminPassword) {
+  if (!storeName || !storeSlug || !adminName || !adminUsername || !adminEmail || !adminPassword) {
     return { error: "Please fill in every field." };
+  }
+
+  if (!adminEmail.includes("@")) {
+    return { error: "Enter a valid admin email address." };
   }
 
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(storeSlug)) {
@@ -59,6 +67,8 @@ export async function createStore(_state: StoreActionState, formData: FormData):
 
   const passwordHash = await bcrypt.hash(adminPassword, 10);
   const codePrefix = await uniqueCodePrefix(storeName, storeSlug);
+  const emailVerifyToken = randomBytes(32).toString("hex");
+  const emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   try {
     const result = await prisma.$transaction(async (tx) => {
@@ -74,13 +84,35 @@ export async function createStore(_state: StoreActionState, formData: FormData):
         data: {
           storeId: store.id,
           username: adminUsername,
+          email: adminEmail,
           passwordHash,
           name: adminName,
           role: "admin",
+          emailVerifyToken,
+          emailVerifyExpires,
         },
       });
 
       return { store, adminUser };
+    });
+
+    const verifyPath = buildAppUrl(`/${result.store.slug}/verify-email?token=${emailVerifyToken}`);
+    const welcome = registrationWelcomeEmail({
+      storeName: result.store.name,
+      userName: result.adminUser.name,
+      username: result.adminUser.username,
+      roleLabel: "admin",
+      verifyPath,
+    });
+
+    await sendMail({
+      storeId: result.store.id,
+      userId: result.adminUser.id,
+      to: result.adminUser.email,
+      subject: welcome.subject,
+      html: welcome.html,
+      fromName: result.store.name,
+      type: "registration_welcome",
     });
 
     await createSession(result.adminUser, result.store.slug);

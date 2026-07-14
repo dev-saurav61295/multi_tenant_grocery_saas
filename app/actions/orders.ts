@@ -6,6 +6,10 @@ import { prisma } from "@/lib/prisma";
 import { requireRole, verifySession } from "@/lib/session";
 import { parseCartParam } from "@/lib/cart";
 import { priceCart } from "@/lib/pricing";
+import { sendMail } from "@/lib/mail";
+import { orderConfirmationEmail } from "@/lib/emails/order-confirmation-email";
+import { orderOutForDeliveryEmail } from "@/lib/emails/order-out-for-delivery-email";
+import { orderDeliveredEmail } from "@/lib/emails/order-delivered-email";
 
 export type PlaceOrderState = { error: string } | undefined;
 
@@ -54,7 +58,8 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
     return { error: `Minimum order value is ₹${MINIMUM_ORDER_VALUE}.` };
   }
 
-  let displayId: string;
+  let displayId = "";
+  let createdOrderId = "";
 
   try {
     const order = await prisma.$transaction(async (tx) => {
@@ -103,12 +108,43 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
     });
 
     displayId = order.displayId;
+    createdOrderId = order.id;
   } catch (error) {
     if (error instanceof InsufficientStockError) {
       return { error: `Sorry, "${error.productName}" just went out of stock. Please update your cart.` };
     }
 
     throw error;
+  }
+
+  try {
+    const [store, user] = await Promise.all([
+      prisma.store.findUnique({ where: { id: session.storeId }, select: { name: true } }),
+      prisma.user.findUnique({ where: { id: session.id }, select: { id: true, email: true } }),
+    ]);
+
+    if (store && user && createdOrderId) {
+      const confirmation = orderConfirmationEmail({
+        storeName: store.name,
+        displayId,
+        address,
+        total: priced.total,
+        items: priced.lines.map((line) => ({ name: line.name, quantity: line.quantity, unitPrice: line.price })),
+      });
+
+      await sendMail({
+        storeId: session.storeId,
+        userId: user.id,
+        orderId: createdOrderId,
+        to: user.email,
+        subject: confirmation.subject,
+        html: confirmation.html,
+        fromName: store.name,
+        type: "order_confirmation",
+      });
+    }
+  } catch (error) {
+    console.error("Failed to send order confirmation email", error);
   }
 
   redirect(`/${session.storeSlug}/order/${displayId}`);
@@ -126,7 +162,32 @@ export async function verifyOrder(orderId: string) {
 export async function dispatchOrder(orderId: string) {
   const session = await requireRole("staff");
 
-  await prisma.order.update({ where: { id: orderId, storeId: session.storeId }, data: { status: "out_for_delivery" } });
+  const updated = await prisma.order.update({
+    where: { id: orderId, storeId: session.storeId },
+    data: { status: "out_for_delivery" },
+    include: {
+      user: { select: { id: true, email: true } },
+      store: { select: { name: true } },
+    },
+  });
+
+  const outForDelivery = orderOutForDeliveryEmail({
+    storeName: updated.store.name,
+    displayId: updated.displayId,
+    address: updated.address,
+    eta: updated.eta,
+  });
+
+  await sendMail({
+    storeId: session.storeId,
+    userId: updated.user.id,
+    orderId: updated.id,
+    to: updated.user.email,
+    subject: outForDelivery.subject,
+    html: outForDelivery.html,
+    fromName: updated.store.name,
+    type: "order_out_for_delivery",
+  });
 
   revalidatePath(`/${session.storeSlug}/staff/packing`);
   revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
@@ -135,7 +196,30 @@ export async function dispatchOrder(orderId: string) {
 export async function completeDelivery(orderId: string) {
   const session = await requireRole("delivery");
 
-  await prisma.order.update({ where: { id: orderId, storeId: session.storeId }, data: { status: "delivered" } });
+  const updated = await prisma.order.update({
+    where: { id: orderId, storeId: session.storeId },
+    data: { status: "delivered" },
+    include: {
+      user: { select: { id: true, email: true } },
+      store: { select: { name: true } },
+    },
+  });
+
+  const delivered = orderDeliveredEmail({
+    storeName: updated.store.name,
+    displayId: updated.displayId,
+  });
+
+  await sendMail({
+    storeId: session.storeId,
+    userId: updated.user.id,
+    orderId: updated.id,
+    to: updated.user.email,
+    subject: delivered.subject,
+    html: delivered.html,
+    fromName: updated.store.name,
+    type: "order_delivered",
+  });
 
   revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
 }

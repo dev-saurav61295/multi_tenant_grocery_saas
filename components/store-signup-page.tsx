@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, LockKeyhole, Store, UserRound } from "lucide-react";
+import { ArrowRight, LockKeyhole, Mail, Store, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { createStore } from "@/app/actions/store";
@@ -50,6 +50,14 @@ export function StoreSignupPage() {
             <div className="flex items-center gap-3 rounded-lg border border-brand-border/70 bg-white px-4 py-3 shadow-sm">
               <UserRound className="h-5 w-5 text-brand-outline" />
               <input name="adminUsername" className="w-full bg-transparent outline-none" placeholder="admin_user" required />
+            </div>
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-brand-muted">Admin Email</span>
+            <div className="flex items-center gap-3 rounded-lg border border-brand-border/70 bg-white px-4 py-3 shadow-sm">
+              <Mail className="h-5 w-5 text-brand-outline" />
+              <input type="email" name="adminEmail" className="w-full bg-transparent outline-none" placeholder="admin@example.com" required />
             </div>
           </label>
 

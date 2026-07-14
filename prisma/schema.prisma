@@ -23,20 +23,33 @@ enum OrderStatus {
   delivered
 }
 
+enum EmailType {
+  registration_welcome
+  order_confirmation
+  order_out_for_delivery
+  order_delivered
+}
+
 model User {
   id           String   @id @default(cuid())
   storeId      String
   store        Store    @relation(fields: [storeId], references: [id])
   username     String
+  email        String
   passwordHash String
   name         String
   role         Role     @default(customer)
+  emailVerifiedAt    DateTime?
+  emailVerifyToken   String?
+  emailVerifyExpires DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  orders Order[]
+  orders     Order[]
+  emailLogs  EmailLog[]
 
   @@unique([storeId, username])
+  @@unique([storeId, email])
   @@index([storeId])
   @@map("users")
 }
@@ -84,7 +97,8 @@ model Order {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
-  items OrderItem[]
+  items      OrderItem[]
+  emailLogs  EmailLog[]
 
   @@index([storeId])
   @@index([userId])
@@ -115,9 +129,28 @@ model Store {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  users    User[]
-  products Product[]
-  orders   Order[]
+  users      User[]
+  products   Product[]
+  orders     Order[]
+  emailLogs  EmailLog[]
 
   @@map("stores")
+}
+
+model EmailLog {
+  id        String    @id @default(cuid())
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id])
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id])
+  orderId   String?
+  order     Order?    @relation(fields: [orderId], references: [id])
+  type      EmailType
+  toEmail   String
+  status    String
+  error     String?
+  createdAt DateTime  @default(now())
+
+  @@index([storeId])
+  @@map("email_logs")
 }
