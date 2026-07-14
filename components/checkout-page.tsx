@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { CreditCard, ImageUp } from "lucide-react";
 import { useActionState, useState } from "react";
+import type { Store } from "@prisma/client";
 import { AccountMenu } from "@/components/account-menu";
 import { placeOrder } from "@/app/actions/orders";
 import { formatCurrency } from "@/lib/format";
@@ -10,12 +11,13 @@ import type { PricedCart } from "@/lib/pricing";
 import type { SessionPayload } from "@/lib/session";
 
 type CheckoutPageProps = {
+  store: Store;
   session: SessionPayload | null;
   cart: PricedCart;
   itemsParam: string;
 };
 
-export function CheckoutPage({ session, cart, itemsParam }: CheckoutPageProps) {
+export function CheckoutPage({ store, session, cart, itemsParam }: CheckoutPageProps) {
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [state, formAction, pending] = useActionState(placeOrder, undefined);
 
@@ -26,14 +28,14 @@ export function CheckoutPage({ session, cart, itemsParam }: CheckoutPageProps) {
       </div>
       <nav className="border-b border-brand-border/60 bg-brand-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-6">
-          <Link href="/" className="text-[2rem] font-bold tracking-tight text-brand-green">Bhagwandas Traders</Link>
+          <Link href={`/${store.slug}`} className="text-[2rem] font-bold tracking-tight text-brand-green">{store.name}</Link>
           <div className="flex items-center gap-6">
             <div className="hidden items-center gap-6 md:flex">
               <a className="text-sm text-brand-muted" href="#">Catalog</a>
               <a className="text-sm text-brand-muted" href="#">Orders</a>
               <span className="border-b-2 border-brand-green pb-1 text-sm font-bold text-brand-green">Checkout</span>
             </div>
-            <AccountMenu session={session} />
+            <AccountMenu storeSlug={store.slug} session={session} />
           </div>
         </div>
       </nav>

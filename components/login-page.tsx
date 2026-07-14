@@ -3,11 +3,17 @@
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Store } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState } from "react";
+import type { Store as PrismaStore } from "@prisma/client";
 import { login } from "@/app/actions/auth";
 
-export function LoginPage() {
+type LoginPageProps = {
+  store: PrismaStore;
+};
+
+export function LoginPage({ store }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [state, formAction, pending] = useActionState(login, undefined);
+  const boundLogin = login.bind(null, store.id);
+  const [state, formAction, pending] = useActionState(boundLogin, undefined);
 
   return (
     <div className="app-shell relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
@@ -21,7 +27,7 @@ export function LoginPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-brand-green text-white shadow-card">
             <Store className="h-7 w-7" />
           </div>
-          <h1 className="mt-5 text-[2.25rem] font-bold tracking-tight text-brand-ink">Bhagwandas Traders</h1>
+          <h1 className="mt-5 text-[2.25rem] font-bold tracking-tight text-brand-ink">{store.name}</h1>
           <p className="mt-2 text-base font-medium text-brand-muted">Inventory & Order Management</p>
         </div>
 
@@ -81,7 +87,7 @@ export function LoginPage() {
 
             <p className="text-center text-sm text-brand-muted">
               New customer?{" "}
-              <Link href="/register" className="font-semibold text-brand-green">
+              <Link href={`/${store.slug}/register`} className="font-semibold text-brand-green">
                 Register here
               </Link>
             </p>

@@ -44,7 +44,7 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
     return { error: "Your cart is empty." };
   }
 
-  const priced = await priceCart(lines);
+  const priced = await priceCart(session.storeId, lines);
 
   if (priced.lines.length === 0) {
     return { error: "Sorry, those items are no longer available." };
@@ -58,8 +58,15 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
 
   try {
     const order = await prisma.$transaction(async (tx) => {
+      const store = await tx.store.findUnique({ where: { id: session.storeId }, select: { codePrefix: true } });
+
+      if (!store) {
+        throw new Error("Store not found");
+      }
+
       const created = await tx.order.create({
         data: {
+          storeId: session.storeId,
           userId: session.id,
           status: "pending_verification",
           phone,
@@ -81,7 +88,7 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
 
       for (const line of priced.lines) {
         const result = await tx.product.updateMany({
-          where: { id: line.productId, stock: { gte: line.quantity } },
+          where: { storeId: session.storeId, id: line.productId, stock: { gte: line.quantity } },
           data: { stock: { decrement: line.quantity } },
         });
 
@@ -90,7 +97,7 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
         }
       }
 
-      const finalDisplayId = `BGD-${formatDateForDisplayId(created.createdAt)}-${100 + created.orderNumber}`;
+      const finalDisplayId = `${store.codePrefix}-${formatDateForDisplayId(created.createdAt)}-${100 + created.orderNumber}`;
 
       return tx.order.update({ where: { id: created.id }, data: { displayId: finalDisplayId } });
     });
@@ -104,31 +111,31 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
     throw error;
   }
 
-  redirect(`/order/${displayId}`);
+  redirect(`/${session.storeSlug}/order/${displayId}`);
 }
 
 export async function verifyOrder(orderId: string) {
-  await requireRole("admin");
+  const session = await requireRole("admin");
 
-  await prisma.order.update({ where: { id: orderId }, data: { status: "packing" } });
+  await prisma.order.update({ where: { id: orderId, storeId: session.storeId }, data: { status: "packing" } });
 
-  revalidatePath("/admin/orders");
-  revalidatePath("/staff/packing");
+  revalidatePath(`/${session.storeSlug}/admin/orders`);
+  revalidatePath(`/${session.storeSlug}/staff/packing`);
 }
 
 export async function dispatchOrder(orderId: string) {
-  await requireRole("staff");
+  const session = await requireRole("staff");
 
-  await prisma.order.update({ where: { id: orderId }, data: { status: "out_for_delivery" } });
+  await prisma.order.update({ where: { id: orderId, storeId: session.storeId }, data: { status: "out_for_delivery" } });
 
-  revalidatePath("/staff/packing");
-  revalidatePath("/delivery/dashboard");
+  revalidatePath(`/${session.storeSlug}/staff/packing`);
+  revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
 }
 
 export async function completeDelivery(orderId: string) {
-  await requireRole("delivery");
+  const session = await requireRole("delivery");
 
-  await prisma.order.update({ where: { id: orderId }, data: { status: "delivered" } });
+  await prisma.order.update({ where: { id: orderId, storeId: session.storeId }, data: { status: "delivered" } });
 
-  revalidatePath("/delivery/dashboard");
+  revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
 }

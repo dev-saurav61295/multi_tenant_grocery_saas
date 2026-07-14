@@ -8,7 +8,7 @@ import { createStaffUser, findUserByUsername } from "@/lib/users";
 export type StaffActionState = { error: string } | undefined;
 
 export async function createStaffAccount(_state: StaffActionState, formData: FormData): Promise<StaffActionState> {
-  await requireRole("admin");
+  const session = await requireRole("admin");
 
   const name = String(formData.get("name") ?? "").trim();
   const username = String(formData.get("username") ?? "").trim();
@@ -23,12 +23,12 @@ export async function createStaffAccount(_state: StaffActionState, formData: For
     return { error: "Select a valid role." };
   }
 
-  if (await findUserByUsername(username)) {
+  if (await findUserByUsername(session.storeId, username)) {
     return { error: "That username is already taken." };
   }
 
   try {
-    await createStaffUser({ username, password, name, role });
+    await createStaffUser({ storeId: session.storeId, username, password, name, role });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { error: "That username is already taken." };
@@ -37,5 +37,5 @@ export async function createStaffAccount(_state: StaffActionState, formData: For
     throw error;
   }
 
-  revalidatePath("/admin/users");
+  revalidatePath(`/${session.storeSlug}/admin/users`);
 }

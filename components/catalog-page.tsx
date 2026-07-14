@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Heart, Minus, Plus, Search, ShoppingCart, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { Product } from "@prisma/client";
+import type { Product, Store } from "@prisma/client";
 import { AccountMenu } from "@/components/account-menu";
 import { cartParamFromLines, computeComboDiscount } from "@/lib/cart";
 import { formatCurrency } from "@/lib/format";
@@ -21,11 +21,12 @@ const productVisuals: Record<string, string> = {
 };
 
 type CatalogPageProps = {
+  store: Store;
   session: SessionPayload | null;
   products: Product[];
 };
 
-export function CatalogPage({ session, products }: CatalogPageProps) {
+export function CatalogPage({ store, session, products }: CatalogPageProps) {
   const [searchValue, setSearchValue] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>(() =>
     Object.fromEntries(products.map((product) => [product.id, 0]))
@@ -54,7 +55,7 @@ export function CatalogPage({ session, products }: CatalogPageProps) {
   const comboDiscount = computeComboDiscount(cartItems);
   const total = subtotal - comboDiscount;
   const minimumOrderMet = total >= 300;
-  const checkoutHref = `/checkout?items=${encodeURIComponent(
+  const checkoutHref = `/${store.slug}/checkout?items=${encodeURIComponent(
     cartParamFromLines(cartItems.map((item) => ({ productId: item.id, quantity: item.quantity })))
   )}`;
 
@@ -99,7 +100,7 @@ export function CatalogPage({ session, products }: CatalogPageProps) {
                 {cartCount}
               </span>
             </button>
-            <AccountMenu session={session} />
+            <AccountMenu storeSlug={store.slug} session={session} />
           </div>
         </div>
       </header>
@@ -251,7 +252,7 @@ export function CatalogPage({ session, products }: CatalogPageProps) {
       <footer className="surface-footer mt-10 px-6 py-8">
         <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-4">
           <div>
-            <h3 className="text-xl font-bold text-brand-green">Bhagwandas Traders</h3>
+            <h3 className="text-xl font-bold text-brand-green">{store.name}</h3>
             <p className="mt-2 text-sm text-brand-muted">Quality local groceries with freshness delivered to your doorstep.</p>
           </div>
           <div className="text-sm text-brand-muted">

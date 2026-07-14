@@ -1,0 +1,1 @@
+export const RESERVED_STORE_SLUGS = ["signup", "api"] as const;

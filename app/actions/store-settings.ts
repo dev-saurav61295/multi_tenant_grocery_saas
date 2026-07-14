@@ -6,10 +6,8 @@ import { requireRole } from "@/lib/session";
 
 export type StoreSettingsState = { error: string } | undefined;
 
-const SINGLETON_ID = "singleton";
-
 export async function saveStoreSettings(_state: StoreSettingsState, formData: FormData): Promise<StoreSettingsState> {
-  await requireRole("admin");
+  const session = await requireRole("admin");
 
   const openingTime = String(formData.get("openingTime") ?? "");
   const closingTime = String(formData.get("closingTime") ?? "");
@@ -24,11 +22,10 @@ export async function saveStoreSettings(_state: StoreSettingsState, formData: Fo
     return { error: "Please provide valid store hours and capacity." };
   }
 
-  await prisma.storeSettings.upsert({
-    where: { id: SINGLETON_ID },
-    update: { openingTime, closingTime, hourlyCapacity },
-    create: { id: SINGLETON_ID, openingTime, closingTime, hourlyCapacity },
+  await prisma.store.update({
+    where: { id: session.storeId },
+    data: { openingTime, closingTime, hourlyCapacity },
   });
 
-  revalidatePath("/admin/users");
+  revalidatePath(`/${session.storeSlug}/admin/users`);
 }

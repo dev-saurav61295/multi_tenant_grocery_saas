@@ -2,13 +2,14 @@
 
 import { AlertTriangle, Boxes, Download, Plus, Search } from "lucide-react";
 import { useActionState, useMemo, useState } from "react";
-import type { Product } from "@prisma/client";
+import type { Product, Store } from "@prisma/client";
 import { createProduct } from "@/app/actions/inventory";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { formatCurrency } from "@/lib/format";
 import type { Role } from "@/lib/users";
 
 type AdminInventoryPageProps = {
+  store: Store;
   currentRole: Role;
   userName: string;
   products: Product[];
@@ -16,7 +17,7 @@ type AdminInventoryPageProps = {
 
 const LOW_STOCK_THRESHOLD = 30;
 
-export function AdminInventoryPage({ currentRole, userName, products }: AdminInventoryPageProps) {
+export function AdminInventoryPage({ store, currentRole, userName, products }: AdminInventoryPageProps) {
   const [query, setQuery] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [state, formAction, pending] = useActionState(createProduct, undefined);
@@ -35,7 +36,9 @@ export function AdminInventoryPage({ currentRole, userName, products }: AdminInv
 
   return (
     <DashboardShell
-      currentPath="/admin/inventory"
+      storeSlug={store.slug}
+      storeName={store.name}
+      currentPath={`/${store.slug}/admin/inventory`}
       currentRole={currentRole}
       userName={userName}
       title="Inventory Catalog"

@@ -6,17 +6,21 @@ import type { AppUser, Role } from "@/lib/users";
 
 const COOKIE_NAME = "session";
 
-export type SessionPayload = Pick<AppUser, "id" | "username" | "name" | "role">;
+export type SessionPayload = Pick<AppUser, "id" | "username" | "name" | "role" | "storeId"> & {
+  storeSlug: string;
+};
 
 // Plain JSON in the cookie value, unencrypted — there is no server-side session
 // store to check against; this is a lightweight optimistic session, not a
 // production-grade auth solution (no rotation, no revocation).
-export async function createSession(user: AppUser) {
+export async function createSession(user: AppUser, storeSlug: string) {
   const payload: SessionPayload = {
     id: user.id,
     username: user.username,
     name: user.name,
     role: user.role,
+    storeId: user.storeId,
+    storeSlug,
   };
 
   const cookieStore = await cookies();
@@ -50,7 +54,7 @@ export const verifySession = cache(async () => {
   const session = await getSession();
 
   if (!session) {
-    redirect("/login");
+    redirect("/");
   }
 
   return session;
@@ -60,7 +64,7 @@ export async function requireRole(...roles: Role[]) {
   const session = await verifySession();
 
   if (!roles.includes(session.role)) {
-    redirect("/login");
+    redirect("/");
   }
 
   return session;

@@ -2,20 +2,20 @@
 
 import { Plus, Search, UserPlus, UserRound } from "lucide-react";
 import { useActionState, useMemo, useState } from "react";
-import type { StoreSettings, User } from "@prisma/client";
+import type { Store, User } from "@prisma/client";
 import { createStaffAccount } from "@/app/actions/staff";
 import { saveStoreSettings } from "@/app/actions/store-settings";
 import { DashboardShell } from "@/components/dashboard-shell";
 import type { Role } from "@/lib/users";
 
 type AdminUsersPageProps = {
+  store: Store;
   currentRole: Role;
   userName: string;
   staff: User[];
-  storeSettings: StoreSettings;
 };
 
-export function AdminUsersPage({ currentRole, userName, staff, storeSettings }: AdminUsersPageProps) {
+export function AdminUsersPage({ store, currentRole, userName, staff }: AdminUsersPageProps) {
   const [query, setQuery] = useState("");
   const [showAddStaff, setShowAddStaff] = useState(false);
   const [staffState, staffFormAction, staffPending] = useActionState(createStaffAccount, undefined);
@@ -35,7 +35,9 @@ export function AdminUsersPage({ currentRole, userName, staff, storeSettings }: 
 
   return (
     <DashboardShell
-      currentPath="/admin/users"
+      storeSlug={store.slug}
+      storeName={store.name}
+      currentPath={`/${store.slug}/admin/users`}
       currentRole={currentRole}
       userName={userName}
       title="Staff Management"
@@ -136,7 +138,7 @@ export function AdminUsersPage({ currentRole, userName, staff, storeSettings }: 
               <input
                 type="time"
                 name="openingTime"
-                defaultValue={storeSettings.openingTime}
+                defaultValue={store.openingTime}
                 className="w-full rounded-lg border border-brand-border bg-white px-4 py-2.5 text-sm outline-none"
               />
             </label>
@@ -145,7 +147,7 @@ export function AdminUsersPage({ currentRole, userName, staff, storeSettings }: 
               <input
                 type="time"
                 name="closingTime"
-                defaultValue={storeSettings.closingTime}
+                defaultValue={store.closingTime}
                 className="w-full rounded-lg border border-brand-border bg-white px-4 py-2.5 text-sm outline-none"
               />
             </label>
@@ -155,7 +157,7 @@ export function AdminUsersPage({ currentRole, userName, staff, storeSettings }: 
                 type="number"
                 name="hourlyCapacity"
                 min={1}
-                defaultValue={storeSettings.hourlyCapacity}
+                defaultValue={store.hourlyCapacity}
                 className="w-full rounded-lg border border-brand-border bg-white px-4 py-2.5 text-sm outline-none"
               />
             </label>

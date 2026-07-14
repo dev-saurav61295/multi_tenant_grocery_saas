@@ -6,6 +6,7 @@ import { AccountMenu } from "@/components/account-menu";
 import type { SessionPayload } from "@/lib/session";
 
 type StorefrontShellProps = {
+  storeSlug: string;
   cartCount: number;
   searchValue: string;
   onSearchChange: (value: string) => void;
@@ -15,6 +16,7 @@ type StorefrontShellProps = {
 };
 
 export function StorefrontShell({
+  storeSlug,
   cartCount,
   searchValue,
   onSearchChange,
@@ -68,7 +70,7 @@ export function StorefrontShell({
             </div>
             </button>
 
-            <AccountMenu session={session} />
+            <AccountMenu storeSlug={storeSlug} session={session} />
           </div>
         </div>
       </header>

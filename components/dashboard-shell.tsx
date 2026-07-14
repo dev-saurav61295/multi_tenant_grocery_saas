@@ -13,6 +13,8 @@ const allNavItems = [
 ];
 
 type DashboardShellProps = {
+  storeSlug: string;
+  storeName: string;
   currentPath: string;
   currentRole: Role;
   userName: string;
@@ -23,6 +25,8 @@ type DashboardShellProps = {
 };
 
 export function DashboardShell({
+  storeSlug,
+  storeName,
   currentPath,
   currentRole,
   userName,
@@ -39,7 +43,7 @@ export function DashboardShell({
         <aside className="flex flex-col gap-8 bg-brand-sidebar px-6 py-8 text-white shadow-focus">
           <div className="space-y-3">
             <div>
-              <h1 className="text-[2rem] font-bold tracking-tight text-brand-green-fixed">Bhagwandas Traders</h1>
+              <h1 className="text-[2rem] font-bold tracking-tight text-brand-green-fixed">{storeName}</h1>
               <p className="text-sm text-brand-border/80">Admin Panel</p>
             </div>
           </div>
@@ -48,11 +52,12 @@ export function DashboardShell({
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = currentPath === item.href;
+                const href = `/${storeSlug}${item.href}`;
 
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={href}
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-bold transition ${
                     active
                       ? "bg-brand-orange text-brand-ink"
@@ -76,7 +81,7 @@ export function DashboardShell({
             </div>
             <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
               <p className="text-sm font-semibold">Signed in as {userName}</p>
-              <form action={logout}>
+              <form action={logout.bind(null, storeSlug)}>
                 <button
                   type="submit"
                   aria-label="Log out"

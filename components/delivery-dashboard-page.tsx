@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { CheckSquare, MapPinned, Phone } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { Prisma } from "@prisma/client";
+import type { Prisma, Store } from "@prisma/client";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { formatCurrency } from "@/lib/format";
 import type { Role } from "@/lib/users";
@@ -13,12 +13,13 @@ type OrderWithItems = Prisma.OrderGetPayload<{
 }>;
 
 type DeliveryDashboardPageProps = {
+  store: Store;
   currentRole: Role;
   userName: string;
   orders: OrderWithItems[];
 };
 
-export function DeliveryDashboardPage({ currentRole, userName, orders }: DeliveryDashboardPageProps) {
+export function DeliveryDashboardPage({ store, currentRole, userName, orders }: DeliveryDashboardPageProps) {
   const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
 
   const selectedOrder = useMemo(
@@ -29,7 +30,9 @@ export function DeliveryDashboardPage({ currentRole, userName, orders }: Deliver
   if (!selectedOrder) {
     return (
       <DashboardShell
-        currentPath="/delivery/dashboard"
+        storeSlug={store.slug}
+        storeName={store.name}
+        currentPath={`/${store.slug}/delivery/dashboard`}
         currentRole={currentRole}
         userName={userName}
         title="Finalize Delivery"
@@ -44,7 +47,9 @@ export function DeliveryDashboardPage({ currentRole, userName, orders }: Deliver
 
   return (
     <DashboardShell
-      currentPath="/delivery/dashboard"
+      storeSlug={store.slug}
+      storeName={store.name}
+      currentPath={`/${store.slug}/delivery/dashboard`}
       currentRole={currentRole}
       userName={userName}
       title="Finalize Delivery"
@@ -83,7 +88,7 @@ export function DeliveryDashboardPage({ currentRole, userName, orders }: Deliver
                       {order.eta ? <p className="mt-3 text-[11px] text-brand-muted">ETA: {order.eta}</p> : null}
                     </button>
                     <Link
-                      href={`/delivery/complete/${order.id}`}
+                      href={`/${store.slug}/delivery/complete/${order.id}`}
                       className="mt-2 inline-flex text-xs font-bold text-brand-green hover:underline"
                     >
                       Confirm Drop-off →
@@ -166,7 +171,7 @@ export function DeliveryDashboardPage({ currentRole, userName, orders }: Deliver
                 </div>
 
                 <Link
-                  href={`/delivery/complete/${selectedOrder.id}`}
+                  href={`/${store.slug}/delivery/complete/${selectedOrder.id}`}
                   className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110"
                 >
                   <CheckSquare className="h-6 w-6" />

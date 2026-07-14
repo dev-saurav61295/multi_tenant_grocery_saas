@@ -3,28 +3,25 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
-const SINGLETON_ID = "singleton";
 
-const demoUsers = [
-  { username: "admin_user", password: "password123", name: "Bhagwandas Admin", role: "admin" as const },
-  { username: "staff_user", password: "password123", name: "Packing Staff", role: "staff" as const },
-  { username: "delivery_user", password: "password123", name: "Delivery Rider", role: "delivery" as const },
-  { username: "neha_sharma", password: "password123", name: "Neha Sharma", role: "customer" as const },
-  { username: "mohan_verma", password: "password123", name: "Mohan Verma", role: "customer" as const },
-  { username: "aarav_jain", password: "password123", name: "Aarav Jain", role: "customer" as const },
-  { username: "suhani_gupta", password: "password123", name: "Suhani Gupta", role: "customer" as const },
-];
+type DemoUser = {
+  username: string;
+  password: string;
+  name: string;
+  role: "admin" | "staff" | "delivery" | "customer";
+};
 
-const demoProducts = [
-  { id: "amul-milk", name: "Amul Gold Milk", brand: "Amul", size: "1L Pouch", price: 72, category: "Dairy", description: "Fresh toned milk for everyday delivery.", comboEligible: false, stock: 84 },
-  { id: "banana-combo", name: "Robusta Banana Combo", brand: "Local Farm", size: "1 Dozen", price: 65, category: "Fruits", description: "Popular family bundle eligible for combo pricing.", comboEligible: true, stock: 24 },
-  { id: "atta", name: "Aashirvaad Atta", brand: "Aashirvaad", size: "5 KG", price: 289, category: "Staples", description: "Chakki fresh whole wheat flour.", comboEligible: false, stock: 21 },
-  { id: "salt", name: "Tata Salt", brand: "Tata", size: "1 KG", price: 30, category: "Staples", description: "Vacuum evaporated iodised salt.", comboEligible: false, stock: 66 },
-  { id: "oil", name: "Fortune Sunlite Oil", brand: "Fortune", size: "1 Litre", price: 160, category: "Cooking", description: "Daily cooking sunflower oil.", comboEligible: false, stock: 39 },
-  { id: "rice", name: "India Gate Basmati Rice", brand: "India Gate", size: "5 KG", price: 499, category: "Staples", description: "Long grain basmati for everyday meals.", comboEligible: false, stock: 18 },
-  { id: "tomato", name: "Fresh Tomato", brand: "Mandi Select", size: "1 KG", price: 42, category: "Vegetables", description: "Sorted grade A tomatoes.", comboEligible: false, stock: 57 },
-  { id: "biscuits", name: "Parle-G Family Pack", brand: "Parle", size: "800 G", price: 95, category: "Snacks", description: "Fast moving essentials for monthly baskets.", comboEligible: false, stock: 40 },
-];
+type DemoProduct = {
+  id: string;
+  name: string;
+  brand: string;
+  size: string;
+  price: number;
+  category: string;
+  description: string;
+  comboEligible: boolean;
+  stock: number;
+};
 
 type DemoOrder = {
   username: string;
@@ -40,63 +37,136 @@ type DemoOrder = {
 const yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
 
-const demoOrders: DemoOrder[] = [
+const stores = [
   {
-    username: "neha_sharma",
-    phone: "+91 98765 21001",
-    address: "12/4 Civil Lines, Near Green Park Gate",
-    status: "pending_verification",
-    items: [
-      { productId: "amul-milk", quantity: 2 },
-      { productId: "banana-combo", quantity: 3 },
-      { productId: "atta", quantity: 1 },
-    ],
+    name: "Bhagwandas Traders",
+    slug: "bhagwandas-traders",
+    codePrefix: "BGD",
+    openingTime: "09:00",
+    closingTime: "20:00",
+    hourlyCapacity: 40,
+    users: [
+      { username: "admin_user", password: "password123", name: "Bhagwandas Admin", role: "admin" as const },
+      { username: "staff_user", password: "password123", name: "Packing Staff", role: "staff" as const },
+      { username: "delivery_user", password: "password123", name: "Delivery Rider", role: "delivery" as const },
+      { username: "neha_sharma", password: "password123", name: "Neha Sharma", role: "customer" as const },
+      { username: "mohan_verma", password: "password123", name: "Mohan Verma", role: "customer" as const },
+      { username: "aarav_jain", password: "password123", name: "Aarav Jain", role: "customer" as const },
+      { username: "suhani_gupta", password: "password123", name: "Suhani Gupta", role: "customer" as const },
+    ] satisfies DemoUser[],
+    products: [
+      { id: "amul-milk", name: "Amul Gold Milk", brand: "Amul", size: "1L Pouch", price: 72, category: "Dairy", description: "Fresh toned milk for everyday delivery.", comboEligible: false, stock: 84 },
+      { id: "banana-combo", name: "Robusta Banana Combo", brand: "Local Farm", size: "1 Dozen", price: 65, category: "Fruits", description: "Popular family bundle eligible for combo pricing.", comboEligible: true, stock: 24 },
+      { id: "atta", name: "Aashirvaad Atta", brand: "Aashirvaad", size: "5 KG", price: 289, category: "Staples", description: "Chakki fresh whole wheat flour.", comboEligible: false, stock: 21 },
+      { id: "salt", name: "Tata Salt", brand: "Tata", size: "1 KG", price: 30, category: "Staples", description: "Vacuum evaporated iodised salt.", comboEligible: false, stock: 66 },
+      { id: "oil", name: "Fortune Sunlite Oil", brand: "Fortune", size: "1 Litre", price: 160, category: "Cooking", description: "Daily cooking sunflower oil.", comboEligible: false, stock: 39 },
+      { id: "rice", name: "India Gate Basmati Rice", brand: "India Gate", size: "5 KG", price: 499, category: "Staples", description: "Long grain basmati for everyday meals.", comboEligible: false, stock: 18 },
+      { id: "tomato", name: "Fresh Tomato", brand: "Mandi Select", size: "1 KG", price: 42, category: "Vegetables", description: "Sorted grade A tomatoes.", comboEligible: false, stock: 57 },
+      { id: "biscuits", name: "Parle-G Family Pack", brand: "Parle", size: "800 G", price: 95, category: "Snacks", description: "Fast moving essentials for monthly baskets.", comboEligible: false, stock: 40 },
+    ] satisfies DemoProduct[],
+    orders: [
+      {
+        username: "neha_sharma",
+        phone: "+91 98765 21001",
+        address: "12/4 Civil Lines, Near Green Park Gate",
+        status: "pending_verification",
+        items: [
+          { productId: "amul-milk", quantity: 2 },
+          { productId: "banana-combo", quantity: 3 },
+          { productId: "atta", quantity: 1 },
+        ],
+      },
+      {
+        username: "mohan_verma",
+        phone: "+91 98765 21002",
+        address: "88 Station Road, Opposite Old Post Office",
+        status: "verified",
+        items: [
+          { productId: "oil", quantity: 2 },
+          { productId: "salt", quantity: 1 },
+          { productId: "tomato", quantity: 2 },
+        ],
+      },
+      {
+        username: "aarav_jain",
+        phone: "+91 98765 21003",
+        address: "14 Collectorate Road, Near District Court",
+        status: "packing",
+        items: [
+          { productId: "rice", quantity: 1 },
+          { productId: "biscuits", quantity: 2 },
+          { productId: "amul-milk", quantity: 1 },
+        ],
+      },
+      {
+        username: "suhani_gupta",
+        phone: "+91 98765 21004",
+        address: "A-17 Khandari, Near Community Hall",
+        status: "out_for_delivery",
+        distanceKm: 4.7,
+        eta: "24 mins",
+        items: [
+          { productId: "banana-combo", quantity: 3 },
+          { productId: "atta", quantity: 1 },
+          { productId: "salt", quantity: 1 },
+        ],
+      },
+      {
+        username: "neha_sharma",
+        phone: "+91 98765 21001",
+        address: "12/4 Civil Lines, Near Green Park Gate",
+        status: "delivered",
+        createdAt: yesterday,
+        items: [
+          { productId: "tomato", quantity: 2 },
+          { productId: "biscuits", quantity: 1 },
+        ],
+      },
+    ] satisfies DemoOrder[],
   },
   {
-    username: "mohan_verma",
-    phone: "+91 98765 21002",
-    address: "88 Station Road, Opposite Old Post Office",
-    status: "verified",
-    items: [
-      { productId: "oil", quantity: 2 },
-      { productId: "salt", quantity: 1 },
-      { productId: "tomato", quantity: 2 },
-    ],
-  },
-  {
-    username: "aarav_jain",
-    phone: "+91 98765 21003",
-    address: "14 Collectorate Road, Near District Court",
-    status: "packing",
-    items: [
-      { productId: "rice", quantity: 1 },
-      { productId: "biscuits", quantity: 2 },
-      { productId: "amul-milk", quantity: 1 },
-    ],
-  },
-  {
-    username: "suhani_gupta",
-    phone: "+91 98765 21004",
-    address: "A-17 Khandari, Near Community Hall",
-    status: "out_for_delivery",
-    distanceKm: 4.7,
-    eta: "24 mins",
-    items: [
-      { productId: "banana-combo", quantity: 3 },
-      { productId: "atta", quantity: 1 },
-      { productId: "salt", quantity: 1 },
-    ],
-  },
-  {
-    username: "neha_sharma",
-    phone: "+91 98765 21001",
-    address: "12/4 Civil Lines, Near Green Park Gate",
-    status: "delivered",
-    createdAt: yesterday,
-    items: [
-      { productId: "tomato", quantity: 2 },
-      { productId: "biscuits", quantity: 1 },
-    ],
+    name: "Fresh Mart Express",
+    slug: "fresh-mart-express",
+    codePrefix: "FME",
+    openingTime: "08:30",
+    closingTime: "21:00",
+    hourlyCapacity: 30,
+    users: [
+      { username: "admin_user", password: "password123", name: "Fresh Mart Admin", role: "admin" as const },
+      { username: "floor_user", password: "password123", name: "Floor Staff", role: "staff" as const },
+      { username: "rider_user", password: "password123", name: "Fresh Rider", role: "delivery" as const },
+      { username: "rhea_patel", password: "password123", name: "Rhea Patel", role: "customer" as const },
+      { username: "iman_ali", password: "password123", name: "Iman Ali", role: "customer" as const },
+    ] satisfies DemoUser[],
+    products: [
+      { id: "fme-milk", name: "Fresh Mart Milk", brand: "Farm Fresh", size: "1L Pouch", price: 68, category: "Dairy", description: "Daily milk supply for local households.", comboEligible: false, stock: 55 },
+      { id: "fme-bread", name: "Soft White Bread", brand: "Fresh Mart", size: "400 G", price: 42, category: "Bakery", description: "Soft bread for breakfast and snacks.", comboEligible: false, stock: 32 },
+      { id: "fme-rice", name: "Golden Grain Rice", brand: "Fresh Mart", size: "5 KG", price: 469, category: "Staples", description: "Household staple with consistent quality.", comboEligible: false, stock: 26 },
+      { id: "fme-fruit-pack", name: "Seasonal Fruit Pack", brand: "Fresh Mart", size: "1 Pack", price: 149, category: "Fruits", description: "Assorted seasonal fruit bundle.", comboEligible: true, stock: 18 },
+    ] satisfies DemoProduct[],
+    orders: [
+      {
+        username: "rhea_patel",
+        phone: "+91 98765 33001",
+        address: "22 Lake View Apartments, Near Central Park",
+        status: "pending_verification",
+        items: [
+          { productId: "fme-milk", quantity: 2 },
+          { productId: "fme-bread", quantity: 2 },
+          { productId: "fme-fruit-pack", quantity: 1 },
+        ],
+      },
+      {
+        username: "iman_ali",
+        phone: "+91 98765 33002",
+        address: "8 Market Road, Opposite City Library",
+        status: "packing",
+        items: [
+          { productId: "fme-rice", quantity: 1 },
+          { productId: "fme-milk", quantity: 1 },
+        ],
+      },
+    ] satisfies DemoOrder[],
   },
 ];
 
@@ -111,14 +181,45 @@ function formatDateForDisplayId(date: Date) {
   return `${yy}${mm}${dd}`;
 }
 
-async function seedUsers() {
-  for (const demoUser of demoUsers) {
+async function seedStores() {
+  for (const store of stores) {
+    await prisma.store.upsert({
+      where: { slug: store.slug },
+      update: {
+        name: store.name,
+        codePrefix: store.codePrefix,
+        openingTime: store.openingTime,
+        closingTime: store.closingTime,
+        hourlyCapacity: store.hourlyCapacity,
+      },
+      create: {
+        name: store.name,
+        slug: store.slug,
+        codePrefix: store.codePrefix,
+        openingTime: store.openingTime,
+        closingTime: store.closingTime,
+        hourlyCapacity: store.hourlyCapacity,
+      },
+    });
+  }
+}
+
+async function seedUsers(store: (typeof stores)[number]) {
+  const storeRecord = await prisma.store.findUniqueOrThrow({ where: { slug: store.slug } });
+
+  for (const demoUser of store.users) {
     const passwordHash = await bcrypt.hash(demoUser.password, SALT_ROUNDS);
 
     await prisma.user.upsert({
-      where: { username: demoUser.username },
+      where: {
+        storeId_username: {
+          storeId: storeRecord.id,
+          username: demoUser.username,
+        },
+      },
       update: { passwordHash, name: demoUser.name, role: demoUser.role },
       create: {
+        storeId: storeRecord.id,
         username: demoUser.username,
         passwordHash,
         name: demoUser.name,
@@ -128,42 +229,46 @@ async function seedUsers() {
   }
 }
 
-async function seedProducts() {
-  for (const product of demoProducts) {
+async function seedProducts(store: (typeof stores)[number]) {
+  const storeRecord = await prisma.store.findUniqueOrThrow({ where: { slug: store.slug } });
+
+  for (const product of store.products) {
     await prisma.product.upsert({
       where: { id: product.id },
-      update: product,
-      create: product,
+      update: { ...product, storeId: storeRecord.id },
+      create: { ...product, storeId: storeRecord.id },
     });
   }
 }
 
-async function seedStoreSettings() {
-  await prisma.storeSettings.upsert({
-    where: { id: SINGLETON_ID },
-    update: {},
-    create: { id: SINGLETON_ID, openingTime: "09:00", closingTime: "20:00", hourlyCapacity: 40 },
-  });
-}
+async function seedOrders(store: (typeof stores)[number]) {
+  const storeRecord = await prisma.store.findUniqueOrThrow({ where: { slug: store.slug } });
 
-async function seedOrders() {
-  // Only seed orders once — re-running the seed shouldn't duplicate demo orders.
-  const existingOrderCount = await prisma.order.count();
+  const existingOrderCount = await prisma.order.count({ where: { storeId: storeRecord.id } });
   if (existingOrderCount > 0) {
     return;
   }
 
-  const products = await prisma.product.findMany();
+  const products = await prisma.product.findMany({ where: { storeId: storeRecord.id } });
   const productsById = new Map(products.map((product) => [product.id, product]));
 
-  for (const demoOrder of demoOrders) {
-    const user = await prisma.user.findUniqueOrThrow({ where: { username: demoOrder.username } });
+  for (const demoOrder of store.orders) {
+    const user = await prisma.user.findUniqueOrThrow({
+      where: {
+        storeId_username: {
+          storeId: storeRecord.id,
+          username: demoOrder.username,
+        },
+      },
+    });
 
     const lines = demoOrder.items.map((item) => {
       const product = productsById.get(item.productId);
+
       if (!product) {
         throw new Error(`Seed order references unknown product "${item.productId}"`);
       }
+
       return { ...item, comboEligible: product.comboEligible, unitPrice: product.price };
     });
 
@@ -174,6 +279,7 @@ async function seedOrders() {
     await prisma.$transaction(async (tx) => {
       const created = await tx.order.create({
         data: {
+          storeId: storeRecord.id,
           userId: user.id,
           status: demoOrder.status,
           phone: demoOrder.phone,
@@ -202,17 +308,20 @@ async function seedOrders() {
         });
       }
 
-      const displayId = `BGD-${formatDateForDisplayId(created.createdAt)}-${100 + created.orderNumber}`;
+      const displayId = `${storeRecord.codePrefix}-${formatDateForDisplayId(created.createdAt)}-${100 + created.orderNumber}`;
       await tx.order.update({ where: { id: created.id }, data: { displayId } });
     });
   }
 }
 
 async function main() {
-  await seedUsers();
-  await seedProducts();
-  await seedStoreSettings();
-  await seedOrders();
+  await seedStores();
+
+  for (const store of stores) {
+    await seedUsers(store);
+    await seedProducts(store);
+    await seedOrders(store);
+  }
 }
 
 main()

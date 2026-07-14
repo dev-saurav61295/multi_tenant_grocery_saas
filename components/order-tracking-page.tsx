@@ -5,17 +5,19 @@ import { AccountMenu } from "@/components/account-menu";
 import { formatCurrency } from "@/lib/format";
 import { orderStatusLabels } from "@/lib/order-status";
 import type { SessionPayload } from "@/lib/session";
+import type { Store } from "@prisma/client";
 
 type OrderWithItems = Prisma.OrderGetPayload<{
   include: { items: { include: { product: true } } };
 }>;
 
 type OrderTrackingPageProps = {
+  store: Store;
   order: OrderWithItems;
   session: SessionPayload | null;
 };
 
-export function OrderTrackingPage({ order, session }: OrderTrackingPageProps) {
+export function OrderTrackingPage({ store, order, session }: OrderTrackingPageProps) {
   const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
   const delivered = order.status === "delivered";
 
@@ -26,8 +28,8 @@ export function OrderTrackingPage({ order, session }: OrderTrackingPageProps) {
       </div>
       <nav className="border-b border-brand-border/60 bg-brand-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-6">
-          <Link href="/" className="text-[2rem] font-bold tracking-tight text-brand-green">Bhagwandas Traders</Link>
-          <AccountMenu session={session} />
+          <Link href={`/${store.slug}`} className="text-[2rem] font-bold tracking-tight text-brand-green">{store.name}</Link>
+          <AccountMenu storeSlug={store.slug} session={session} />
         </div>
       </nav>
 
@@ -113,7 +115,7 @@ export function OrderTrackingPage({ order, session }: OrderTrackingPageProps) {
       <footer className="surface-footer mt-10 px-6 py-8">
         <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-4 text-sm text-brand-muted">
           <div>
-            <h3 className="text-xl font-bold text-brand-green">Bhagwandas Traders</h3>
+            <h3 className="text-xl font-bold text-brand-green">{store.name}</h3>
             <p className="mt-2">Quality local groceries. Delivering freshness to your doorstep.</p>
           </div>
           <div>

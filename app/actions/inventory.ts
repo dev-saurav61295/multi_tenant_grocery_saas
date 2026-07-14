@@ -7,7 +7,7 @@ import { requireRole } from "@/lib/session";
 export type InventoryActionState = { error: string } | undefined;
 
 export async function createProduct(_state: InventoryActionState, formData: FormData): Promise<InventoryActionState> {
-  await requireRole("admin");
+  const session = await requireRole("admin");
 
   const name = String(formData.get("name") ?? "").trim();
   const brand = String(formData.get("brand") ?? "").trim();
@@ -33,9 +33,9 @@ export async function createProduct(_state: InventoryActionState, formData: Form
   }
 
   await prisma.product.create({
-    data: { name, brand, size, category, description, comboEligible, price, stock },
+    data: { storeId: session.storeId, name, brand, size, category, description, comboEligible, price, stock },
   });
 
-  revalidatePath("/admin/inventory");
-  revalidatePath("/");
+  revalidatePath(`/${session.storeSlug}/admin/inventory`);
+  revalidatePath(`/${session.storeSlug}`);
 }

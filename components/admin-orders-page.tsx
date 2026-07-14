@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Filter, Search, X } from "lucide-react";
 import { useState, useTransition } from "react";
-import type { Prisma } from "@prisma/client";
+import type { Prisma, Store } from "@prisma/client";
 import { verifyOrder } from "@/app/actions/orders";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { formatCurrency } from "@/lib/format";
@@ -14,12 +14,13 @@ type OrderWithDetails = Prisma.OrderGetPayload<{
 }>;
 
 type AdminOrdersPageProps = {
+  store: Store;
   currentRole: Role;
   userName: string;
   orders: OrderWithDetails[];
 };
 
-export function AdminOrdersPage({ currentRole, userName, orders }: AdminOrdersPageProps) {
+export function AdminOrdersPage({ store, currentRole, userName, orders }: AdminOrdersPageProps) {
   const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
   const [isPending, startTransition] = useTransition();
 
@@ -35,7 +36,9 @@ export function AdminOrdersPage({ currentRole, userName, orders }: AdminOrdersPa
 
   return (
     <DashboardShell
-      currentPath="/admin/orders"
+      storeSlug={store.slug}
+      storeName={store.name}
+      currentPath={`/${store.slug}/admin/orders`}
       currentRole={currentRole}
       userName={userName}
       title="Orders Queue"

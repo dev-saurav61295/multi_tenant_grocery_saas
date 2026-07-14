@@ -2,7 +2,7 @@
 
 import { AlertTriangle, CheckCircle2, Clock3, Printer } from "lucide-react";
 import { useState, useTransition } from "react";
-import type { Prisma } from "@prisma/client";
+import type { Prisma, Store } from "@prisma/client";
 import { dispatchOrder } from "@/app/actions/orders";
 import { DashboardShell } from "@/components/dashboard-shell";
 import type { Role } from "@/lib/users";
@@ -12,12 +12,13 @@ type OrderWithItems = Prisma.OrderGetPayload<{
 }>;
 
 type StaffPackingPageProps = {
+  store: Store;
   currentRole: Role;
   userName: string;
   orders: OrderWithItems[];
 };
 
-export function StaffPackingPage({ currentRole, userName, orders }: StaffPackingPageProps) {
+export function StaffPackingPage({ store, currentRole, userName, orders }: StaffPackingPageProps) {
   const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
   const [checkedItems, setCheckedItems] = useState<Record<string, string[]>>({});
   const [flaggedItems, setFlaggedItems] = useState<Record<string, string[]>>({});
@@ -28,7 +29,9 @@ export function StaffPackingPage({ currentRole, userName, orders }: StaffPacking
   if (!selectedOrder) {
     return (
       <DashboardShell
-        currentPath="/staff/packing"
+        storeSlug={store.slug}
+        storeName={store.name}
+        currentPath={`/${store.slug}/staff/packing`}
         currentRole={currentRole}
         userName={userName}
         title="Packing Station Panel"
@@ -65,7 +68,9 @@ export function StaffPackingPage({ currentRole, userName, orders }: StaffPacking
 
   return (
     <DashboardShell
-      currentPath="/staff/packing"
+      storeSlug={store.slug}
+      storeName={store.name}
+      currentPath={`/${store.slug}/staff/packing`}
       currentRole={currentRole}
       userName={userName}
       title="Packing Station Panel"

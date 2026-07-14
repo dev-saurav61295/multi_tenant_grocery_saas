@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { CheckCircle2, CheckSquare, MapPinned } from "lucide-react";
 import { useState, useTransition } from "react";
-import type { Prisma } from "@prisma/client";
+import type { Prisma, Store } from "@prisma/client";
 import { completeDelivery } from "@/app/actions/orders";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { formatCurrency } from "@/lib/format";
@@ -12,6 +12,7 @@ import type { Role } from "@/lib/users";
 type OrderWithItems = Prisma.OrderGetPayload<{ include: { user: true } }>;
 
 type DeliveryCompletePageProps = {
+  store: Store;
   order: OrderWithItems | null;
   currentRole: Role;
   userName: string;
@@ -23,7 +24,7 @@ const checklistLabels = {
   sanitized: "Sanitized hands before handling",
 } as const;
 
-export function DeliveryCompletePage({ order, currentRole, userName }: DeliveryCompletePageProps) {
+export function DeliveryCompletePage({ store, order, currentRole, userName }: DeliveryCompletePageProps) {
   const [checklist, setChecklist] = useState({
     itemsMatched: true,
     paymentUploaded: false,
@@ -58,7 +59,9 @@ export function DeliveryCompletePage({ order, currentRole, userName }: DeliveryC
   if (!order) {
     return (
       <DashboardShell
-        currentPath="/delivery/dashboard"
+        storeSlug={store.slug}
+        storeName={store.name}
+        currentPath={`/${store.slug}/delivery/dashboard`}
         currentRole={currentRole}
         userName={userName}
         title="Finalize Delivery"
@@ -67,7 +70,7 @@ export function DeliveryCompletePage({ order, currentRole, userName }: DeliveryC
         <div className="panel rounded-xl p-8 text-center">
           <p className="text-lg font-semibold text-brand-ink">Stop not found</p>
           <p className="mt-2 text-sm text-brand-muted">This delivery stop doesn&apos;t exist or has already been removed from the manifest.</p>
-          <Link href="/delivery/dashboard" className="mt-6 inline-flex rounded-xl bg-brand-green px-5 py-3 text-sm font-bold text-white">
+          <Link href={`/${store.slug}/delivery/dashboard`} className="mt-6 inline-flex rounded-xl bg-brand-green px-5 py-3 text-sm font-bold text-white">
             Back to Dashboard
           </Link>
         </div>
@@ -77,7 +80,9 @@ export function DeliveryCompletePage({ order, currentRole, userName }: DeliveryC
 
   return (
     <DashboardShell
-      currentPath="/delivery/dashboard"
+      storeSlug={store.slug}
+      storeName={store.name}
+      currentPath={`/${store.slug}/delivery/dashboard`}
       currentRole={currentRole}
       userName={userName}
       title="Finalize Delivery"
@@ -91,7 +96,7 @@ export function DeliveryCompletePage({ order, currentRole, userName }: DeliveryC
           <h2 className="mt-6 text-[2rem] font-bold tracking-tight text-brand-green">Delivery Complete!</h2>
           <p className="mt-2 text-sm text-brand-muted">Order {order.displayId} for {order.user.name} has been finalized.</p>
           <Link
-            href="/delivery/dashboard"
+            href={`/${store.slug}/delivery/dashboard`}
             className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-brand-green px-5 py-4 text-base font-bold text-white transition hover:brightness-110"
           >
             Back to Dashboard
