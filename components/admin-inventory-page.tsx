@@ -1,10 +1,12 @@
 "use client";
 
-import { AlertTriangle, Boxes, Download, Plus, Search } from "lucide-react";
+import Image from "next/image";
+import { AlertTriangle, Boxes, Download, ImageUp, Plus, Search } from "lucide-react";
 import { useActionState, useMemo, useState } from "react";
 import type { Product, Store } from "@prisma/client";
 import { createProduct } from "@/app/actions/inventory";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { downloadCsv } from "@/lib/csv-export";
 import { formatCurrency } from "@/lib/format";
 import type { Role } from "@/lib/users";
 
@@ -34,6 +36,14 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
 
   const lowStockCount = products.filter((item) => item.stock < LOW_STOCK_THRESHOLD).length;
 
+  function exportInventory() {
+    downloadCsv(
+      `${store.slug}-inventory.csv`,
+      ["Product Name", "Brand", "Size", "Category", "Price", "Stock"],
+      filteredItems.map((item) => [item.name, item.brand, item.size, item.category, String(item.price), String(item.stock)])
+    );
+  }
+
   return (
     <DashboardShell
       storeSlug={store.slug}
@@ -45,7 +55,7 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
       subtitle="Manage your product listings, pricing, and real-time stock levels."
       action={
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 rounded-lg border border-brand-green bg-white px-5 py-3 text-sm font-bold text-brand-green">
+          <button type="button" onClick={exportInventory} className="inline-flex items-center gap-2 rounded-lg border border-brand-green bg-white px-5 py-3 text-sm font-bold text-brand-green">
             <Download className="h-4 w-4" />
             Quick Export
           </button>
@@ -130,6 +140,11 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
                   <span className="mb-2 block text-sm font-semibold text-brand-ink">Description</span>
                   <textarea name="description" required rows={2} className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
                 </label>
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-brand-border bg-white px-4 py-3 text-sm font-semibold text-brand-ink hover:bg-brand-panel-soft/40">
+                  <ImageUp className="h-4 w-4 text-brand-green" />
+                  Product Photo (optional)
+                  <input name="image" type="file" accept="image/*" className="sr-only" />
+                </label>
                 <label className="flex items-center gap-2">
                   <input type="checkbox" name="comboEligible" className="h-4 w-4 rounded border-brand-border text-brand-green focus:ring-brand-green" />
                   <span className="text-sm font-semibold text-brand-ink">Eligible for combo pricing</span>
@@ -150,6 +165,7 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
             <table className="min-w-full border-collapse bg-white">
               <thead className="border-b border-brand-border bg-brand-panel-high text-left text-xs font-bold uppercase tracking-[0.2em] text-brand-muted">
                 <tr>
+                  <th className="px-5 py-4"></th>
                   <th className="px-5 py-4">Product Name & Brand</th>
                   <th className="px-5 py-4">Variant Size</th>
                   <th className="px-5 py-4">Base Price</th>
@@ -159,6 +175,17 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
               <tbody>
                 {filteredItems.map((item) => (
                   <tr key={item.id} className="border-b border-brand-border/50 text-sm hover:bg-brand-panel-soft/60">
+                    <td className="px-5 py-4">
+                      <div className="relative h-10 w-10 overflow-hidden rounded-md border border-brand-border/60 bg-brand-panel-soft">
+                        {item.imageUrl ? (
+                          <Image src={item.imageUrl} alt={item.name} fill sizes="40px" className="object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-brand-outline">
+                            <Boxes className="h-4 w-4" />
+                          </div>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-5 py-4">
                       <p className="text-[1.15rem] font-semibold text-brand-ink">{item.name}</p>
                       <p className="text-brand-muted">{item.brand}</p>

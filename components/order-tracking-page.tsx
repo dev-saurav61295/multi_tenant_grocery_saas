@@ -48,7 +48,10 @@ export function OrderTrackingPage({ store, order, session }: OrderTrackingPagePr
           <div className="soft-card rounded-xl p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span className="text-xs font-bold uppercase tracking-[0.22em] text-brand-muted">Order Information</span>
-              <span className="status-pill bg-brand-orange text-white">{orderStatusLabels[order.status]}</span>
+              <span className="status-pill inline-flex items-center gap-2 bg-brand-orange text-white">
+                {!delivered ? <span className="h-2 w-2 animate-pulse rounded-full bg-white" /> : null}
+                {orderStatusLabels[order.status]}
+              </span>
             </div>
             <h2 className="mt-4 text-[2.1rem] font-bold tracking-tight text-brand-ink">{order.displayId}</h2>
             <p className="mt-1 text-sm text-brand-muted">

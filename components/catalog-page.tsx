@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Heart, Minus, Plus, Search, ShoppingCart, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -121,7 +122,10 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
 
               return (
                 <article key={product.id} className="panel overflow-hidden rounded-xl transition hover:shadow-focus">
-                  <div className={`relative aspect-square bg-gradient-to-br ${productVisuals[product.id] ?? "from-white to-brand-panel-soft"}`}>
+                  <div className={`relative aspect-square ${product.imageUrl ? "bg-brand-panel-soft" : `bg-gradient-to-br ${productVisuals[product.id] ?? "from-white to-brand-panel-soft"}`}`}>
+                    {product.imageUrl ? (
+                      <Image src={product.imageUrl} alt={product.name} fill sizes="(min-width: 1280px) 25vw, 50vw" className="object-cover" />
+                    ) : null}
                     <button type="button" className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-brand-outline shadow-sm" aria-label={`Save ${product.name}`}>
                       <Heart className="h-4 w-4" />
                     </button>

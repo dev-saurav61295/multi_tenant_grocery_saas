@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole, verifySession } from "@/lib/session";
+import { savePrivateUpload } from "@/lib/storage";
 import { parseCartParam } from "@/lib/cart";
 import { priceCart } from "@/lib/pricing";
 import { sendMail } from "@/lib/mail";
@@ -33,7 +34,9 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
 
   const phone = String(formData.get("phone") ?? "").trim();
   const address = String(formData.get("address") ?? "").trim();
-  const screenshotName = String(formData.get("screenshotName") ?? "").trim() || null;
+  const paymentProofFile = formData.get("paymentProof");
+  const hasPaymentProof = paymentProofFile instanceof File && paymentProofFile.size > 0;
+  const screenshotName = hasPaymentProof ? paymentProofFile.name : null;
   const lines = parseCartParam(String(formData.get("items") ?? ""));
 
   if (!/^[+]?[\d\s-]{10,15}$/.test(phone)) {
@@ -58,6 +61,10 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
     return { error: `Minimum order value is ₹${MINIMUM_ORDER_VALUE}.` };
   }
 
+  const paymentProofUrl = hasPaymentProof
+    ? await savePrivateUpload(session.storeId, "payment-proofs", paymentProofFile)
+    : null;
+
   let displayId = "";
   let createdOrderId = "";
 
@@ -80,6 +87,7 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
           comboDiscount: priced.comboDiscount,
           total: priced.total,
           screenshotName,
+          paymentProofUrl,
           displayId: "",
           items: {
             create: priced.lines.map((line) => ({
@@ -153,10 +161,36 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
 export async function verifyOrder(orderId: string) {
   const session = await requireRole("admin");
 
-  await prisma.order.update({ where: { id: orderId, storeId: session.storeId }, data: { status: "packing" } });
+  await prisma.order.update({
+    where: { id: orderId, storeId: session.storeId },
+    data: { status: "packing", verifiedAt: new Date() },
+  });
 
   revalidatePath(`/${session.storeSlug}/admin/orders`);
   revalidatePath(`/${session.storeSlug}/staff/packing`);
+}
+
+export async function assignRider(orderId: string, riderId: string) {
+  const session = await requireRole("admin");
+
+  await prisma.order.update({
+    where: { id: orderId, storeId: session.storeId },
+    data: { riderId },
+  });
+
+  revalidatePath(`/${session.storeSlug}/admin/orders`);
+  revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
+}
+
+export async function acceptPickup(orderId: string) {
+  const session = await requireRole("delivery");
+
+  await prisma.order.update({
+    where: { id: orderId, storeId: session.storeId, riderId: session.id },
+    data: { acceptedAt: new Date() },
+  });
+
+  revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
 }
 
 export async function dispatchOrder(orderId: string) {

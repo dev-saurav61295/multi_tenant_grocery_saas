@@ -1,9 +1,12 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, Clock3, Printer } from "lucide-react";
-import { useState, useTransition } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { AlertTriangle, CheckCircle2, Clock3, Coffee, Printer } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
 import type { Prisma, Store } from "@prisma/client";
 import { dispatchOrder } from "@/app/actions/orders";
+import { toggleBreak } from "@/app/actions/staff";
 import { DashboardShell } from "@/components/dashboard-shell";
 import type { Role } from "@/lib/users";
 
@@ -16,13 +19,30 @@ type StaffPackingPageProps = {
   currentRole: Role;
   userName: string;
   orders: OrderWithItems[];
+  onBreak: boolean;
 };
 
-export function StaffPackingPage({ store, currentRole, userName, orders }: StaffPackingPageProps) {
+function timeAgo(date: Date, now: number) {
+  const minutes = Math.max(0, Math.round((now - date.getTime()) / 60000));
+  if (minutes < 1) return "just now";
+  if (minutes === 1) return "1m ago";
+  return `${minutes}m ago`;
+}
+
+export function StaffPackingPage({ store, currentRole, userName, orders, onBreak }: StaffPackingPageProps) {
+  const router = useRouter();
   const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
   const [checkedItems, setCheckedItems] = useState<Record<string, string[]>>({});
   const [flaggedItems, setFlaggedItems] = useState<Record<string, string[]>>({});
   const [isPending, startTransition] = useTransition();
+  const [isTogglingBreak, startBreakTransition] = useTransition();
+  // Computed client-side only (post-mount) so SSR/hydration output matches — Date.now() would otherwise differ between server render and client hydration.
+  const [now, setNow] = useState<number | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberately deferring Date.now() to after mount to avoid an SSR/CSR text mismatch
+    setNow(Date.now());
+  }, []);
 
   const selectedOrder = orders.find((order) => order.id === selectedOrderId) ?? orders[0];
 
@@ -63,7 +83,10 @@ export function StaffPackingPage({ store, currentRole, userName, orders }: Staff
   }
 
   function markComplete() {
-    startTransition(() => dispatchOrder(selectedOrder.id));
+    startTransition(async () => {
+      await dispatchOrder(selectedOrder.id);
+      router.refresh();
+    });
   }
 
   return (
@@ -76,9 +99,25 @@ export function StaffPackingPage({ store, currentRole, userName, orders }: Staff
       title="Packing Station Panel"
       subtitle="Manage the ready queue and complete packing with checklist precision."
       action={
-        <div className="flex items-center gap-3 rounded-full bg-brand-panel-soft px-4 py-2 text-sm font-bold text-brand-ink">
-          <Clock3 className="h-4 w-4 text-brand-green" />
-          {orders.length} READY
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 rounded-full bg-brand-panel-soft px-4 py-2 text-sm font-bold text-brand-ink">
+            <Clock3 className="h-4 w-4 text-brand-green" />
+            {orders.length} READY
+          </div>
+          <button
+            type="button"
+            disabled={isTogglingBreak}
+            onClick={() => startBreakTransition(async () => {
+              await toggleBreak();
+              router.refresh();
+            })}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition disabled:opacity-60 ${
+              onBreak ? "bg-brand-orange-deep text-white" : "bg-brand-green-bright text-brand-ink"
+            }`}
+          >
+            <Coffee className="h-4 w-4" />
+            {onBreak ? "On Break" : "Active"}
+          </button>
         </div>
       }
     >
@@ -115,7 +154,9 @@ export function StaffPackingPage({ store, currentRole, userName, orders }: Staff
             <div>
               <h2 className="text-[2.3rem] font-bold tracking-tight text-brand-ink">Order {selectedOrder.displayId}</h2>
               <div className="mt-2 flex items-center gap-3 text-sm">
-                <span className="inline-flex items-center gap-1 font-bold text-brand-green"><CheckCircle2 className="h-4 w-4" /> Payment Verified</span>
+                <span className="inline-flex items-center gap-1 font-bold text-brand-green">
+                  <CheckCircle2 className="h-4 w-4" /> Payment Verified{selectedOrder.verifiedAt && now ? ` • ${timeAgo(selectedOrder.verifiedAt, now)}` : ""}
+                </span>
                 <span className="text-brand-outline">•</span>
                 <span className="text-brand-muted">{priorityLabel(selectedOrder.priority)}</span>
               </div>
@@ -131,10 +172,14 @@ export function StaffPackingPage({ store, currentRole, userName, orders }: Staff
                 <div key={item.id} className="rounded-xl border border-brand-border/60 bg-white p-5 shadow-sm">
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-4">
-                      <div className={`h-16 w-16 rounded-xl bg-gradient-to-br ${index % 2 === 0 ? "from-brand-panel-alt to-brand-green-fixed/30" : "from-brand-panel-soft to-brand-orange/20"}`} />
+                      <div className={`relative h-16 w-16 overflow-hidden rounded-xl ${item.product.imageUrl ? "" : `bg-gradient-to-br ${index % 2 === 0 ? "from-brand-panel-alt to-brand-green-fixed/30" : "from-brand-panel-soft to-brand-orange/20"}`}`}>
+                        {item.product.imageUrl ? (
+                          <Image src={item.product.imageUrl} alt={item.product.name} fill sizes="64px" className="object-cover" />
+                        ) : null}
+                      </div>
                       <div>
                         <p className="text-[1.15rem] font-semibold text-brand-ink">{item.product.name}</p>
-                        <p className="mt-1 text-sm text-brand-muted">Qty: <span className="font-bold text-brand-green">{item.quantity}</span></p>
+                        <p className="mt-1 text-sm text-brand-muted">SKU: <span className="font-semibold text-brand-ink">{item.product.id}</span> • Qty: <span className="font-bold text-brand-green">{item.quantity}</span></p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">

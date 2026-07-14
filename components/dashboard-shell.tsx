@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Boxes, ClipboardList, LogOut, PackageCheck, ShieldCheck, Truck } from "lucide-react";
+import { useState } from "react";
+import { Bell, Boxes, ClipboardList, HelpCircle, LogOut, PackageCheck, Settings, ShieldCheck, Truck } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import type { Role } from "@/lib/users";
 
@@ -8,6 +11,7 @@ const allNavItems = [
   { href: "/admin/orders", label: "Orders Queue", icon: ClipboardList, roles: ["admin"] as Role[] },
   { href: "/admin/inventory", label: "Inventory", icon: Boxes, roles: ["admin"] as Role[] },
   { href: "/admin/users", label: "Staff & Users", icon: ShieldCheck, roles: ["admin"] as Role[] },
+  { href: "/admin/settings", label: "Store Settings", icon: Settings, roles: ["admin"] as Role[] },
   { href: "/staff/packing", label: "Packing Station", icon: PackageCheck, roles: ["staff"] as Role[] },
   { href: "/delivery/dashboard", label: "Delivery Portal", icon: Truck, roles: ["delivery"] as Role[] },
 ];
@@ -36,6 +40,8 @@ export function DashboardShell({
   action,
 }: DashboardShellProps) {
   const navItems = allNavItems.filter((item) => item.roles.includes(currentRole));
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const initials = userName.split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase();
 
   return (
     <div className="min-h-screen bg-brand-background text-brand-ink">
@@ -108,7 +114,36 @@ export function DashboardShell({
               <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
               </div>
             </div>
-            {action}
+            <div className="flex items-center gap-2">
+              {action}
+              <button type="button" aria-label="Notifications" className="rounded-full p-2 text-brand-outline hover:bg-brand-panel-soft">
+                <Bell className="h-5 w-5" />
+              </button>
+              <button type="button" aria-label="Help" className="rounded-full p-2 text-brand-outline hover:bg-brand-panel-soft">
+                <HelpCircle className="h-5 w-5" />
+              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowAccountMenu((current) => !current)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-panel-high text-sm font-bold text-brand-ink"
+                >
+                  {initials}
+                </button>
+                {showAccountMenu ? (
+                  <div className="absolute right-0 top-12 z-20 w-48 rounded-xl border border-brand-border/60 bg-white p-3 shadow-focus">
+                    <p className="truncate text-sm font-bold text-brand-ink">{userName}</p>
+                    <p className="text-xs capitalize text-brand-muted">{currentRole}</p>
+                    <form action={logout.bind(null, storeSlug)} className="mt-3">
+                      <button type="submit" className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50">
+                        <LogOut className="h-4 w-4" />
+                        Log out
+                      </button>
+                    </form>
+                  </div>
+                ) : null}
+              </div>
+            </div>
           </header>
 
           <main className="flex-1 p-4 lg:p-8">{children}</main>

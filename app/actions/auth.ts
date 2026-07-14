@@ -15,6 +15,7 @@ export type AuthState = { error: string } | undefined;
 export async function login(storeId: string, _state: AuthState, formData: FormData): Promise<AuthState> {
   const username = String(formData.get("username") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const rememberMe = formData.get("remember") === "on";
 
   const user = await findUserByCredentials(storeId, username, password);
 
@@ -28,7 +29,7 @@ export async function login(storeId: string, _state: AuthState, formData: FormDa
     return { error: "Store not found." };
   }
 
-  await createSession(user, store.slug);
+  await createSession(user, store.slug, rememberMe);
   redirect(roleHome(store.slug, user.role));
 }
 

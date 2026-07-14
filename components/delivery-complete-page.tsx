@@ -103,7 +103,11 @@ export function DeliveryCompletePage({ store, order, currentRole, userName }: De
           </Link>
         </div>
       ) : (
-        <section className="overflow-hidden rounded-2xl border border-brand-border/40 bg-white shadow-focus">
+        <div className="space-y-4">
+          <div className="text-sm font-bold text-brand-muted">
+            Delivery Portal <span className="mx-2">›</span> <span className="text-brand-green">Confirmation</span>
+          </div>
+          <section className="overflow-hidden rounded-2xl border border-brand-border/40 bg-white shadow-focus">
           <div className="grid lg:grid-cols-2 lg:divide-x lg:divide-brand-border/30">
             <div className="space-y-8 p-6 lg:p-8">
               <div>
@@ -126,7 +130,16 @@ export function DeliveryCompletePage({ store, order, currentRole, userName }: De
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-muted">Verified Payment Proof</p>
                 <div className="mt-4 overflow-hidden rounded-xl border-2 border-brand-green-bright bg-brand-panel-alt p-3">
-                  <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-brand-panel-soft to-brand-green-fixed/20" />
+                  {order.paymentProofUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={`/api/files/${store.id}/${order.paymentProofUrl}`}
+                      alt="Payment proof screenshot"
+                      className="aspect-[4/3] w-full rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-brand-panel-soft to-brand-green-fixed/20" />
+                  )}
                 </div>
               </div>
             </div>
@@ -161,18 +174,22 @@ export function DeliveryCompletePage({ store, order, currentRole, userName }: De
 
               {error ? <p className="text-sm font-semibold text-red-600">{error}</p> : null}
 
-              <button
-                type="button"
-                disabled={!allChecked || isPending}
-                onClick={confirmDropOff}
-                className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <CheckSquare className="h-6 w-6" />
-                {isPending ? "Finalizing..." : "Confirm Drop-off & Finalize Order"}
-              </button>
+              <div>
+                <button
+                  type="button"
+                  disabled={!allChecked || isPending}
+                  onClick={confirmDropOff}
+                  className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <CheckSquare className="h-6 w-6" />
+                  {isPending ? "Finalizing..." : "Confirm Drop-off & Finalize Order"}
+                </button>
+                <p className="mt-2 text-center text-xs text-brand-muted">This action will notify the customer and close the active manifest.</p>
+              </div>
             </div>
           </div>
-        </section>
+          </section>
+        </div>
       )}
     </DashboardShell>
   );

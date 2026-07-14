@@ -60,6 +60,7 @@ export async function createStaffUser(input: {
   password: string;
   name: string;
   role: Exclude<Role, "customer">;
+  avatarUrl?: string | null;
 }): Promise<AppUser> {
   const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
 
@@ -71,6 +72,7 @@ export async function createStaffUser(input: {
       passwordHash,
       name: input.name,
       role: input.role,
+      avatarUrl: input.avatarUrl,
     },
   });
 }

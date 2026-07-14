@@ -1,11 +1,12 @@
 "use client";
 
-import { Plus, Search, UserPlus, UserRound } from "lucide-react";
+import Image from "next/image";
+import { Download, ImageUp, Plus, Search, UserPlus, UserRound } from "lucide-react";
 import { useActionState, useMemo, useState } from "react";
 import type { Store, User } from "@prisma/client";
 import { createStaffAccount } from "@/app/actions/staff";
-import { saveStoreSettings } from "@/app/actions/store-settings";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { downloadCsv } from "@/lib/csv-export";
 import type { Role } from "@/lib/users";
 
 type AdminUsersPageProps = {
@@ -19,7 +20,6 @@ export function AdminUsersPage({ store, currentRole, userName, staff }: AdminUse
   const [query, setQuery] = useState("");
   const [showAddStaff, setShowAddStaff] = useState(false);
   const [staffState, staffFormAction, staffPending] = useActionState(createStaffAccount, undefined);
-  const [settingsState, settingsFormAction, settingsPending] = useActionState(saveStoreSettings, undefined);
 
   const filteredStaff = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -33,6 +33,14 @@ export function AdminUsersPage({ store, currentRole, userName, staff }: AdminUse
     );
   }, [staff, query]);
 
+  function exportStaff() {
+    downloadCsv(
+      `${store.slug}-staff.csv`,
+      ["Name", "Username", "Email", "Role"],
+      filteredStaff.map((member) => [member.name, member.username, member.email, member.role])
+    );
+  }
+
   return (
     <DashboardShell
       storeSlug={store.slug}
@@ -43,34 +51,48 @@ export function AdminUsersPage({ store, currentRole, userName, staff }: AdminUse
       title="Staff Management"
       subtitle="Manage your team's access levels and profiles."
       action={
-        <button className="inline-flex items-center gap-2 rounded-lg bg-brand-orange-deep px-5 py-3 text-sm font-bold text-white">
-          <UserPlus className="h-4 w-4" />
-          Invite Member
-        </button>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={exportStaff} className="inline-flex items-center gap-2 rounded-lg border border-brand-green bg-white px-5 py-3 text-sm font-bold text-brand-green">
+            <Download className="h-4 w-4" />
+            Quick Export
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAddStaff((current) => !current)}
+            className="inline-flex items-center gap-2 rounded-lg bg-brand-orange-deep px-5 py-3 text-sm font-bold text-white"
+          >
+            <UserPlus className="h-4 w-4" />
+            Invite Member
+          </button>
+        </div>
       }
     >
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="space-y-6">
-          <label className="flex items-center gap-3 rounded-full bg-brand-panel-soft px-4 py-2.5 shadow-sm md:max-w-md">
-            <Search className="h-5 w-5 text-brand-outline" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search staff members..."
-              className="w-full bg-transparent text-sm outline-none placeholder:text-brand-outline"
-            />
-          </label>
+      <div className="space-y-6">
+        <label className="flex items-center gap-3 rounded-full bg-brand-panel-soft px-4 py-2.5 shadow-sm md:max-w-md">
+          <Search className="h-5 w-5 text-brand-outline" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search staff members..."
+            className="w-full bg-transparent text-sm outline-none placeholder:text-brand-outline"
+          />
+        </label>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredStaff.map((member) => (
               <div key={member.id} className="panel rounded-xl p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-panel-high text-brand-ink">
-                    <UserRound className="h-6 w-6" />
+                  <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-brand-panel-high text-brand-ink">
+                    {member.avatarUrl ? (
+                      <Image src={member.avatarUrl} alt={member.name} fill sizes="48px" className="object-cover" />
+                    ) : (
+                      <UserRound className="h-6 w-6" />
+                    )}
                   </div>
                   <div>
                     <p className="font-semibold text-brand-ink">{member.name}</p>
                     <p className="text-xs text-brand-muted">{member.username}</p>
+                    <p className="text-xs text-brand-muted">{member.email}</p>
                   </div>
                 </div>
                 <div className="mt-4">
@@ -119,66 +141,22 @@ export function AdminUsersPage({ store, currentRole, userName, staff }: AdminUse
                     <option value="delivery">Delivery</option>
                   </select>
                 </label>
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-brand-border bg-white px-4 py-3 text-sm font-semibold text-brand-ink hover:bg-brand-panel-soft/40">
+                  <ImageUp className="h-4 w-4 text-brand-green" />
+                  Avatar (optional)
+                  <input name="avatar" type="file" accept="image/*" className="sr-only" />
+                </label>
 
                 {staffState?.error ? (
-                  <p className="md:col-span-2 xl:col-span-4 text-sm font-semibold text-red-600">{staffState.error}</p>
+                  <p className="md:col-span-2 xl:col-span-5 text-sm font-semibold text-red-600">{staffState.error}</p>
                 ) : null}
 
-                <button type="submit" disabled={staffPending} className="md:col-span-2 xl:col-span-4 rounded-lg bg-brand-green px-5 py-3 text-sm font-bold text-white disabled:opacity-60">
+                <button type="submit" disabled={staffPending} className="md:col-span-2 xl:col-span-5 rounded-lg bg-brand-green px-5 py-3 text-sm font-bold text-white disabled:opacity-60">
                   {staffPending ? "Creating..." : "Create Account"}
                 </button>
               </form>
             </div>
           ) : null}
-        </section>
-
-        <aside className="panel h-fit rounded-xl p-5">
-          <h3 className="text-lg font-bold text-brand-ink">Store Configuration</h3>
-          <p className="mt-1 text-sm text-brand-muted">Operating hours and hourly order capacity.</p>
-
-          <form action={settingsFormAction} className="mt-5 space-y-4">
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-brand-muted">Opening Time</span>
-              <input
-                type="time"
-                name="openingTime"
-                defaultValue={store.openingTime}
-                className="w-full rounded-lg border border-brand-border bg-white px-4 py-2.5 text-sm outline-none"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-brand-muted">Closing Time</span>
-              <input
-                type="time"
-                name="closingTime"
-                defaultValue={store.closingTime}
-                className="w-full rounded-lg border border-brand-border bg-white px-4 py-2.5 text-sm outline-none"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-brand-muted">Hourly Capacity</span>
-              <input
-                type="number"
-                name="hourlyCapacity"
-                min={1}
-                defaultValue={store.hourlyCapacity}
-                className="w-full rounded-lg border border-brand-border bg-white px-4 py-2.5 text-sm outline-none"
-              />
-            </label>
-
-            {settingsState?.error ? (
-              <p className="text-sm font-semibold text-red-600">{settingsState.error}</p>
-            ) : null}
-
-            <button
-              type="submit"
-              disabled={settingsPending}
-              className="w-full rounded-lg bg-brand-green px-4 py-3 text-sm font-bold text-white disabled:opacity-60"
-            >
-              {settingsPending ? "Saving..." : "Save Changes"}
-            </button>
-          </form>
-        </aside>
       </div>
     </DashboardShell>
   );

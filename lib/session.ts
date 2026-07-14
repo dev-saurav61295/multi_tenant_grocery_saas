@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { AppUser, Role } from "@/lib/users";
 
 const COOKIE_NAME = "session";
+const REMEMBER_ME_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 export type SessionPayload = Pick<AppUser, "id" | "username" | "name" | "role" | "storeId"> & {
   storeSlug: string;
@@ -13,7 +14,7 @@ export type SessionPayload = Pick<AppUser, "id" | "username" | "name" | "role" |
 // Plain JSON in the cookie value, unencrypted — there is no server-side session
 // store to check against; this is a lightweight optimistic session, not a
 // production-grade auth solution (no rotation, no revocation).
-export async function createSession(user: AppUser, storeSlug: string) {
+export async function createSession(user: AppUser, storeSlug: string, rememberMe = false) {
   const payload: SessionPayload = {
     id: user.id,
     username: user.username,
@@ -29,6 +30,7 @@ export async function createSession(user: AppUser, storeSlug: string) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
+    ...(rememberMe ? { maxAge: REMEMBER_ME_MAX_AGE } : {}),
   });
 }
 

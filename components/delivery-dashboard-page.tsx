@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { CheckSquare, MapPinned, Phone } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { CheckCircle2, CheckSquare, MapPinned, Phone, Truck } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
 import type { Prisma, Store } from "@prisma/client";
+import { acceptPickup } from "@/app/actions/orders";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { formatCurrency } from "@/lib/format";
 import type { Role } from "@/lib/users";
@@ -17,15 +19,29 @@ type DeliveryDashboardPageProps = {
   currentRole: Role;
   userName: string;
   orders: OrderWithItems[];
+  completedToday: number;
 };
 
-export function DeliveryDashboardPage({ store, currentRole, userName, orders }: DeliveryDashboardPageProps) {
+export function DeliveryDashboardPage({ store, currentRole, userName, orders, completedToday }: DeliveryDashboardPageProps) {
+  const router = useRouter();
   const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
+  const [isPending, startTransition] = useTransition();
 
   const selectedOrder = useMemo(
     () => orders.find((order) => order.id === selectedOrderId) ?? orders[0],
     [orders, selectedOrderId]
   );
+
+  function acceptSelectedPickup() {
+    if (!selectedOrder) {
+      return;
+    }
+
+    startTransition(async () => {
+      await acceptPickup(selectedOrder.id);
+      router.refresh();
+    });
+  }
 
   if (!selectedOrder) {
     return (
@@ -60,6 +76,31 @@ export function DeliveryDashboardPage({ store, currentRole, userName, orders }: 
           Delivery Portal <span className="mx-2">›</span> <span className="text-brand-green">Confirmation</span>
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="soft-card rounded-xl p-5">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-green-bright text-brand-ink">
+                <Truck className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-brand-muted">Assigned to Me</p>
+                <p className="text-[2rem] font-bold text-brand-ink">{orders.length}</p>
+              </div>
+            </div>
+          </div>
+          <div className="soft-card rounded-xl p-5">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-200 text-brand-orange-deep">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-brand-muted">Completed Today</p>
+                <p className="text-[2rem] font-bold text-brand-ink">{completedToday}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
           <section className="rounded-xl border border-brand-border/50 bg-brand-panel-soft/60 p-4">
             <p className="text-sm font-bold uppercase tracking-[0.22em] text-brand-muted">Assigned Manifest</p>
@@ -87,12 +128,18 @@ export function DeliveryDashboardPage({ store, currentRole, userName, orders }: 
                       </div>
                       {order.eta ? <p className="mt-3 text-[11px] text-brand-muted">ETA: {order.eta}</p> : null}
                     </button>
-                    <Link
-                      href={`/${store.slug}/delivery/complete/${order.id}`}
-                      className="mt-2 inline-flex text-xs font-bold text-brand-green hover:underline"
-                    >
-                      Confirm Drop-off →
-                    </Link>
+                    {order.acceptedAt ? (
+                      <Link
+                        href={`/${store.slug}/delivery/complete/${order.id}`}
+                        className="mt-2 inline-flex text-xs font-bold text-brand-green hover:underline"
+                      >
+                        Confirm Drop-off →
+                      </Link>
+                    ) : (
+                      <span className="mt-2 inline-flex rounded-full bg-brand-panel-high px-2 py-1 text-[10px] font-bold uppercase text-brand-muted">
+                        Awaiting Pickup
+                      </span>
+                    )}
                   </div>
                 );
               })}
@@ -122,7 +169,16 @@ export function DeliveryDashboardPage({ store, currentRole, userName, orders }: 
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-muted">Verified Payment Proof</p>
                   <div className="mt-4 overflow-hidden rounded-xl border-2 border-brand-green-bright bg-brand-panel-alt p-3">
-                    <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-brand-panel-soft to-brand-green-fixed/20" />
+                    {selectedOrder.paymentProofUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={`/api/files/${store.id}/${selectedOrder.paymentProofUrl}`}
+                        alt="Payment proof screenshot"
+                        className="aspect-[4/3] w-full rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-brand-panel-soft to-brand-green-fixed/20" />
+                    )}
                   </div>
                 </div>
               </div>
@@ -170,13 +226,25 @@ export function DeliveryDashboardPage({ store, currentRole, userName, orders }: 
                   </a>
                 </div>
 
-                <Link
-                  href={`/${store.slug}/delivery/complete/${selectedOrder.id}`}
-                  className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110"
-                >
-                  <CheckSquare className="h-6 w-6" />
-                  Confirm Drop-off & Finalize Order
-                </Link>
+                {selectedOrder.acceptedAt ? (
+                  <Link
+                    href={`/${store.slug}/delivery/complete/${selectedOrder.id}`}
+                    className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110"
+                  >
+                    <CheckSquare className="h-6 w-6" />
+                    Confirm Drop-off & Finalize Order
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={acceptSelectedPickup}
+                    disabled={isPending}
+                    className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-orange-deep px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110 disabled:opacity-60"
+                  >
+                    <CheckCircle2 className="h-6 w-6" />
+                    {isPending ? "Accepting..." : "Accept & Confirm Pickup"}
+                  </button>
+                )}
               </div>
             </div>
           </section>

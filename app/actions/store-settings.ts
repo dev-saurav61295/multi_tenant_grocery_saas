@@ -27,5 +27,5 @@ export async function saveStoreSettings(_state: StoreSettingsState, formData: Fo
     data: { openingTime, closingTime, hourlyCapacity },
   });
 
-  revalidatePath(`/${session.storeSlug}/admin/users`);
+  revalidatePath(`/${session.storeSlug}/admin/settings`);
 }

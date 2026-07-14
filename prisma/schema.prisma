@@ -42,11 +42,14 @@ model User {
   emailVerifiedAt    DateTime?
   emailVerifyToken   String?
   emailVerifyExpires DateTime?
+  avatarUrl    String?
+  onBreak      Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  orders     Order[]
-  emailLogs  EmailLog[]
+  orders         Order[]
+  emailLogs      EmailLog[]
+  assignedOrders Order[]    @relation("OrderRider")
 
   @@unique([storeId, username])
   @@unique([storeId, email])
@@ -66,6 +69,7 @@ model Product {
   description   String
   comboEligible Boolean     @default(false)
   stock         Int         @default(0)
+  imageUrl      String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -94,6 +98,11 @@ model Order {
   packingSlot    String?
   priority       String      @default("Standard")
   screenshotName String?
+  paymentProofUrl String?
+  riderId        String?
+  rider          User?       @relation("OrderRider", fields: [riderId], references: [id])
+  acceptedAt     DateTime?
+  verifiedAt     DateTime?
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
@@ -103,6 +112,7 @@ model Order {
   @@index([storeId])
   @@index([userId])
   @@index([status])
+  @@index([riderId])
   @@map("orders")
 }
 
@@ -126,6 +136,7 @@ model Store {
   openingTime    String   @default("09:00")
   closingTime    String   @default("20:00")
   hourlyCapacity Int      @default(40)
+  upiId          String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

@@ -37,6 +37,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# user-uploaded content (product/avatar images, payment-proof screenshots)
+/public/uploads
+/private-uploads
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

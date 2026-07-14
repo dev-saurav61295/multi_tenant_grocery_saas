@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Store } from "lucide-react";
+import { AlertCircle, ArrowRight, Eye, EyeOff, LockKeyhole, Mail, MessageCircle, Store } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import type { Store as PrismaStore } from "@prisma/client";
@@ -18,8 +18,8 @@ export function LoginPage({ store }: LoginPageProps) {
   return (
     <div className="app-shell relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute right-[-2rem] top-[-2rem] h-80 w-80 rounded-full bg-brand-green-fixed/30 blur-3xl" />
-        <div className="absolute bottom-[-3rem] left-[-3rem] h-80 w-80 rounded-full bg-brand-orange/20 blur-3xl" />
+        <div className="absolute right-[-2rem] top-[-2rem] h-80 w-80 animate-pulse rounded-full bg-brand-green-fixed/30 blur-3xl" />
+        <div className="absolute bottom-[-3rem] left-[-3rem] h-80 w-80 animate-pulse rounded-full bg-brand-orange/20 blur-3xl [animation-delay:1s]" />
       </div>
 
       <section className="relative z-10 w-full max-w-md">
@@ -28,13 +28,13 @@ export function LoginPage({ store }: LoginPageProps) {
             <Store className="h-7 w-7" />
           </div>
           <h1 className="mt-5 text-[2.25rem] font-bold tracking-tight text-brand-ink">{store.name}</h1>
-          <p className="mt-2 text-base font-medium text-brand-muted">Inventory & Order Management</p>
+          <p className="mt-2 text-base font-medium text-brand-muted">Store &amp; Account Access</p>
         </div>
 
         <div className="rounded-xl border border-brand-green/10 bg-white p-8 shadow-focus lg:p-10">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-brand-ink">Sign In</h2>
-            <p className="text-sm text-brand-muted">Enter your credentials to access the admin portal</p>
+            <p className="text-sm text-brand-muted">Enter your credentials to access your account</p>
           </div>
 
           <form action={formAction} className="space-y-5">
@@ -72,8 +72,16 @@ export function LoginPage({ store }: LoginPageProps) {
               </div>
             </label>
 
+            <label className="flex items-center gap-2 text-sm font-semibold text-brand-muted">
+              <input type="checkbox" name="remember" className="h-4 w-4 rounded border-brand-border text-brand-green focus:ring-brand-green" />
+              Remember me for 30 days
+            </label>
+
             {state?.error ? (
-              <p className="text-sm font-semibold text-red-600">{state.error}</p>
+              <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                <AlertCircle className="h-5 w-5 shrink-0" />
+                {state.error}
+              </div>
             ) : null}
 
             <button
@@ -83,6 +91,22 @@ export function LoginPage({ store }: LoginPageProps) {
             >
               {pending ? "Signing In..." : "Sign In to Dashboard"}
               <ArrowRight className="h-5 w-5" />
+            </button>
+
+            <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wide text-brand-outline">
+              <span className="h-px flex-1 bg-brand-border" />
+              Or continue with
+              <span className="h-px flex-1 bg-brand-border" />
+            </div>
+
+            <button
+              type="button"
+              disabled
+              title="WhatsApp sign-in is coming soon"
+              className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-brand-green px-5 py-4 text-base font-bold text-brand-green opacity-60"
+            >
+              <MessageCircle className="h-5 w-5" />
+              Continue with WhatsApp (coming soon)
             </button>
 
             <p className="text-center text-sm text-brand-muted">

@@ -11,18 +11,27 @@ type PackingPageProps = Readonly<{
 export default async function PackingPage({ params }: PackingPageProps) {
   const { store: storeSlug } = await params;
   const session = await verifySession();
-  const [store, orders] = await Promise.all([
+  const [store, orders, currentUser] = await Promise.all([
     getStoreBySlug(storeSlug),
     prisma.order.findMany({
       where: { storeId: session.storeId, status: "packing" },
       include: { user: true, items: { include: { product: true } } },
       orderBy: { createdAt: "asc" },
     }),
+    prisma.user.findUnique({ where: { id: session.id }, select: { onBreak: true } }),
   ]);
 
   if (!store) {
     notFound();
   }
 
-  return <StaffPackingPage store={store} currentRole={session.role} userName={session.name} orders={orders} />;
+  return (
+    <StaffPackingPage
+      store={store}
+      currentRole={session.role}
+      userName={session.name}
+      orders={orders}
+      onBreak={currentUser?.onBreak ?? false}
+    />
+  );
 }

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import QRCode from "qrcode";
 import { CheckoutPage } from "@/components/checkout-page";
 import { parseCartParam } from "@/lib/cart";
 import { getStoreBySlug } from "@/lib/store";
@@ -31,5 +32,12 @@ export default async function StoreCheckout({ params, searchParams }: CheckoutPr
     redirect(`/${store.slug}`);
   }
 
-  return <CheckoutPage store={store} session={session} cart={cart} itemsParam={items ?? ""} />;
+  const qrCodeDataUrl = store.upiId
+    ? await QRCode.toDataURL(
+        `upi://pay?pa=${encodeURIComponent(store.upiId)}&pn=${encodeURIComponent(store.name)}&am=${cart.total}&cu=INR`,
+        { margin: 1, width: 320 }
+      )
+    : null;
+
+  return <CheckoutPage store={store} session={session} cart={cart} itemsParam={items ?? ""} qrCodeDataUrl={qrCodeDataUrl} />;
 }

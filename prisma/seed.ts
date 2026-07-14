@@ -22,7 +22,13 @@ type DemoProduct = {
   description: string;
   comboEligible: boolean;
   stock: number;
+  imageUrl?: string;
 };
+
+/** Deterministic demo photo per product id — picsum.photos "seed" images are stable across requests. */
+function demoImageUrl(productId: string) {
+  return `https://picsum.photos/seed/${productId}/480/480`;
+}
 
 type DemoOrder = {
   username: string;
@@ -46,6 +52,7 @@ const stores = [
     openingTime: "09:00",
     closingTime: "20:00",
     hourlyCapacity: 40,
+    upiId: "bhagwandas@upi",
     users: [
       { username: "admin_user", email: "admin.bhagwandas@example.com", password: "password123", name: "Bhagwandas Admin", role: "admin" as const },
       { username: "staff_user", email: "staff.bhagwandas@example.com", password: "password123", name: "Packing Staff", role: "staff" as const },
@@ -132,6 +139,7 @@ const stores = [
     openingTime: "08:30",
     closingTime: "21:00",
     hourlyCapacity: 30,
+    upiId: "freshmart@upi",
     users: [
       { username: "admin_user", email: "admin.freshmart@example.com", password: "password123", name: "Fresh Mart Admin", role: "admin" as const },
       { username: "floor_user", email: "staff.freshmart@example.com", password: "password123", name: "Floor Staff", role: "staff" as const },
@@ -192,6 +200,7 @@ async function seedStores() {
         openingTime: store.openingTime,
         closingTime: store.closingTime,
         hourlyCapacity: store.hourlyCapacity,
+        upiId: store.upiId,
       },
       create: {
         name: store.name,
@@ -200,6 +209,7 @@ async function seedStores() {
         openingTime: store.openingTime,
         closingTime: store.closingTime,
         hourlyCapacity: store.hourlyCapacity,
+        upiId: store.upiId,
       },
     });
   }
@@ -242,11 +252,12 @@ async function seedUsers(store: (typeof stores)[number]) {
 async function seedProducts(store: (typeof stores)[number]) {
   const storeRecord = await prisma.store.findUniqueOrThrow({ where: { slug: store.slug } });
 
-  for (const product of store.products) {
+  for (const product of store.products as DemoProduct[]) {
+    const data = { ...product, imageUrl: product.imageUrl ?? demoImageUrl(product.id), storeId: storeRecord.id };
     await prisma.product.upsert({
       where: { id: product.id },
-      update: { ...product, storeId: storeRecord.id },
-      create: { ...product, storeId: storeRecord.id },
+      update: data,
+      create: data,
     });
   }
 }

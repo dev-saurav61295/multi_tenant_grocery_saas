@@ -11,12 +11,19 @@ type DeliveryPageProps = Readonly<{
 export default async function DeliveryPage({ params }: DeliveryPageProps) {
   const { store: storeSlug } = await params;
   const session = await verifySession();
-  const [store, orders] = await Promise.all([
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const [store, orders, completedToday] = await Promise.all([
     getStoreBySlug(storeSlug),
     prisma.order.findMany({
-      where: { storeId: session.storeId, status: "out_for_delivery" },
+      where: { storeId: session.storeId, status: "out_for_delivery", riderId: session.id },
       include: { user: true, items: { include: { product: true } } },
       orderBy: { createdAt: "asc" },
+    }),
+    prisma.order.count({
+      where: { storeId: session.storeId, riderId: session.id, status: "delivered", updatedAt: { gte: startOfToday } },
     }),
   ]);
 
@@ -24,5 +31,13 @@ export default async function DeliveryPage({ params }: DeliveryPageProps) {
     notFound();
   }
 
-  return <DeliveryDashboardPage store={store} currentRole={session.role} userName={session.name} orders={orders} />;
+  return (
+    <DeliveryDashboardPage
+      store={store}
+      currentRole={session.role}
+      userName={session.name}
+      orders={orders}
+      completedToday={completedToday}
+    />
+  );
 }

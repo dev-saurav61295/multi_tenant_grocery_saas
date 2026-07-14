@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { CreditCard, ImageUp } from "lucide-react";
-import { useActionState, useState } from "react";
+import { CreditCard, ImageUp, Sparkles, X } from "lucide-react";
+import { useActionState, useRef, useState } from "react";
 import type { Store } from "@prisma/client";
 import { AccountMenu } from "@/components/account-menu";
 import { placeOrder } from "@/app/actions/orders";
@@ -15,11 +15,26 @@ type CheckoutPageProps = {
   session: SessionPayload | null;
   cart: PricedCart;
   itemsParam: string;
+  qrCodeDataUrl: string | null;
 };
 
-export function CheckoutPage({ store, session, cart, itemsParam }: CheckoutPageProps) {
-  const [uploadedFileName, setUploadedFileName] = useState("");
+export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }: CheckoutPageProps) {
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [state, formAction, pending] = useActionState(placeOrder, undefined);
+
+  function setSelectedFile(next: File | null) {
+    const input = fileInputRef.current;
+    if (input) {
+      const transfer = new DataTransfer();
+      if (next) {
+        transfer.items.add(next);
+      }
+      input.files = transfer.files;
+    }
+    setProofFile(next);
+  }
 
   return (
     <div className="app-shell pb-32">
@@ -42,7 +57,6 @@ export function CheckoutPage({ store, session, cart, itemsParam }: CheckoutPageP
 
       <form action={formAction}>
         <input type="hidden" name="items" value={itemsParam} />
-        <input type="hidden" name="screenshotName" value={uploadedFileName} />
 
         <div className="px-4 py-6 lg:px-6 lg:py-8">
           <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -66,11 +80,12 @@ export function CheckoutPage({ store, session, cart, itemsParam }: CheckoutPageP
 
               {cart.comboDiscount > 0 ? (
                 <div className="mt-6 rounded-xl border border-brand-green/20 bg-brand-green/10 p-4">
-                  <div className="flex items-center justify-between text-sm font-bold text-brand-green">
-                    <span>Tiered combo discount</span>
+                  <div className="flex items-center gap-2 text-sm font-bold text-brand-green">
+                    <Sparkles className="h-4 w-4" />
+                    <span className="flex-1">Bulk Order Combo Discount</span>
                     <span>-{formatCurrency(cart.comboDiscount)}</span>
                   </div>
-                  <p className="mt-2 text-sm text-brand-muted">₹20 off per combo-eligible item bought 3 or more at a time.</p>
+                  <p className="mt-2 text-sm text-brand-muted">You saved {formatCurrency(cart.comboDiscount)} — ₹20 off per combo-eligible item bought 3 or more at a time.</p>
                 </div>
               ) : null}
 
@@ -127,43 +142,81 @@ export function CheckoutPage({ store, session, cart, itemsParam }: CheckoutPageP
 
               <div className="mt-6 grid place-items-center rounded-xl bg-brand-panel-soft p-6">
                 <div className="grid h-72 w-full max-w-xs place-items-center rounded-xl bg-brand-panel-alt">
-                  <div className="grid h-52 w-52 grid-cols-6 gap-2 rounded-2xl bg-white p-4 shadow-card">
-                    {Array.from({ length: 36 }).map((_, index) => (
-                      <div
-                        key={index}
-                        className={`${index % 2 === 0 || index % 5 === 0 ? "bg-brand-green" : "bg-brand-panel-soft"} rounded-sm`}
-                      />
-                    ))}
-                  </div>
+                  {qrCodeDataUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={qrCodeDataUrl} alt="Scan to pay via UPI" className="h-52 w-52 rounded-2xl bg-white p-4 shadow-card" />
+                  ) : (
+                    <div className="grid h-52 w-52 place-items-center rounded-2xl bg-white p-4 text-center text-sm text-brand-muted shadow-card">
+                      QR unavailable — pay via UPI ID below.
+                    </div>
+                  )}
                   <div className="text-center">
-                    <p className="inline-flex rounded-full bg-brand-orange-deep px-3 py-1 text-[11px] font-bold text-white">BHAGWANDAS@UPI</p>
+                    <p className="inline-flex rounded-full bg-brand-orange-deep px-3 py-1 text-[11px] font-bold text-white">
+                      {store.upiId ?? "UPI not configured"}
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <label className="mt-6 flex cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-brand-orange bg-brand-orange/5 px-6 py-10 text-center transition hover:bg-brand-orange/10">
+              <label
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  setIsDragging(false);
+                  const dropped = event.dataTransfer.files?.[0];
+                  if (dropped) {
+                    setSelectedFile(dropped);
+                  }
+                }}
+                className={`mt-6 flex cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${
+                  isDragging ? "border-brand-green bg-brand-green/10" : "border-brand-orange bg-brand-orange/5 hover:bg-brand-orange/10"
+                }`}
+              >
                 <div className="rounded-full bg-brand-orange p-4 text-white shadow-card">
                   <ImageUp className="h-7 w-7" />
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-brand-ink">Upload Payment Screenshot</p>
-                  <p className="mt-1 text-sm text-brand-muted">JPG, PNG or PDF accepted for manual verification.</p>
+                  <p className="mt-1 text-sm text-brand-muted">Drag and drop, or click to browse. JPG, PNG or PDF accepted for manual verification.</p>
                 </div>
                 <input
+                  ref={fileInputRef}
                   type="file"
+                  name="paymentProof"
+                  accept="image/*,.pdf"
                   className="sr-only"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    setUploadedFileName(file?.name ?? "");
-                  }}
+                  onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
                 />
               </label>
 
-              <div className="mt-4 rounded-xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-muted">
-                {uploadedFileName || "No screenshot uploaded yet"}
-              </div>
+              {proofFile ? (
+                <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-brand-border bg-white px-4 py-3 text-sm">
+                  <span className="truncate text-brand-ink">{proofFile.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFile(null)}
+                    aria-label="Remove selected file"
+                    className="rounded-full p-1 text-brand-muted hover:bg-brand-panel-soft hover:text-brand-ink"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-muted">
+                  No screenshot uploaded yet
+                </div>
+              )}
               <p className="mt-4 text-center text-sm italic text-brand-muted">Verification usually takes 5-10 minutes.</p>
             </section>
+          </div>
+
+          <div className="mx-auto mt-4 max-w-7xl border-t border-brand-border/60 px-4 py-6 text-sm text-brand-muted lg:px-6">
+            <p className="font-bold text-brand-ink">{store.name}</p>
+            <p className="mt-1">Need help with this order? Contact Support or review our Privacy Policy and Terms.</p>
           </div>
         </div>
 

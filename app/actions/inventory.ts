@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { savePublicUpload } from "@/lib/storage";
 
 export type InventoryActionState = { error: string } | undefined;
 
@@ -17,6 +18,7 @@ export async function createProduct(_state: InventoryActionState, formData: Form
   const comboEligible = formData.get("comboEligible") === "on";
   const price = Number(formData.get("price"));
   const stock = Number(formData.get("stock"));
+  const image = formData.get("image");
 
   if (
     !name ||
@@ -32,8 +34,10 @@ export async function createProduct(_state: InventoryActionState, formData: Form
     return { error: "Please fill in every field with valid values." };
   }
 
+  const imageUrl = image instanceof File && image.size > 0 ? await savePublicUpload(session.storeId, "products", image) : null;
+
   await prisma.product.create({
-    data: { storeId: session.storeId, name, brand, size, category, description, comboEligible, price, stock },
+    data: { storeId: session.storeId, name, brand, size, category, description, comboEligible, price, stock, imageUrl },
   });
 
   revalidatePath(`/${session.storeSlug}/admin/inventory`);
