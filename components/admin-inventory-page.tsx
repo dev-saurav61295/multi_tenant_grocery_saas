@@ -1,53 +1,37 @@
 "use client";
 
-import { AlertTriangle, Boxes, Download, Plus, Search, TrendingUp } from "lucide-react";
-import { useMemo, useState } from "react";
+import { AlertTriangle, Boxes, Download, Plus, Search } from "lucide-react";
+import { useActionState, useMemo, useState } from "react";
+import type { Product } from "@prisma/client";
+import { createProduct } from "@/app/actions/inventory";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { formatCurrency } from "@/lib/format";
-import { inventoryItems } from "@/lib/mock-data";
 import type { Role } from "@/lib/users";
 
 type AdminInventoryPageProps = {
   currentRole: Role;
   userName: string;
+  products: Product[];
 };
 
-export function AdminInventoryPage({ currentRole, userName }: AdminInventoryPageProps) {
-  const [items, setItems] = useState(inventoryItems);
+const LOW_STOCK_THRESHOLD = 30;
+
+export function AdminInventoryPage({ currentRole, userName, products }: AdminInventoryPageProps) {
   const [query, setQuery] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [draft, setDraft] = useState({ name: "", brand: "", size: "", price: "", stock: "" });
+  const [state, formAction, pending] = useActionState(createProduct, undefined);
 
   const filteredItems = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) {
-      return items;
+      return products;
     }
-    return items.filter((item) =>
+    return products.filter((item) =>
       [item.name, item.brand, item.size].some((value) => value.toLowerCase().includes(normalized))
     );
-  }, [items, query]);
+  }, [products, query]);
 
-  function addProduct() {
-    if (!draft.name || !draft.brand || !draft.size || !draft.price || !draft.stock) {
-      return;
-    }
-
-    setItems((current) => [
-      {
-        id: `inv-${current.length + 1}`,
-        name: draft.name,
-        brand: draft.brand,
-        size: draft.size,
-        price: Number(draft.price),
-        stock: Number(draft.stock),
-      },
-      ...current,
-    ]);
-
-    setDraft({ name: "", brand: "", size: "", price: "", stock: "" });
-    setShowForm(false);
-  }
+  const lowStockCount = products.filter((item) => item.stock < LOW_STOCK_THRESHOLD).length;
 
   return (
     <DashboardShell
@@ -86,7 +70,7 @@ export function AdminInventoryPage({ currentRole, userName }: AdminInventoryPage
           </label>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
+        <section className="grid gap-4 md:grid-cols-2">
           <div className="soft-card rounded-xl p-5">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-green-bright text-brand-ink">
@@ -94,7 +78,7 @@ export function AdminInventoryPage({ currentRole, userName }: AdminInventoryPage
               </div>
               <div>
                 <p className="text-sm font-bold text-brand-muted">Total SKUs</p>
-                <p className="text-[2rem] font-bold text-brand-ink">1,284</p>
+                <p className="text-[2rem] font-bold text-brand-ink">{products.length}</p>
               </div>
             </div>
           </div>
@@ -105,18 +89,7 @@ export function AdminInventoryPage({ currentRole, userName }: AdminInventoryPage
               </div>
               <div>
                 <p className="text-sm font-bold text-brand-muted">Low Stock Items</p>
-                <p className="text-[2rem] font-bold text-brand-ink">42</p>
-              </div>
-            </div>
-          </div>
-          <div className="soft-card rounded-xl p-5">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-orange/20 text-brand-orange-deep">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-brand-muted">Monthly Turnaround</p>
-                <p className="text-[2rem] font-bold text-brand-ink">+12.4%</p>
+                <p className="text-[2rem] font-bold text-brand-ink">{lowStockCount}</p>
               </div>
             </div>
           </div>
@@ -124,27 +97,48 @@ export function AdminInventoryPage({ currentRole, userName }: AdminInventoryPage
 
         {showForm ? (
           <section className="panel rounded-xl p-5">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-              {[
-                ["name", "Product Name"],
-                ["brand", "Brand/Company"],
-                ["size", "Variant Size"],
-                ["price", "Base Price"],
-                ["stock", "Dummy Stock"],
-              ].map(([key, label]) => (
-                <label key={key} className="block">
-                  <span className="mb-2 block text-sm font-semibold text-brand-ink">{label}</span>
-                  <input
-                    value={draft[key as keyof typeof draft]}
-                    onChange={(event) => setDraft((current) => ({ ...current, [key]: event.target.value }))}
-                    className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none"
-                  />
+            <form action={formAction}>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Product Name</span>
+                  <input name="name" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
                 </label>
-              ))}
-            </div>
-            <button type="button" onClick={addProduct} className="mt-4 rounded-lg bg-brand-green px-5 py-3 text-sm font-bold text-white">
-              Save Product
-            </button>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Brand/Company</span>
+                  <input name="brand" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Variant Size</span>
+                  <input name="size" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Category</span>
+                  <input name="category" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Base Price</span>
+                  <input name="price" type="number" min="1" step="1" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Stock</span>
+                  <input name="stock" type="number" min="0" step="1" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                </label>
+                <label className="block md:col-span-2 xl:col-span-3">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Description</span>
+                  <textarea name="description" required rows={2} className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" name="comboEligible" className="h-4 w-4 rounded border-brand-border text-brand-green focus:ring-brand-green" />
+                  <span className="text-sm font-semibold text-brand-ink">Eligible for combo pricing</span>
+                </label>
+              </div>
+
+              {state?.error ? <p className="mt-4 text-sm font-semibold text-red-600">{state.error}</p> : null}
+
+              <button type="submit" disabled={pending} className="mt-4 rounded-lg bg-brand-green px-5 py-3 text-sm font-bold text-white disabled:opacity-60">
+                {pending ? "Saving..." : "Save Product"}
+              </button>
+            </form>
           </section>
         ) : null}
 
@@ -171,7 +165,7 @@ export function AdminInventoryPage({ currentRole, userName }: AdminInventoryPage
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-24 overflow-hidden rounded-full bg-brand-panel-high">
-                          <div className={`h-2 rounded-full ${item.stock < 30 ? "bg-brand-orange-deep" : "bg-brand-green"}`} style={{ width: `${Math.min(item.stock, 100)}%` }} />
+                          <div className={`h-2 rounded-full ${item.stock < LOW_STOCK_THRESHOLD ? "bg-brand-orange-deep" : "bg-brand-green"}`} style={{ width: `${Math.min(item.stock, 100)}%` }} />
                         </div>
                         <span className="text-xs font-bold text-brand-ink">{item.stock} Units</span>
                       </div>
@@ -186,7 +180,7 @@ export function AdminInventoryPage({ currentRole, userName }: AdminInventoryPage
         <section className="grid gap-4 md:grid-cols-3">
           <div className="rounded-xl border border-brand-green/20 bg-brand-green/10 p-5">
             <p className="font-bold text-brand-green">Smart Replenishment</p>
-            <p className="mt-3 text-sm text-brand-muted">6 items have reached critical thresholds. Generate a draft purchase order.</p>
+            <p className="mt-3 text-sm text-brand-muted">Review low-stock items and generate a draft purchase order.</p>
           </div>
           <div className="rounded-xl border border-brand-orange/20 bg-brand-orange/10 p-5">
             <p className="font-bold text-brand-orange-deep">Bulk Price Update</p>

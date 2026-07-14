@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { Heart, Minus, Plus, Search, ShoppingCart, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
+import type { Product } from "@prisma/client";
 import { AccountMenu } from "@/components/account-menu";
+import { cartParamFromLines, computeComboDiscount } from "@/lib/cart";
 import { formatCurrency } from "@/lib/format";
-import { catalogProducts } from "@/lib/mock-data";
 import type { SessionPayload } from "@/lib/session";
 
 const productVisuals: Record<string, string> = {
@@ -21,43 +22,41 @@ const productVisuals: Record<string, string> = {
 
 type CatalogPageProps = {
   session: SessionPayload | null;
+  products: Product[];
 };
 
-export function CatalogPage({ session }: CatalogPageProps) {
+export function CatalogPage({ session, products }: CatalogPageProps) {
   const [searchValue, setSearchValue] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>(() =>
-    Object.fromEntries(catalogProducts.map((product) => [product.id, product.defaultQuantity]))
+    Object.fromEntries(products.map((product) => [product.id, 0]))
   );
 
   const filteredProducts = useMemo(() => {
     const query = searchValue.trim().toLowerCase();
 
     if (!query) {
-      return catalogProducts;
+      return products;
     }
 
-    return catalogProducts.filter((product) =>
+    return products.filter((product) =>
       [product.name, product.brand, product.category].some((value) =>
         value.toLowerCase().includes(query)
       )
     );
-  }, [searchValue]);
+  }, [products, searchValue]);
 
-  const cartItems = catalogProducts
+  const cartItems = products
     .map((product) => ({ ...product, quantity: quantities[product.id] ?? 0 }))
     .filter((product) => product.quantity > 0);
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const comboDiscount = cartItems.reduce((sum, item) => {
-    if (!item.comboEligible || item.quantity < 3) {
-      return sum;
-    }
-
-    return sum + 20;
-  }, 0);
+  const comboDiscount = computeComboDiscount(cartItems);
   const total = subtotal - comboDiscount;
   const minimumOrderMet = total >= 300;
+  const checkoutHref = `/checkout?items=${encodeURIComponent(
+    cartParamFromLines(cartItems.map((item) => ({ productId: item.id, quantity: item.quantity })))
+  )}`;
 
   function adjustQuantity(productId: string, delta: number) {
     setQuantities((current) => {
@@ -228,9 +227,19 @@ export function CatalogPage({ session }: CatalogPageProps) {
                 <span>Total</span>
                 <span>{formatCurrency(total)}</span>
               </div>
-              <Link href="/checkout" className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-brand-orange-deep px-5 py-4 text-base font-bold text-white transition hover:brightness-110">
-                Checkout
-              </Link>
+              {cartItems.length > 0 ? (
+                <Link href={checkoutHref} className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-brand-orange-deep px-5 py-4 text-base font-bold text-white transition hover:brightness-110">
+                  Checkout
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="mt-3 inline-flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-brand-orange-deep/40 px-5 py-4 text-base font-bold text-white"
+                >
+                  Add items to checkout
+                </button>
+              )}
               <div className="rounded-xl bg-white px-4 py-3 text-sm text-brand-muted shadow-sm">
                 Need help? Chat with us on WhatsApp.
               </div>

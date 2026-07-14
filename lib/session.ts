@@ -2,14 +2,15 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { AppUser } from "@/lib/users";
+import type { AppUser, Role } from "@/lib/users";
 
 const COOKIE_NAME = "session";
 
 export type SessionPayload = Pick<AppUser, "id" | "username" | "name" | "role">;
 
-// Plain JSON in the cookie value, unencrypted — there is no real secret to
-// protect yet since this is mock, in-memory dev data, not a production auth solution.
+// Plain JSON in the cookie value, unencrypted — there is no server-side session
+// store to check against; this is a lightweight optimistic session, not a
+// production-grade auth solution (no rotation, no revocation).
 export async function createSession(user: AppUser) {
   const payload: SessionPayload = {
     id: user.id,
@@ -54,3 +55,13 @@ export const verifySession = cache(async () => {
 
   return session;
 });
+
+export async function requireRole(...roles: Role[]) {
+  const session = await verifySession();
+
+  if (!roles.includes(session.role)) {
+    redirect("/login");
+  }
+
+  return session;
+}

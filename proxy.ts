@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { roleHome } from "@/lib/users";
+import { roleHome } from "@/lib/roles";
 import type { SessionPayload } from "@/lib/session";
 
 function readSession(request: NextRequest): SessionPayload | null {

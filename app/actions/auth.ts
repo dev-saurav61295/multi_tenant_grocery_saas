@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { Prisma } from "@prisma/client";
 import { createSession, deleteSession } from "@/lib/session";
 import { findUserByCredentials, findUserByUsername, registerCustomer, roleHome } from "@/lib/users";
 
@@ -10,7 +11,7 @@ export async function login(_state: AuthState, formData: FormData): Promise<Auth
   const username = String(formData.get("username") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
-  const user = findUserByCredentials(username, password);
+  const user = await findUserByCredentials(username, password);
 
   if (!user) {
     return { error: "Invalid username or password." };
@@ -29,11 +30,22 @@ export async function register(_state: AuthState, formData: FormData): Promise<A
     return { error: "Please fill in every field." };
   }
 
-  if (findUserByUsername(username)) {
+  if (await findUserByUsername(username)) {
     return { error: "That username is already taken." };
   }
 
-  const user = registerCustomer({ username, password, name });
+  let user;
+
+  try {
+    user = await registerCustomer({ username, password, name });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return { error: "That username is already taken." };
+    }
+
+    throw error;
+  }
+
   await createSession(user);
   redirect(roleHome[user.role]);
 }

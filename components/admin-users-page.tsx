@@ -1,40 +1,37 @@
 "use client";
 
 import { Plus, Search, UserPlus, UserRound } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
+import type { StoreSettings, User } from "@prisma/client";
+import { createStaffAccount } from "@/app/actions/staff";
+import { saveStoreSettings } from "@/app/actions/store-settings";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { staffMembers } from "@/lib/mock-data";
 import type { Role } from "@/lib/users";
 
 type AdminUsersPageProps = {
   currentRole: Role;
   userName: string;
+  staff: User[];
+  storeSettings: StoreSettings;
 };
 
-const statusStyles: Record<string, string> = {
-  "Active Now": "bg-brand-green-bright",
-};
-
-export function AdminUsersPage({ currentRole, userName }: AdminUsersPageProps) {
+export function AdminUsersPage({ currentRole, userName, staff, storeSettings }: AdminUsersPageProps) {
   const [query, setQuery] = useState("");
-  const [openingTime, setOpeningTime] = useState("09:00");
-  const [closingTime, setClosingTime] = useState("20:00");
-  const [hourlyCapacity, setHourlyCapacity] = useState(40);
-  const [saved, setSaved] = useState(false);
+  const [showAddStaff, setShowAddStaff] = useState(false);
+  const [staffState, staffFormAction, staffPending] = useActionState(createStaffAccount, undefined);
+  const [settingsState, settingsFormAction, settingsPending] = useActionState(saveStoreSettings, undefined);
 
   const filteredStaff = useMemo(() => {
     const normalized = query.trim().toLowerCase();
 
     if (!normalized) {
-      return staffMembers;
+      return staff;
     }
 
-    return staffMembers.filter((member) =>
-      [member.name, member.email, member.role].some((value) => value.toLowerCase().includes(normalized))
+    return staff.filter((member) =>
+      [member.name, member.username, member.role].some((value) => value.toLowerCase().includes(normalized))
     );
-  }, [query]);
-
-  const capacityLoadPercent = 65;
+  }, [staff, query]);
 
   return (
     <DashboardShell
@@ -65,24 +62,18 @@ export function AdminUsersPage({ currentRole, userName }: AdminUsersPageProps) {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredStaff.map((member) => (
               <div key={member.id} className="panel rounded-xl p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-panel-high text-brand-ink">
-                      <UserRound className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-brand-ink">{member.name}</p>
-                      <p className="text-xs text-brand-muted">{member.email}</p>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-panel-high text-brand-ink">
+                    <UserRound className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-brand-ink">{member.name}</p>
+                    <p className="text-xs text-brand-muted">{member.username}</p>
                   </div>
                 </div>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="rounded-full bg-brand-panel-soft px-3 py-1 text-xs font-bold text-brand-ink">
+                <div className="mt-4">
+                  <span className="rounded-full bg-brand-panel-soft px-3 py-1 text-xs font-bold capitalize text-brand-ink">
                     {member.role}
-                  </span>
-                  <span className="flex items-center gap-2 text-xs text-brand-muted">
-                    <span className={`h-2 w-2 rounded-full ${statusStyles[member.status] ?? "bg-brand-outline"}`} />
-                    {member.status}
                   </span>
                 </div>
               </div>
@@ -90,25 +81,62 @@ export function AdminUsersPage({ currentRole, userName }: AdminUsersPageProps) {
 
             <button
               type="button"
+              onClick={() => setShowAddStaff((current) => !current)}
               className="flex min-h-[140px] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-brand-border/70 text-brand-muted transition hover:border-brand-green hover:text-brand-green"
             >
               <Plus className="h-6 w-6" />
               <span className="text-sm font-bold">Add New Staff</span>
             </button>
           </div>
+
+          {showAddStaff ? (
+            <div className="panel rounded-xl p-5">
+              <form action={staffFormAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Name</span>
+                  <input name="name" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Username</span>
+                  <input name="username" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Password</span>
+                  <input name="password" type="password" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-brand-ink">Role</span>
+                  <select name="role" required defaultValue="" className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none">
+                    <option value="" disabled>Select a role</option>
+                    <option value="admin">Admin</option>
+                    <option value="staff">Staff</option>
+                    <option value="delivery">Delivery</option>
+                  </select>
+                </label>
+
+                {staffState?.error ? (
+                  <p className="md:col-span-2 xl:col-span-4 text-sm font-semibold text-red-600">{staffState.error}</p>
+                ) : null}
+
+                <button type="submit" disabled={staffPending} className="md:col-span-2 xl:col-span-4 rounded-lg bg-brand-green px-5 py-3 text-sm font-bold text-white disabled:opacity-60">
+                  {staffPending ? "Creating..." : "Create Account"}
+                </button>
+              </form>
+            </div>
+          ) : null}
         </section>
 
         <aside className="panel h-fit rounded-xl p-5">
           <h3 className="text-lg font-bold text-brand-ink">Store Configuration</h3>
           <p className="mt-1 text-sm text-brand-muted">Operating hours and hourly order capacity.</p>
 
-          <div className="mt-5 space-y-4">
+          <form action={settingsFormAction} className="mt-5 space-y-4">
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-brand-muted">Opening Time</span>
               <input
                 type="time"
-                value={openingTime}
-                onChange={(event) => setOpeningTime(event.target.value)}
+                name="openingTime"
+                defaultValue={storeSettings.openingTime}
                 className="w-full rounded-lg border border-brand-border bg-white px-4 py-2.5 text-sm outline-none"
               />
             </label>
@@ -116,8 +144,8 @@ export function AdminUsersPage({ currentRole, userName }: AdminUsersPageProps) {
               <span className="mb-2 block text-sm font-semibold text-brand-muted">Closing Time</span>
               <input
                 type="time"
-                value={closingTime}
-                onChange={(event) => setClosingTime(event.target.value)}
+                name="closingTime"
+                defaultValue={storeSettings.closingTime}
                 className="w-full rounded-lg border border-brand-border bg-white px-4 py-2.5 text-sm outline-none"
               />
             </label>
@@ -125,32 +153,25 @@ export function AdminUsersPage({ currentRole, userName }: AdminUsersPageProps) {
               <span className="mb-2 block text-sm font-semibold text-brand-muted">Hourly Capacity</span>
               <input
                 type="number"
+                name="hourlyCapacity"
                 min={1}
-                value={hourlyCapacity}
-                onChange={(event) => setHourlyCapacity(Number(event.target.value))}
+                defaultValue={storeSettings.hourlyCapacity}
                 className="w-full rounded-lg border border-brand-border bg-white px-4 py-2.5 text-sm outline-none"
               />
             </label>
 
-            <div>
-              <div className="flex items-center justify-between text-xs font-bold text-brand-muted">
-                <span>Capacity Load</span>
-                <span>{capacityLoadPercent}%</span>
-              </div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-brand-panel-high">
-                <div className="h-2 rounded-full bg-brand-green" style={{ width: `${capacityLoadPercent}%` }} />
-              </div>
-              <p className="mt-2 text-xs text-brand-muted">Operating at {capacityLoadPercent}% of max capacity.</p>
-            </div>
+            {settingsState?.error ? (
+              <p className="text-sm font-semibold text-red-600">{settingsState.error}</p>
+            ) : null}
 
             <button
-              type="button"
-              onClick={() => setSaved(true)}
-              className="w-full rounded-lg bg-brand-green px-4 py-3 text-sm font-bold text-white"
+              type="submit"
+              disabled={settingsPending}
+              className="w-full rounded-lg bg-brand-green px-4 py-3 text-sm font-bold text-white disabled:opacity-60"
             >
-              {saved ? "Saved" : "Save Changes"}
+              {settingsPending ? "Saving..." : "Save Changes"}
             </button>
-          </div>
+          </form>
         </aside>
       </div>
     </DashboardShell>

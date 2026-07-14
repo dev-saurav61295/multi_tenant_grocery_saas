@@ -2,13 +2,17 @@
 
 import Link from "next/link";
 import { CheckCircle2, CheckSquare, MapPinned } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import type { Prisma } from "@prisma/client";
+import { completeDelivery } from "@/app/actions/orders";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { deliveryStops } from "@/lib/mock-data";
+import { formatCurrency } from "@/lib/format";
 import type { Role } from "@/lib/users";
 
+type OrderWithItems = Prisma.OrderGetPayload<{ include: { user: true } }>;
+
 type DeliveryCompletePageProps = {
-  stopId: string;
+  order: OrderWithItems | null;
   currentRole: Role;
   userName: string;
 };
@@ -19,14 +23,15 @@ const checklistLabels = {
   sanitized: "Sanitized hands before handling",
 } as const;
 
-export function DeliveryCompletePage({ stopId, currentRole, userName }: DeliveryCompletePageProps) {
-  const stop = deliveryStops.find((candidate) => candidate.id === stopId);
+export function DeliveryCompletePage({ order, currentRole, userName }: DeliveryCompletePageProps) {
   const [checklist, setChecklist] = useState({
     itemsMatched: true,
     paymentUploaded: false,
     sanitized: false,
   });
   const [confirmed, setConfirmed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const allChecked = Object.values(checklist).every(Boolean);
 
@@ -34,7 +39,23 @@ export function DeliveryCompletePage({ stopId, currentRole, userName }: Delivery
     setChecklist((current) => ({ ...current, [key]: !current[key] }));
   }
 
-  if (!stop) {
+  function confirmDropOff() {
+    if (!order) {
+      return;
+    }
+
+    setError(null);
+    startTransition(async () => {
+      try {
+        await completeDelivery(order.id);
+        setConfirmed(true);
+      } catch {
+        setError("Something went wrong finalizing this order. Please try again.");
+      }
+    });
+  }
+
+  if (!order) {
     return (
       <DashboardShell
         currentPath="/delivery/dashboard"
@@ -68,7 +89,7 @@ export function DeliveryCompletePage({ stopId, currentRole, userName }: Delivery
             <CheckCircle2 className="h-12 w-12" />
           </div>
           <h2 className="mt-6 text-[2rem] font-bold tracking-tight text-brand-green">Delivery Complete!</h2>
-          <p className="mt-2 text-sm text-brand-muted">Order {stop.orderId} for {stop.customer} has been finalized.</p>
+          <p className="mt-2 text-sm text-brand-muted">Order {order.displayId} for {order.user.name} has been finalized.</p>
           <Link
             href="/delivery/dashboard"
             className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-brand-green px-5 py-4 text-base font-bold text-white transition hover:brightness-110"
@@ -83,13 +104,13 @@ export function DeliveryCompletePage({ stopId, currentRole, userName }: Delivery
               <div>
                 <span className="inline-flex rounded-full bg-brand-orange px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-ink">Manifest Summary</span>
                 <p className="mt-4 text-xs font-bold uppercase tracking-[0.22em] text-brand-muted">Order ID</p>
-                <p className="mt-2 text-[3rem] font-bold tracking-tight text-brand-green">{stop.orderId}</p>
+                <p className="mt-2 text-[3rem] font-bold tracking-tight text-brand-green">{order.displayId}</p>
               </div>
 
               <div className="flex items-end justify-between border-b border-brand-border/20 pb-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-muted">Total Bill Amount</p>
-                  <p className="mt-2 text-[2.2rem] font-bold text-brand-orange-deep">₹1,240.00</p>
+                  <p className="mt-2 text-[2.2rem] font-bold text-brand-orange-deep">{formatCurrency(order.total)}</p>
                 </div>
                 <div className="text-right text-sm text-brand-muted">
                   <p>Payment Method</p>
@@ -111,7 +132,7 @@ export function DeliveryCompletePage({ stopId, currentRole, userName }: Delivery
                   <MapPinned className="h-4 w-4 text-brand-green" /> Drop-off Location
                 </p>
                 <div className="mt-4 rounded-xl border border-brand-border/50 bg-white p-4">
-                  <p className="font-semibold text-brand-ink">{stop.address}</p>
+                  <p className="font-semibold text-brand-ink">{order.address}</p>
                   <p className="mt-2 text-sm text-brand-muted">Within 5KM service radius</p>
                 </div>
               </div>
@@ -133,14 +154,16 @@ export function DeliveryCompletePage({ stopId, currentRole, userName }: Delivery
                 </div>
               </div>
 
+              {error ? <p className="text-sm font-semibold text-red-600">{error}</p> : null}
+
               <button
                 type="button"
-                disabled={!allChecked}
-                onClick={() => setConfirmed(true)}
+                disabled={!allChecked || isPending}
+                onClick={confirmDropOff}
                 className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <CheckSquare className="h-6 w-6" />
-                Confirm Drop-off & Finalize Order
+                {isPending ? "Finalizing..." : "Confirm Drop-off & Finalize Order"}
               </button>
             </div>
           </div>

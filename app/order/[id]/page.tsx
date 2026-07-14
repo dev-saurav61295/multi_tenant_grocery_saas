@@ -1,5 +1,7 @@
+import { notFound } from "next/navigation";
 import { OrderTrackingPage } from "@/components/order-tracking-page";
-import { getSession } from "@/lib/session";
+import { prisma } from "@/lib/prisma";
+import { verifySession } from "@/lib/session";
 
 type OrderPageProps = {
   params: Promise<{
@@ -9,7 +11,16 @@ type OrderPageProps = {
 
 export default async function OrderPage({ params }: OrderPageProps) {
   const { id } = await params;
-  const session = await getSession();
+  const session = await verifySession();
 
-  return <OrderTrackingPage orderId={id} session={session} />;
+  const order = await prisma.order.findUnique({
+    where: { displayId: id },
+    include: { items: { include: { product: true } } },
+  });
+
+  if (!order || order.userId !== session.id) {
+    notFound();
+  }
+
+  return <OrderTrackingPage order={order} session={session} />;
 }

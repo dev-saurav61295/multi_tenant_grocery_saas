@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  customer
+  admin
+  staff
+  delivery
+}
+
+enum OrderStatus {
+  pending_verification
+  verified
+  packing
+  out_for_delivery
+  delivered
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(customer)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  orders Order[]
+
+  @@map("users")
+}
+
+model Product {
+  id            String      @id @default(cuid())
+  name          String
+  brand         String
+  size          String
+  price         Int
+  category      String
+  description   String
+  comboEligible Boolean     @default(false)
+  stock         Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  orderNumber    Int         @unique @default(autoincrement())
+  displayId      String      @unique
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  status         OrderStatus @default(pending_verification)
+  phone          String
+  address        String
+  subtotal       Int
+  comboDiscount  Int
+  total          Int
+  distanceKm     Float?
+  eta            String?
+  packingSlot    String?
+  priority       String      @default("Standard")
+  screenshotName String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Int
+
+  @@map("order_items")
+}
+
+model StoreSettings {
+  id             String   @id @default("singleton")
+  openingTime    String   @default("09:00")
+  closingTime    String   @default("20:00")
+  hourlyCapacity Int      @default(40)
+  updatedAt      DateTime @updatedAt
+
+  @@map("store_settings")
+}
