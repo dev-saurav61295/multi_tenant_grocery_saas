@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#390c00",
+                    "on-secondary-fixed": "#301400",
+                    "on-primary-fixed-variant": "#005228",
+                    "primary": "#006d37",
+                    "primary-fixed-dim": "#4ae183",
+                    "tertiary-container": "#ff9875",
+                    "primary-container": "#2ecc71",
+                    "surface-tint": "#006d37",
+                    "surface-container-high": "#e2ebe0",
+                    "primary-fixed": "#6bfe9c",
+                    "inverse-primary": "#4ae183",
+                    "tertiary": "#98472a",
+                    "on-secondary-container": "#663100",
+                    "surface-bright": "#f3fcf1",
+                    "on-error-container": "#93000a",
+                    "outline-variant": "#bbcbbb",
+                    "tertiary-fixed-dim": "#ffb59d",
+                    "outline": "#6c7b6d",
+                    "tertiary-fixed": "#ffdbd0",
+                    "surface": "#f3fcf1",
+                    "on-tertiary-fixed-variant": "#793015",
+                    "surface-container": "#e8f0e5",
+                    "on-secondary": "#ffffff",
+                    "on-surface-variant": "#3d4a3e",
+                    "on-primary-container": "#005027",
+                    "surface-container-low": "#eef6eb",
+                    "inverse-surface": "#2b322b",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#161d17",
+                    "on-secondary-fixed-variant": "#713700",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed-dim": "#ffb783",
+                    "surface-container-lowest": "#ffffff",
+                    "on-background": "#161d17",
+                    "on-tertiary-container": "#772e14",
+                    "background": "#f3fcf1",
+                    "surface-variant": "#dce5da",
+                    "surface-dim": "#d4dcd2",
+                    "surface-container-highest": "#dce5da",
+                    "secondary": "#944a00",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#00210c",
+                    "error": "#ba1a1a",
+                    "inverse-on-surface": "#ebf3e8",
+                    "secondary-fixed": "#ffdcc5",
+                    "secondary-container": "#fc8f34",
+                    "on-error": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "container-margin-desktop": "64px",
+                    "lg": "24px",
+                    "sm": "8px",
+                    "container-margin-mobile": "16px",
+                    "xl": "40px",
+                    "md": "16px",
+                    "gutter": "16px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "label-bold": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "price-display": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "title-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "price-display": ["20px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3fcf1;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Glassmorphism Accents */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- SideNavBar Shell -->
+<nav class="fixed left-0 top-0 h-full flex flex-col z-50 docked w-64 bg-inverse-surface dark:bg-surface-container-lowest shadow-lg">
+<div class="p-lg">
+<div class="flex flex-col gap-1">
+<span class="font-headline-lg text-headline-lg text-primary-fixed-dim dark:text-primary tracking-tight">Bhagwandas Traders</span>
+<span class="font-body-sm text-body-sm text-surface-variant opacity-70">Admin Panel</span>
+</div>
+</div>
+<div class="flex-1 px-md flex flex-col gap-2 mt-md">
+<!-- Nav Item: Orders Dashboard -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-bold text-label-bold">Orders Dashboard</span>
+</a>
+<!-- Nav Item: Inventory Management (Active) -->
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-bold active:scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-label-bold text-label-bold">Inventory Management</span>
+</a>
+<!-- Nav Item: User Management -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-bold text-label-bold">User Management</span>
+</a>
+<!-- Nav Item: Store Settings -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-bold text-label-bold">Store Settings</span>
+</a>
+</div>
+<div class="p-md mt-auto">
+<button class="w-full bg-primary-container text-on-primary-container py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                New Order
+            </button>
+</div>
+</nav>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 left-64 w-[calc(100%-16rem)] h-16 bg-surface dark:bg-surface-dim border-b border-outline-variant flex justify-between items-center px-lg z-40">
+<div class="flex items-center gap-md w-1/2">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-body-sm focus:ring-2 focus:ring-primary outline-none" placeholder="Search inventory, brands, or SKU..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-md">
+<button class="flex items-center gap-1 font-label-bold text-label-bold text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="flex items-center gap-1 font-label-bold text-label-bold text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<div class="h-8 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="font-label-bold text-label-bold leading-none">Admin User</p>
+<p class="text-[10px] text-outline">Super Admin</p>
+</div>
+<span class="material-symbols-outlined text-4xl text-on-surface-variant" data-icon="account_circle">account_circle</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen">
+<div class="p-lg max-w-7xl mx-auto">
+<!-- Page Header Controls -->
+<div class="flex justify-between items-end mb-lg">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Inventory Catalog</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Manage your product listings, pricing, and real-time stock levels.</p>
+</div>
+<div class="flex gap-md">
+<button class="px-lg py-3 rounded-lg border border-primary text-primary font-bold hover:bg-primary-container/10 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="file_download">file_download</span>
+                        Quick Export
+                    </button>
+<button class="px-lg py-3 rounded-lg bg-secondary text-on-secondary font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                        + Add New Product
+                    </button>
+</div>
+</div>
+<!-- Stats Overview (Asymmetric Layout) -->
+<div class="grid grid-cols-12 gap-gutter mb-lg">
+<div class="col-span-12 md:col-span-4 glass-card p-md rounded-xl shadow-sm flex items-center gap-md">
+<div class="h-12 w-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" data-icon="inventory">inventory</span>
+</div>
+<div>
+<p class="text-outline font-label-bold text-label-bold">Total SKUs</p>
+<p class="font-headline-lg text-headline-lg leading-none">1,284</p>
+</div>
+</div>
+<div class="col-span-12 md:col-span-4 glass-card p-md rounded-xl shadow-sm flex items-center gap-md">
+<div class="h-12 w-12 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+</div>
+<div>
+<p class="text-outline font-label-bold text-label-bold">Low Stock Items</p>
+<p class="font-headline-lg text-headline-lg leading-none">42</p>
+</div>
+</div>
+<div class="col-span-12 md:col-span-4 glass-card p-md rounded-xl shadow-sm flex items-center gap-md">
+<div class="h-12 w-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+</div>
+<div>
+<p class="text-outline font-label-bold text-label-bold">Monthly Turnaround</p>
+<p class="font-headline-lg text-headline-lg leading-none">+12.4%</p>
+</div>
+</div>
+</div>
+<!-- Inventory Data Table -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-high border-b border-outline-variant">
+<tr>
+<th class="px-lg py-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Product Name &amp; Brand</th>
+<th class="px-lg py-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Variant Size</th>
+<th class="px-lg py-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Base Price</th>
+<th class="px-lg py-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Stock Level</th>
+<th class="px-lg py-4 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Product Row 1 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 rounded bg-surface-container flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="object-cover h-full w-full" data-alt="A clean, studio-lit photograph of a premium basmati rice bag with elegant green and gold packaging, positioned against a minimalist white background. The lighting is soft and professional, highlighting the high-quality textures of the fabric bag. The overall aesthetic is fresh, reliable, and premium." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1suqdfg2n_GoZ9T5tcSixpIOuFuSRAQ7VKmIT_HhqLLsRVZ4YxVJVhBt7jFku4RVIi4vGJxtNgEtshepKZCqiY1S6ZMBWJmq-Wc6Ty5jjv0cucLi25KV4zLG1_Fk_TVRdIWoB8M60guqWji9s_fiSoYZSh21DpnB1BMfUTPgSuIJArEc4VHSa3kXClJTt8qQltaFWFy6QzLBKly1N_m-rl0ok0TjLAmaZG7UK2Ur-SCzKu9ug5Ijn"/>
+</div>
+<div>
+<p class="font-title-md text-title-md text-on-surface leading-tight">Premium Basmati Rice</p>
+<p class="text-body-sm text-outline">Bhagwandas Select</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="bg-surface-variant px-sm py-xs rounded font-label-bold text-label-bold">5 kg Bag</span>
+</td>
+<td class="px-lg py-md">
+<p class="font-price-display text-price-display text-secondary">₹749.00</p>
+</td>
+<td class="px-lg py-md">
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center w-32">
+<span class="text-[10px] font-bold text-primary uppercase">In Stock</span>
+<span class="text-[10px] font-bold text-on-surface-variant">124 Units</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-4/5"></div>
+</div>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-primary-container/20 rounded-full text-primary transition-colors" title="Edit">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-full text-error transition-colors" title="Delete">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Product Row 2 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 rounded bg-surface-container flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="object-cover h-full w-full" data-alt="A macro photograph of a glass jar of organic wildflower honey, showing the rich golden amber liquid with a rustic wooden honey dipper resting on top. The background is a crisp white kitchen counter with bright morning sunlight streaming in, creating long soft shadows. The visual style is premium, tactile, and natural." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLliRDP8_J0LZ3WcDuyv4ValRSNRcmacO99wbFybXRyn_JReqUd-wzWfCZu2AlukT7fFjwu7tseCQsaDcMKh0yXGS07ZRqaVxjfuO9z-5xGEoKd21ygywl_2PNPE2HluE-Fq8lh3esuruoOzjNQs_yxjIOVwR3v-i6hGkDWLEQnPhceDwj0GYbEo7lhbrJIIMlVoBowfJtwV5iTCDPo-RaMJTGP1_mpa4Vr8Kkf37aHVlpfxEWTB7L"/>
+</div>
+<div>
+<p class="font-title-md text-title-md text-on-surface leading-tight">Organic Wildflower Honey</p>
+<p class="text-body-sm text-outline">Natures Pantry</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="bg-surface-variant px-sm py-xs rounded font-label-bold text-label-bold">500g Jar</span>
+</td>
+<td class="px-lg py-md">
+<p class="font-price-display text-price-display text-secondary">₹420.00</p>
+</td>
+<td class="px-lg py-md">
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center w-32">
+<span class="text-[10px] font-bold text-tertiary uppercase">Low Stock</span>
+<span class="text-[10px] font-bold text-on-surface-variant">12 Units</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-1/5"></div>
+</div>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-primary-container/20 rounded-full text-primary transition-colors" title="Edit">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-full text-error transition-colors" title="Delete">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Product Row 3 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 rounded bg-surface-container flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="object-cover h-full w-full" data-alt="A clean, minimalist pack of whole wheat rotis or flatbreads in clear, eco-friendly packaging with a green organic seal. The product is laid out on a bright white marble surface, illuminated by neutral, high-key studio lighting. The brand aesthetic is health-conscious, modern, and efficient." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuS1bvRhlv7MAfAj4kY6n4GQ0bqriek7ljKUaTJ58hY2_pXd2AQQv3wIHomR6SAi2NP-yR8HjuVlped-C33Xb5PVnuFquUc4qB4IjcIXZrIttjVgZoi5eYzbWA12kgclVsCv5gsal4TygcYThbyrIuboTpKHuX1ukaYnrqAwYxqBffS5v5aynQ-0IZKYwhVJOj6IDByhbmvcsRzMlHMxQRSZsHw7DIr3Y2p-V2eCDx_BiSWkKeoOsN"/>
+</div>
+<div>
+<p class="font-title-md text-title-md text-on-surface leading-tight">Whole Wheat Flour (Atta)</p>
+<p class="text-body-sm text-outline">Ashirwad Fresh</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="bg-surface-variant px-sm py-xs rounded font-label-bold text-label-bold">10 kg</span>
+</td>
+<td class="px-lg py-md">
+<p class="font-price-display text-price-display text-secondary">₹565.00</p>
+</td>
+<td class="px-lg py-md">
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center w-32">
+<span class="text-[10px] font-bold text-primary uppercase">In Stock</span>
+<span class="text-[10px] font-bold text-on-surface-variant">450 Units</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-full"></div>
+</div>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-primary-container/20 rounded-full text-primary transition-colors" title="Edit">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-full text-error transition-colors" title="Delete">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Product Row 4 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 rounded bg-surface-container flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="object-cover h-full w-full" data-alt="A professional studio shot of a cold-pressed virgin coconut oil bottle with a clean white label and minimalist blue accents. The bottle is placed next to a cracked coconut shell on a white wooden table. Bright, airy lighting enhances the sense of purity and premium quality. The style is fresh, organized, and high-end." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhlzsS5InYG6UACEDnlQNxepP718p-Pq9TAne6s9ReIjDKqoMyXnHIymc4Ne2Bs7J-Q8o0Tdl7KIhb2ik7v1zHLD-HQ2a-aCn_9V6LGpcBdyY2qYC4zFyJqJWJcGttKIm7U3sru5RgZ7UlDkkewRZn0x10_S37uedIafvbEmN0z8eqvTD5XrSEYya17Pf02-WxDSbEiFOfGbySUZmiVdkIIdycybdRy9A3XbPmjbm8fFEBq-sjLrHH"/>
+</div>
+<div>
+<p class="font-title-md text-title-md text-on-surface leading-tight">Cold Pressed Coconut Oil</p>
+<p class="text-body-sm text-outline">Pure Harvest</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="bg-surface-variant px-sm py-xs rounded font-label-bold text-label-bold">1 L Bottle</span>
+</td>
+<td class="px-lg py-md">
+<p class="font-price-display text-price-display text-secondary">₹890.00</p>
+</td>
+<td class="px-lg py-md">
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center w-32">
+<span class="text-[10px] font-bold text-primary uppercase">In Stock</span>
+<span class="text-[10px] font-bold text-on-surface-variant">88 Units</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-3/5"></div>
+</div>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<div class="flex justify-end gap-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 hover:bg-primary-container/20 rounded-full text-primary transition-colors" title="Edit">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-full text-error transition-colors" title="Delete">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Table Pagination -->
+<div class="px-lg py-md flex justify-between items-center bg-surface-container-low border-t border-outline-variant">
+<p class="font-body-sm text-body-sm text-on-surface-variant">Showing <span class="font-bold">1-4</span> of <span class="font-bold">1,284</span> products</p>
+<div class="flex gap-xs">
+<button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="px-4 py-2 rounded-lg bg-primary text-on-primary font-bold">1</button>
+<button class="px-4 py-2 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors">2</button>
+<button class="px-4 py-2 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors">3</button>
+<button class="p-2 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Contextual Actions / Quick Filters Area -->
+<div class="mt-lg grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="bg-primary-container/10 border border-primary/20 p-lg rounded-xl flex flex-col gap-sm">
+<div class="flex items-center gap-2 text-primary font-bold">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+                        Smart Replenishment
+                    </div>
+<p class="text-body-sm text-on-surface-variant">6 items have reached critical thresholds. Would you like to generate a draft purchase order?</p>
+<button class="mt-2 text-primary font-bold text-label-bold uppercase tracking-wider hover:underline text-left">View suggestions</button>
+</div>
+<div class="bg-secondary-container/10 border border-secondary/20 p-lg rounded-xl flex flex-col gap-sm">
+<div class="flex items-center gap-2 text-secondary font-bold">
+<span class="material-symbols-outlined" data-icon="sell">sell</span>
+                        Bulk Price Update
+                    </div>
+<p class="text-body-sm text-on-surface-variant">Quickly adjust base prices for entire categories or brands based on seasonal shifts.</p>
+<button class="mt-2 text-secondary font-bold text-label-bold uppercase tracking-wider hover:underline text-left">Open Editor</button>
+</div>
+<div class="bg-surface-container-high p-lg rounded-xl flex flex-col gap-sm">
+<div class="flex items-center gap-2 text-on-surface-variant font-bold">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+                        Stock History
+                    </div>
+<p class="text-body-sm text-on-surface-variant">Review the last 24 hours of inventory movements and adjustments.</p>
+<button class="mt-2 text-on-surface-variant font-bold text-label-bold uppercase tracking-wider hover:underline text-left">View Logs</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (Limited context: Only for add on mobile) -->
+<button class="md:hidden fixed bottom-6 right-6 h-16 w-16 rounded-full bg-secondary text-on-secondary shadow-2xl flex items-center justify-center z-50 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+<script>
+        // Micro-interactions
+        document.querySelectorAll('tr').forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                row.querySelector('img').style.transform = 'scale(1.1)';
+                row.querySelector('img').style.transition = 'transform 0.3s ease';
+            });
+            row.addEventListener('mouseleave', () => {
+                row.querySelector('img').style.transform = 'scale(1.0)';
+            });
+        });
+
+        // Search highlight simulation
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(val) ? '' : 'none';
+            });
+        });
+    </script>
+</body></html>

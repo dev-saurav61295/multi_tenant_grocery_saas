@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "on-tertiary-fixed": "#390c00",
+                  "on-secondary-fixed": "#301400",
+                  "on-primary-fixed-variant": "#005228",
+                  "primary": "#006d37",
+                  "primary-fixed-dim": "#4ae183",
+                  "tertiary-container": "#ff9875",
+                  "primary-container": "#2ecc71",
+                  "surface-tint": "#006d37",
+                  "surface-container-high": "#e2ebe0",
+                  "primary-fixed": "#6bfe9c",
+                  "inverse-primary": "#4ae183",
+                  "tertiary": "#98472a",
+                  "on-secondary-container": "#663100",
+                  "surface-bright": "#f3fcf1",
+                  "on-error-container": "#93000a",
+                  "outline-variant": "#bbcbbb",
+                  "tertiary-fixed-dim": "#ffb59d",
+                  "outline": "#6c7b6d",
+                  "tertiary-fixed": "#ffdbd0",
+                  "surface": "#f3fcf1",
+                  "on-tertiary-fixed-variant": "#793015",
+                  "surface-container": "#e8f0e5",
+                  "on-secondary": "#ffffff",
+                  "on-surface-variant": "#3d4a3e",
+                  "on-primary-container": "#005027",
+                  "surface-container-low": "#eef6eb",
+                  "inverse-surface": "#2b322b",
+                  "on-tertiary": "#ffffff",
+                  "on-surface": "#161d17",
+                  "on-secondary-fixed-variant": "#713700",
+                  "on-primary": "#ffffff",
+                  "secondary-fixed-dim": "#ffb783",
+                  "surface-container-lowest": "#ffffff",
+                  "on-background": "#161d17",
+                  "on-tertiary-container": "#772e14",
+                  "background": "#f3fcf1",
+                  "surface-variant": "#dce5da",
+                  "surface-dim": "#d4dcd2",
+                  "surface-container-highest": "#dce5da",
+                  "secondary": "#944a00",
+                  "error-container": "#ffdad6",
+                  "on-primary-fixed": "#00210c",
+                  "error": "#ba1a1a",
+                  "inverse-on-surface": "#ebf3e8",
+                  "secondary-fixed": "#ffdcc5",
+                  "secondary-container": "#fc8f34",
+                  "on-error": "#ffffff"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "xs": "4px",
+                  "container-margin-desktop": "64px",
+                  "lg": "24px",
+                  "sm": "8px",
+                  "container-margin-mobile": "16px",
+                  "xl": "40px",
+                  "md": "16px",
+                  "gutter": "16px",
+                  "base": "4px"
+          },
+          "fontFamily": {
+                  "headline-lg-mobile": ["Inter"],
+                  "label-bold": ["Inter"],
+                  "display-lg": ["Inter"],
+                  "body-sm": ["Inter"],
+                  "price-display": ["Inter"],
+                  "body-lg": ["Inter"],
+                  "headline-lg": ["Inter"],
+                  "title-md": ["Inter"]
+          },
+          "fontSize": {
+                  "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                  "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                  "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                  "price-display": ["20px", {"lineHeight": "24px", "fontWeight": "700"}],
+                  "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                  "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #f3fcf1;
+      font-family: 'Inter', sans-serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+    .data-table-row:hover {
+      background-color: #e8f0e5;
+    }
+    .drawer-transition {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="overflow-hidden">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-inverse-surface dark:bg-surface-container-lowest shadow-lg flex flex-col z-50">
+<div class="px-md py-xl">
+<h1 class="font-headline-lg text-headline-lg text-primary-fixed-dim dark:text-primary tracking-tight">Bhagwandas Traders</h1>
+<p class="font-body-sm text-body-sm text-surface-variant opacity-70">Admin Panel</p>
+</div>
+<nav class="flex-1 px-sm space-y-base">
+<!-- Active Tab: Orders Dashboard -->
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-bold scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-bold text-label-bold">Orders Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-bold text-label-bold">Inventory Management</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-bold text-label-bold">User Management</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-bold text-label-bold">Store Settings</span>
+</a>
+</nav>
+<div class="p-md">
+<button class="w-full py-3 bg-primary text-on-primary rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">add</span>
+        New Order
+      </button>
+</div>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="flex justify-between items-center h-16 w-[calc(100%-16rem)] ml-64 px-md z-40 border-b border-outline-variant bg-surface dark:bg-surface-dim fixed top-0">
+<div class="flex items-center gap-md">
+<div class="relative w-96">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary text-body-sm font-body-sm" placeholder="Search orders, customers, or transactions..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<button class="text-on-surface-variant font-label-bold text-label-bold hover:text-primary transition-all">Quick Export</button>
+<div class="flex items-center gap-sm">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-all relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center ml-2 cursor-pointer">
+<span class="material-symbols-outlined text-on-primary-container text-[20px]">account_circle</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-64 pt-16 h-screen flex relative">
+<!-- Data Table Section -->
+<section class="flex-1 p-lg overflow-y-auto custom-scrollbar">
+<div class="mb-lg flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Orders Queue</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Monitoring 14 pending verifications from recent local transactions.</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-md py-2 bg-surface-container border border-outline-variant rounded-lg flex items-center gap-2 font-label-bold text-label-bold text-on-surface">
+<span class="material-symbols-outlined text-sm">filter_list</span> Filter
+          </button>
+<button class="px-md py-2 bg-surface-container border border-outline-variant rounded-lg flex items-center gap-2 font-label-bold text-label-bold text-on-surface">
+<span class="material-symbols-outlined text-sm">sort</span> Sort
+          </button>
+</div>
+</div>
+<!-- Table -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(44,62,80,0.05)] overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="px-md py-4 font-label-bold text-label-bold text-on-surface-variant">Order ID</th>
+<th class="px-md py-4 font-label-bold text-label-bold text-on-surface-variant">Customer Name</th>
+<th class="px-md py-4 font-label-bold text-label-bold text-on-surface-variant">Order Value</th>
+<th class="px-md py-4 font-label-bold text-label-bold text-on-surface-variant">Status</th>
+<th class="px-md py-4 font-label-bold text-label-bold text-on-surface-variant">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Active Selected Row -->
+<tr class="data-table-row bg-primary-container/10">
+<td class="px-md py-4 font-label-bold text-label-bold text-primary">#BT-90241</td>
+<td class="px-md py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center font-bold text-on-secondary-fixed text-xs">RK</div>
+<span class="font-body-lg text-body-lg text-on-surface">Rajesh Kumar</span>
+</div>
+</td>
+<td class="px-md py-4 font-price-display text-price-display text-secondary">₹14,500.00</td>
+<td class="px-md py-4">
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[11px] font-bold uppercase tracking-wider">Pending Verification</span>
+</td>
+<td class="px-md py-4">
+<button class="text-primary hover:underline font-label-bold text-label-bold">View Details</button>
+</td>
+</tr>
+<!-- Other Rows -->
+<tr class="data-table-row">
+<td class="px-md py-4 font-label-bold text-label-bold text-on-surface">#BT-90239</td>
+<td class="px-md py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center font-bold text-on-surface-variant text-xs">SP</div>
+<span class="font-body-lg text-body-lg text-on-surface">Sunita Patel</span>
+</div>
+</td>
+<td class="px-md py-4 font-price-display text-price-display text-secondary">₹8,240.00</td>
+<td class="px-md py-4">
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[11px] font-bold uppercase tracking-wider">Pending Verification</span>
+</td>
+<td class="px-md py-4">
+<button class="text-primary hover:underline font-label-bold text-label-bold">View Details</button>
+</td>
+</tr>
+<tr class="data-table-row">
+<td class="px-md py-4 font-label-bold text-label-bold text-on-surface">#BT-90235</td>
+<td class="px-md py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center font-bold text-on-surface-variant text-xs">AS</div>
+<span class="font-body-lg text-body-lg text-on-surface">Amit Sharma</span>
+</div>
+</td>
+<td class="px-md py-4 font-price-display text-price-display text-secondary">₹22,100.00</td>
+<td class="px-md py-4">
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[11px] font-bold uppercase tracking-wider">Pending Verification</span>
+</td>
+<td class="px-md py-4">
+<button class="text-primary hover:underline font-label-bold text-label-bold">View Details</button>
+</td>
+</tr>
+<tr class="data-table-row">
+<td class="px-md py-4 font-label-bold text-label-bold text-on-surface">#BT-90230</td>
+<td class="px-md py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center font-bold text-on-surface-variant text-xs">VS</div>
+<span class="font-body-lg text-body-lg text-on-surface">Vikram Singh</span>
+</div>
+</td>
+<td class="px-md py-4 font-price-display text-price-display text-secondary">₹1,250.00</td>
+<td class="px-md py-4">
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[11px] font-bold uppercase tracking-wider">Pending Verification</span>
+</td>
+<td class="px-md py-4">
+<button class="text-primary hover:underline font-label-bold text-label-bold">View Details</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Side Inspection Drawer -->
+<aside class="w-96 bg-surface-container-lowest shadow-2xl border-l border-outline-variant drawer-transition h-full flex flex-col" id="inspectionDrawer">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Verification Detail</h3>
+<p class="font-label-bold text-label-bold text-on-surface-variant">Order #BT-90241</p>
+</div>
+<button class="p-2 hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-md custom-scrollbar">
+<!-- Customer Brief -->
+<div class="mb-lg p-md bg-surface border border-outline-variant rounded-xl flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center font-bold text-on-secondary-fixed text-lg">RK</div>
+<div>
+<p class="font-label-bold text-label-bold text-on-surface">Rajesh Kumar</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Phone: +91 98765 43210</p>
+</div>
+</div>
+<!-- Payment Screenshot -->
+<div class="mb-lg">
+<label class="font-label-bold text-label-bold text-on-surface-variant block mb-sm uppercase tracking-wide">Payment Proof (UPI/Transfer)</label>
+<div class="relative group cursor-zoom-in rounded-xl overflow-hidden border-2 border-outline-variant hover:border-primary transition-colors">
+<img class="w-full aspect-[4/5] object-cover" data-alt="A clean, clear high-resolution smartphone screenshot of a successful digital payment confirmation screen. The interface shows a transaction of 14,500 Rupees with a large green checkmark, 'Payment Successful' text in a modern sans-serif font, and a bank logo. The lighting is bright and crisp, emphasizing details like the transaction ID and timestamp in a professional, light-themed mobile banking app UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf5Y42OxTa_SfZdWIljErjuVWE9ZMC_9nGg2jUMzB8q9Y9v9gSavGdm_4UaE2Y-V-VdO44srTdY3GJFzjtgaFWCwmt-_KHIy7VxKASlOi1BddQYnPNb6HATB4GHXaLOUITc3P2LXwRHJXtWngtn4gEs7HC3tV64sAND2uLjsa5krjIDG-GFG83YPatd7kkqXF672w_djNIRCaFDzN7kS_HSOU9VzulXE7WZhEYYe9LIj3hQL0NaBbR"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<span class="material-symbols-outlined text-white text-4xl">zoom_in</span>
+</div>
+</div>
+<p class="mt-2 text-center font-body-sm text-body-sm text-on-surface-variant">Tap to expand screenshot</p>
+</div>
+<!-- Transaction Details -->
+<div class="space-y-md mb-xl">
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Declared Value</span>
+<span class="font-label-bold text-label-bold text-on-surface">₹14,500.00</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Transfer Mode</span>
+<span class="font-label-bold text-label-bold text-on-surface">GPay (UPI)</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Date Submitted</span>
+<span class="font-label-bold text-label-bold text-on-surface">Oct 24, 11:42 AM</span>
+</div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="p-md bg-surface-container-low border-t border-outline-variant space-y-sm">
+<button class="w-full py-4 bg-primary text-on-primary rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-on-primary-container transition-colors shadow-lg active:scale-[0.98]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
+          Approve & Verify Payment
+        </button>
+<button class="w-full py-3 bg-surface-container-highest text-error rounded-xl font-label-bold text-label-bold flex items-center justify-center gap-2 hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined">report</span>
+          Flag as Invalid / Suspicious
+        </button>
+</div>
+</aside>
+</main>
+<!-- Interactive Scripts -->
+<script>
+    // Micro-interactions for the drawer or table selection can be added here
+    document.addEventListener('DOMContentLoaded', () => {
+      const rows = document.querySelectorAll('.data-table-row');
+      rows.forEach(row => {
+        row.addEventListener('click', () => {
+          // Reset others
+          rows.forEach(r => {
+            r.classList.remove('bg-primary-container/10');
+            r.querySelector('td:first-child').classList.remove('text-primary');
+            r.querySelector('td:first-child').classList.add('text-on-surface');
+          });
+          // Highlight this
+          row.classList.add('bg-primary-container/10');
+          row.querySelector('td:first-child').classList.remove('text-on-surface');
+          row.querySelector('td:first-child').classList.add('text-primary');
+          
+          // Simulation: Update drawer content would happen here
+        });
+      });
+    });
+  </script>
+</body></html>

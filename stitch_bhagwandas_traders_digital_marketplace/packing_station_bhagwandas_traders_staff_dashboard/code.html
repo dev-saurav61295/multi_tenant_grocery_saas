@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workforce Central | Packing Station</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#ffffff",
+                    "on-secondary-fixed-variant": "#713700",
+                    "on-background": "#161d17",
+                    "surface-container-low": "#eef6eb",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f3fcf1",
+                    "surface-container": "#e8f0e5",
+                    "on-secondary-fixed": "#301400",
+                    "tertiary-fixed-dim": "#ffb59d",
+                    "primary-fixed": "#6bfe9c",
+                    "on-primary-fixed": "#00210c",
+                    "secondary-container": "#fc8f34",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#e2ebe0",
+                    "on-primary": "#ffffff",
+                    "surface-dim": "#d4dcd2",
+                    "primary-container": "#2ecc71",
+                    "on-tertiary-container": "#772e14",
+                    "inverse-surface": "#2b322b",
+                    "on-primary-fixed-variant": "#005228",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "surface-container-highest": "#dce5da",
+                    "on-primary-container": "#005027",
+                    "background": "#f3fcf1",
+                    "primary-fixed-dim": "#4ae183",
+                    "on-surface": "#161d17",
+                    "inverse-on-surface": "#ebf3e8",
+                    "surface-variant": "#dce5da",
+                    "on-tertiary-fixed-variant": "#793015",
+                    "secondary": "#944a00",
+                    "outline-variant": "#bbcbbb",
+                    "outline": "#6c7b6d",
+                    "inverse-primary": "#4ae183",
+                    "tertiary-fixed": "#ffdbd0",
+                    "surface-tint": "#006d37",
+                    "on-surface-variant": "#3d4a3e",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#ff9875",
+                    "surface": "#f3fcf1",
+                    "secondary-fixed-dim": "#ffb783",
+                    "on-secondary-container": "#663100",
+                    "primary": "#006d37",
+                    "tertiary": "#98472a",
+                    "on-tertiary-fixed": "#390c00",
+                    "secondary-fixed": "#ffdcc5",
+                    "on-error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "40px",
+                    "container-margin-mobile": "16px",
+                    "sm": "8px",
+                    "gutter": "16px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "container-margin-desktop": "64px",
+                    "xs": "4px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "title-md": ["Inter"],
+                    "price-display": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "label-bold": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "price-display": ["20px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .packing-list-scroll::-webkit-scrollbar { width: 4px; }
+        .packing-list-scroll::-webkit-scrollbar-track { background: transparent; }
+        .packing-list-scroll::-webkit-scrollbar-thumb { background: #dce5da; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- TopNavBar -->
+<header class="sticky top-0 w-full z-50 flex justify-between items-center px-md lg:px-container-margin-desktop h-16 bg-surface-container-lowest shadow-[0px_4px_20px_rgba(44,62,80,0.05)]">
+<div class="flex items-center gap-4">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Bhagwandas Traders</h1>
+<span class="h-6 w-[1px] bg-outline-variant/30 hidden lg:block"></span>
+<span class="hidden lg:block font-title-md text-title-md text-on-surface-variant">Packing Station Panel</span>
+</div>
+<div class="flex items-center gap-lg">
+<!-- Worker Status Toggle -->
+<div class="flex items-center bg-surface-container rounded-full px-4 py-2 gap-3 cursor-pointer select-none group" onclick="toggleStatus()">
+<div class="w-3 h-3 rounded-full bg-primary transition-colors duration-300" id="status-dot"></div>
+<span class="font-label-bold text-label-bold text-on-surface-variant group-active:scale-95 transition-transform" id="status-text">Active</span>
+<span class="material-symbols-outlined text-[18px] text-outline">expand_more</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-cover bg-center border-2 border-primary-container" data-alt="Professional headshot of a warehouse staff member wearing a clean green apron, smiling warmly in a bright, modern, well-organized grocery distribution center with soft morning light filtering through high windows. Minimalist and high-end aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuClPSNOfrBNFxIc7qPOlynRg81dXj5t_Qa9r_rC8VY7t1GQOKQs40K6HkX67ezBStxyY7NCwd__3HNyulFKMrHvSRflKpTca7Yea8kYUoXWshUn9G8emvhEwv09A1kETvvBNyei-QCUb3xMYeJUlpV6PIab1Ji0SeiSNxPMKZN6GZmpNto3m5NqGp885E8VnDlpBJxBKVJvhJ5uf5m7AgiQOZiNYb_yQ2U3ykcJu4PmbY2fnEwcQpD_')"></div>
+</div>
+</div>
+</header>
+<div class="flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden">
+<!-- SideNavBar (Used for Primary Navigation) -->
+<aside class="hidden lg:flex flex-col h-full w-64 bg-surface-container-lowest border-r border-outline-variant/30 shadow-[0px_10px_30px_rgba(44,62,80,0.12)]">
+<div class="p-lg flex flex-col gap-sm">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">store</span>
+</div>
+<div>
+<p class="font-label-bold text-label-bold text-primary">Main St. Branch</p>
+<p class="text-[10px] text-outline uppercase tracking-wider">Shift: 08:00 - 16:00</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container rounded-lg font-bold transition-all duration-200" href="#">
+<span class="material-symbols-outlined">package_2</span>
+<span class="font-label-bold text-label-bold">Packing Station</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">delivery_dining</span>
+<span class="font-label-bold text-label-bold">Delivery Portal</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-label-bold text-label-bold">Manifests</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-bold text-label-bold">Inventory</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-lg border-t border-outline-variant/20">
+<button class="w-full bg-primary text-on-primary font-label-bold text-label-bold py-3 rounded-xl mb-4 hover:opacity-90 active:scale-95 transition-all">
+                    New Assignment
+                </button>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-bold text-label-bold">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-error hover:bg-error-container rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-bold text-label-bold">Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area: Two Column Layout for Desktop -->
+<main class="flex-1 flex flex-col lg:flex-row overflow-hidden pb-20 lg:pb-0">
+<!-- Left Column: Order Queue -->
+<section class="w-full lg:w-80 bg-surface-container-low/50 flex flex-col border-r border-outline-variant/20">
+<div class="p-lg bg-white/40 backdrop-blur-sm border-b border-outline-variant/20 flex justify-between items-center">
+<h2 class="font-title-md text-title-md text-on-surface">Queue</h2>
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-[10px] font-bold">5 READY</span>
+</div>
+<div class="flex-1 overflow-y-auto packing-list-scroll p-4 space-y-3">
+<!-- Active Order -->
+<div class="p-4 bg-white rounded-xl shadow-[0px_4px_20px_rgba(44,62,80,0.05)] border-2 border-primary-container ring-4 ring-primary-container/10">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-bold text-label-bold text-primary">#BT-90248</span>
+<span class="text-[10px] text-primary font-bold px-1.5 py-0.5 bg-primary/10 rounded uppercase">Packing</span>
+</div>
+<p class="text-on-surface-variant font-body-sm text-body-sm">Rohan Sharma</p>
+<p class="text-outline text-[11px]">8 items • Verified 2m ago</p>
+</div>
+<!-- Pending Orders -->
+<div class="p-4 bg-white rounded-xl hover:shadow-md transition-shadow cursor-pointer border border-transparent">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-bold text-label-bold text-on-surface">#BT-90249</span>
+<span class="text-[10px] text-outline font-bold px-1.5 py-0.5 bg-surface-container-high rounded uppercase">Wait</span>
+</div>
+<p class="text-on-surface-variant font-body-sm text-body-sm">Priya Varma</p>
+<p class="text-outline text-[11px]">12 items • Verified 5m ago</p>
+</div>
+<div class="p-4 bg-white rounded-xl hover:shadow-md transition-shadow cursor-pointer border border-transparent">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-bold text-label-bold text-on-surface">#BT-90250</span>
+<span class="text-[10px] text-outline font-bold px-1.5 py-0.5 bg-surface-container-high rounded uppercase">Wait</span>
+</div>
+<p class="text-on-surface-variant font-body-sm text-body-sm">Amit Malhotra</p>
+<p class="text-outline text-[11px]">4 items • Verified 12m ago</p>
+</div>
+</div>
+</section>
+<!-- Main Panel (Right): Packing Details -->
+<section class="flex-1 flex flex-col bg-white overflow-hidden relative">
+<!-- Order Detail Header -->
+<div class="p-lg lg:px-xl border-b border-outline-variant/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<a class="lg:hidden p-1 -ml-1" href="#"><span class="material-symbols-outlined">arrow_back</span></a>
+<h2 class="font-headline-lg-mobile lg:text-headline-lg font-bold text-on-surface">Order #BT-90248</h2>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1 text-primary text-body-sm font-label-bold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                Payment Verified
+                            </span>
+<span class="text-outline">•</span>
+<span class="text-on-surface-variant text-body-sm">Standard Delivery</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="bg-surface-container-low px-4 py-2 rounded-xl flex items-center gap-2 border border-primary-container/20">
+<span class="material-symbols-outlined text-primary text-[20px]">timer</span>
+<span class="font-price-display text-price-display text-primary">12:45</span>
+</div>
+</div>
+</div>
+<!-- Packing Checklist -->
+<div class="flex-1 overflow-y-auto packing-list-scroll p-lg lg:px-xl space-y-6">
+<p class="font-label-bold text-label-bold text-outline uppercase tracking-widest">Packing Items (2)</p>
+<!-- Item 1 -->
+<div class="group relative bg-white border border-outline-variant/30 rounded-2xl p-4 md:p-6 flex items-center gap-6 transition-all hover:border-primary/40 hover:shadow-lg">
+<div class="w-20 h-20 bg-surface-container-low rounded-xl flex-shrink-0 bg-cover bg-center" data-alt="A premium 1-liter bottle of fresh farm milk, clean minimalist branding, positioned in a bright high-end kitchen setting with soft sunlight, hyper-realistic, professional commercial photography, emerald green color accents." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA2p2qildp6p7hvlQS-_Lc7OulwKiW3Z84mpgyI8rdqqUzAF24jHnfaqXR4uRNmMYbSzO9tQCC3vSYeZaMBbuBMqL1tp9N66knnBYujZPRk4pd7V-kjPJ2xahy3Ees-eRXSTsCA9hgI71u1x_r-01cgVx1mwXNJE1_OqKmUrMNKRrxtKNOt0h7Ek8u7TvA2GtaPOR2O4kwLwhs2_q65axsP3nsGeqGoYBn9QCFlwr9JG-NcJ4iR3rTp')"></div>
+<div class="flex-1">
+<h3 class="font-title-md text-title-md text-on-surface mb-1">Brand Alpha Milk - 1L</h3>
+<div class="flex items-center gap-4">
+<p class="text-on-surface-variant font-body-sm">Qty: <span class="font-bold text-primary">3</span></p>
+<span class="text-outline-variant text-xs">SKU: 8820-ALPH</span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-3">
+<div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="group relative bg-white border border-outline-variant/30 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row md:items-center gap-6 transition-all hover:border-secondary/40">
+<div class="w-20 h-20 bg-surface-container-low rounded-xl flex-shrink-0 bg-cover bg-center" data-alt="A 5kg bag of premium whole wheat atta flour, high-quality fabric texture packaging with artisanal branding, set against a clean white stone countertop in a modern high-end market, warm morning lighting, vibrant orange and green accents." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDyAgYdyK1pzGyCs_oB1JXRs4k2NwZ81ZMak1COAeuSZfE4jLBMmG75jVzVFPU-VemJkTWK2xNp129zwYirTNW5h_McJXJoOJtlgiaoWiBZdlZtQhBKNDMEbj3cmctPmzFWK_WitBF3ojPtPt4x7LNpZNvqOI_lAKTNIRT2QBnaVvupzGwjUNCIt0dXQY9__bL5ZS0Cl5k-cEGZB3PLlZMpZS3vIyJVYqVuuwJtxVHVkifgbSZvgu3f')"></div>
+<div class="flex-1">
+<h3 class="font-title-md text-title-md text-on-surface mb-1">Brand Beta Atta - 5kg</h3>
+<div class="flex items-center gap-4">
+<p class="text-on-surface-variant font-body-sm">Qty: <span class="font-bold text-primary">1</span></p>
+<span class="text-outline-variant text-xs">SKU: 4412-BETA</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-secondary text-secondary font-label-bold text-label-bold hover:bg-secondary/5 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">report</span>
+                                Flag Out of Stock
+                            </button>
+<button class="w-10 h-10 border-2 border-outline-variant rounded-full flex items-center justify-center text-outline-variant hover:border-primary hover:text-primary transition-all">
+<span class="material-symbols-outlined">check</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Action Container -->
+<div class="sticky bottom-0 left-0 w-full p-lg bg-white/80 backdrop-blur-md border-t border-outline-variant/20 flex gap-4">
+<button class="flex-1 bg-primary text-on-primary font-title-md text-title-md py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-primary/20 hover:opacity-95 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined">verified</span>
+                        Mark Packing Complete &amp; Dispatch
+                    </button>
+<button class="w-16 h-16 rounded-2xl bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-surface-dim transition-colors">
+<span class="material-symbols-outlined">print</span>
+</button>
+</div>
+</section>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface-container-lowest shadow-[0px_-4px_20px_rgba(44,62,80,0.1)] px-4 py-2 pb-safe">
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1">
+<span class="material-symbols-outlined">package_2</span>
+<span class="font-label-bold text-label-bold">Packing</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-label-bold text-label-bold">Delivery</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-bold text-label-bold">Profile</span>
+</div>
+</nav>
+<script>
+        let isActive = true;
+        function toggleStatus() {
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            isActive = !isActive;
+            
+            if(isActive) {
+                dot.classList.remove('bg-secondary');
+                dot.classList.add('bg-primary');
+                text.innerText = 'Active';
+                text.classList.remove('text-secondary');
+                text.classList.add('text-on-surface-variant');
+            } else {
+                dot.classList.remove('bg-primary');
+                dot.classList.add('bg-secondary');
+                text.innerText = 'On Break';
+                text.classList.remove('text-on-surface-variant');
+                text.classList.add('text-secondary');
+            }
+        }
+    </script>
+</body></html>

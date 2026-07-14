@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3fcf1;
+  --foreground: #161d17;
+  --brand-green: #006d37;
+  --brand-green-bright: #2ecc71;
+  --brand-green-fixed: #6bfe9c;
+  --brand-orange: #fc8f34;
+  --brand-orange-deep: #944a00;
+  --brand-muted: #3d4a3e;
+  --panel: #ffffff;
+  --panel-soft: #eef6eb;
+  --panel-alt: #e8f0e5;
+  --panel-high: #e2ebe0;
+  --panel-highest: #dce5da;
+  --sidebar: #2b322b;
+  --border: #bbcbbb;
+  --outline: #6c7b6d;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-background: var(--background);
+  --color-brand-green: var(--brand-green);
+  --color-brand-green-bright: var(--brand-green-bright);
+  --color-brand-green-fixed: var(--brand-green-fixed);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-orange-deep: var(--brand-orange-deep);
+  --color-brand-muted: var(--brand-muted);
+  --color-brand-panel: var(--panel);
+  --color-brand-panel-soft: var(--panel-soft);
+  --color-brand-panel-alt: var(--panel-alt);
+  --color-brand-panel-high: var(--panel-high);
+  --color-brand-panel-highest: var(--panel-highest);
+  --color-brand-sidebar: var(--sidebar);
+  --color-brand-border: var(--border);
+  --color-brand-outline: var(--outline);
+  --font-sans: var(--font-geist-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(107, 254, 156, 0.35), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(252, 143, 52, 0.12), transparent 20%),
+    linear-gradient(180deg, #f3fcf1 0%, #eef6eb 100%);
+}
+
+.panel {
+  border: 1px solid rgba(187, 203, 187, 0.85);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 20px rgba(44, 62, 80, 0.05);
+}
+
+.grid-surface {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(238, 246, 235, 0.65) 100%);
+}
+
+.soft-card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(187, 203, 187, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.status-pill {
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 700;
+}
+
+.surface-footer {
+  background: #e2ebe0;
+  border-top: 1px solid rgba(187, 203, 187, 0.8);
+}

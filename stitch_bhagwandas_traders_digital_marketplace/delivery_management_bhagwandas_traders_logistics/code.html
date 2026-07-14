@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Delivery Portal - Workforce Central</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-secondary": "#ffffff",
+                "on-secondary-fixed-variant": "#713700",
+                "on-background": "#161d17",
+                "surface-container-low": "#eef6eb",
+                "error-container": "#ffdad6",
+                "surface-bright": "#f3fcf1",
+                "surface-container": "#e8f0e5",
+                "on-secondary-fixed": "#301400",
+                "tertiary-fixed-dim": "#ffb59d",
+                "primary-fixed": "#6bfe9c",
+                "on-primary-fixed": "#00210c",
+                "secondary-container": "#fc8f34",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-high": "#e2ebe0",
+                "on-primary": "#ffffff",
+                "surface-dim": "#d4dcd2",
+                "primary-container": "#2ecc71",
+                "on-tertiary-container": "#772e14",
+                "inverse-surface": "#2b322b",
+                "on-primary-fixed-variant": "#005228",
+                "on-tertiary": "#ffffff",
+                "on-error": "#ffffff",
+                "surface-container-highest": "#dce5da",
+                "on-primary-container": "#005027",
+                "background": "#f3fcf1",
+                "primary-fixed-dim": "#4ae183",
+                "on-surface": "#161d17",
+                "inverse-on-surface": "#ebf3e8",
+                "surface-variant": "#dce5da",
+                "on-tertiary-fixed-variant": "#793015",
+                "secondary": "#944a00",
+                "outline-variant": "#bbcbbb",
+                "outline": "#6c7b6d",
+                "inverse-primary": "#4ae183",
+                "tertiary-fixed": "#ffdbd0",
+                "surface-tint": "#006d37",
+                "on-surface-variant": "#3d4a3e",
+                "error": "#ba1a1a",
+                "tertiary-container": "#ff9875",
+                "surface": "#f3fcf1",
+                "secondary-fixed-dim": "#ffb783",
+                "on-secondary-container": "#663100",
+                "primary": "#006d37",
+                "tertiary": "#98472a",
+                "on-tertiary-fixed": "#390c00",
+                "secondary-fixed": "#ffdcc5",
+                "on-error-container": "#93000a"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "xl": "40px",
+                "container-margin-mobile": "16px",
+                "sm": "8px",
+                "gutter": "16px",
+                "lg": "24px",
+                "md": "16px",
+                "container-margin-desktop": "64px",
+                "xs": "4px",
+                "base": "4px"
+            },
+            "fontFamily": {
+                "title-md": ["Inter"],
+                "price-display": ["Inter"],
+                "headline-lg-mobile": ["Inter"],
+                "label-bold": ["Inter"],
+                "body-sm": ["Inter"],
+                "headline-lg": ["Inter"],
+                "display-lg": ["Inter"],
+                "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                "price-display": ["20px", {"lineHeight": "24px", "fontWeight": "700"}],
+                "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-card {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-lg min-h-screen">
+<!-- TopNavBar -->
+<header class="sticky top-0 w-full z-50 flex justify-between items-center px-md lg:px-container-margin-desktop h-16 bg-surface-container-lowest shadow-[0px_4px_20px_rgba(44,62,80,0.05)]">
+<div class="flex items-center gap-4">
+<span class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Workforce Central</span>
+<div class="hidden md:flex ml-8 gap-6 h-full items-center">
+<a class="text-on-surface-variant font-label-bold text-label-bold transition-colors hover:bg-surface-container px-3 py-2 rounded-lg" href="#">Home</a>
+<a class="text-primary border-b-2 border-primary font-label-bold text-label-bold px-3 py-2" href="#">Delivery</a>
+<a class="text-on-surface-variant font-label-bold text-label-bold transition-colors hover:bg-surface-container px-3 py-2 rounded-lg" href="#">Reports</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-surface-container px-4 py-1.5 rounded-full border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline text-[20px] mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-sm w-48" placeholder="Search orders..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-surface-container transition-colors duration-150">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-surface-container transition-colors duration-150">help</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-container">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a friendly logistics manager wearing a crisp white polo shirt in a bright, modern office with soft daylight coming from the side. High-key lighting, minimalist aesthetic with clean green and white tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQ2p5qg8YBji-SXb46JStTWnocRiQPwwvdso5qKJcosCnINt00LoQpgMGPm2TSiOqj3URK538ZKDOQI2pfO8oApPNQuyb2AJFFAeBCCa9p4aRSKpe2nLJem2GG35R-F_GNQKRzsiAm7cpXR8FM_Yuv0wDPAepy2t5cHcM1x-_R2MaoJIcSbamCqM5yn_vpCqmMZTeSQcxB93SwdZaL7EgBRC7zsYJXSLlBLOkwEZPDLOhRLuuRvIe5"/>
+</div>
+</div>
+</header>
+<div class="flex">
+<!-- SideNavBar -->
+<nav class="hidden lg:flex flex-col h-screen fixed left-0 top-0 border-r border-outline-variant/30 bg-surface-container-lowest w-64 z-40 pt-20">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-high/50">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">storefront</span>
+</div>
+<div>
+<p class="font-label-bold text-label-bold text-primary">Main St. Branch</p>
+<p class="text-[10px] text-outline">Shift: 08:00 - 16:00</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col px-4 gap-1 flex-grow">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">package_2</span>
+<span class="font-label-bold text-label-bold">Packing Station</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container rounded-lg font-bold transition-all duration-200" href="#">
+<span class="material-symbols-outlined">delivery_dining</span>
+<span class="font-label-bold text-label-bold">Delivery Portal</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-label-bold text-label-bold">Manifests</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-bold text-label-bold">Inventory</span>
+</a>
+<button class="mt-8 mx-2 py-3 px-4 bg-primary text-on-primary rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">add</span>
+<span>New Assignment</span>
+</button>
+</div>
+<div class="px-4 py-6 border-t border-outline-variant/20">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-bold text-label-bold">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-error hover:bg-error-container/20 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-bold text-label-bold">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 lg:ml-64 p-4 md:p-8 lg:p-container-margin-desktop mb-20 lg:mb-0">
+<!-- Top Metric Bar -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Metric 1 -->
+<div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+<div>
+<p class="text-on-surface-variant text-body-sm mb-1">Assigned Deliveries</p>
+<h3 class="font-display-lg text-display-lg text-primary">12</h3>
+</div>
+<div class="bg-primary-container/20 p-4 rounded-full">
+<span class="material-symbols-outlined text-primary text-[32px]">local_shipping</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+<div>
+<p class="text-on-surface-variant text-body-sm mb-1">Completed Today</p>
+<h3 class="font-display-lg text-display-lg text-secondary">48</h3>
+</div>
+<div class="bg-secondary-container/20 p-4 rounded-full">
+<span class="material-symbols-outlined text-secondary text-[32px]">task_alt</span>
+</div>
+</div>
+<!-- Metric 3: Notification Ticker -->
+<div class="glass-panel p-6 rounded-2xl bg-gradient-to-br from-primary-container/10 to-surface-container relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-on-surface-variant text-body-sm mb-2 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+                            Live Updates
+                        </p>
+<div class="h-10 overflow-hidden" id="ticker-container">
+<ul class="transition-transform duration-1000 ease-in-out" id="ticker-list">
+<li class="font-label-bold text-label-bold text-on-surface">Rider #402 completed Zone B</li>
+<li class="font-label-bold text-label-bold text-on-surface">New batch ready for pickup</li>
+<li class="font-label-bold text-label-bold text-on-surface">Route 4 traffic alert: +5 mins</li>
+</ul>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]">notifications_active</span>
+</div>
+</div>
+</div>
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Delivery Queue</h1>
+<p class="text-on-surface-variant">Real-time active assignments for your current shift</p>
+</div>
+<div class="flex gap-2 bg-surface-container-high p-1 rounded-xl">
+<button class="px-4 py-2 bg-white rounded-lg shadow-sm font-label-bold text-label-bold text-primary">All Zones</button>
+<button class="px-4 py-2 hover:bg-white/50 rounded-lg transition-all font-label-bold text-label-bold text-on-surface-variant">Zone A</button>
+<button class="px-4 py-2 hover:bg-white/50 rounded-lg transition-all font-label-bold text-label-bold text-on-surface-variant">Zone B</button>
+</div>
+</div>
+<!-- Main Panel: Order Assignments Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Delivery Card 1 -->
+<div class="animate-card bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden hover:shadow-md transition-all duration-300">
+<div class="p-6">
+<!-- Section 1: Identity -->
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary border-2 border-white shadow-sm">SP</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Sunita Patel</h4>
+<p class="text-body-sm text-on-surface-variant">+91 98765-43210</p>
+</div>
+</div>
+<span class="bg-primary-container/20 text-on-primary-container px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Premium</span>
+</div>
+<div class="flex items-start gap-2 mb-6 text-on-surface-variant bg-surface-container-low p-3 rounded-xl">
+<span class="material-symbols-outlined text-[20px] mt-0.5">location_on</span>
+<div class="text-body-sm">
+<p class="font-semibold text-on-surface">42 Garden Estates, Sector 5</p>
+<p>Approx. 2.4 KM from store</p>
+</div>
+</div>
+<!-- Section 2: Quick Actions -->
+<div class="grid grid-cols-2 gap-3 mb-6">
+<button class="flex flex-col items-center justify-center gap-1 p-3 bg-surface-container hover:bg-surface-container-high transition-colors rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary">call</span>
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Call</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-3 bg-surface-container hover:bg-surface-container-high transition-colors rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-secondary">near_me</span>
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Maps</span>
+</button>
+</div>
+<!-- Section 3: Primary Action -->
+<button class="w-full py-4 bg-primary text-on-primary rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-on-primary-fixed-variant transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined">check_circle</span>
+<span>Accept & Confirm Pickup</span>
+</button>
+</div>
+</div>
+<!-- Delivery Card 2 -->
+<div class="animate-card bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden hover:shadow-md transition-all duration-300" style="animation-delay: 0.1s">
+<div class="p-6">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary border-2 border-white shadow-sm">RJ</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Rajesh J.</h4>
+<p class="text-body-sm text-on-surface-variant">+91 91234-56789</p>
+</div>
+</div>
+<span class="bg-secondary-container/20 text-on-secondary-container px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Rush</span>
+</div>
+<div class="flex items-start gap-2 mb-6 text-on-surface-variant bg-surface-container-low p-3 rounded-xl">
+<span class="material-symbols-outlined text-[20px] mt-0.5">location_on</span>
+<div class="text-body-sm">
+<p class="font-semibold text-on-surface">Heights Apartment, Flat 4B</p>
+<p>Approx. 0.8 KM from store</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 mb-6">
+<button class="flex flex-col items-center justify-center gap-1 p-3 bg-surface-container hover:bg-surface-container-high transition-colors rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary">call</span>
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Call</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-3 bg-surface-container hover:bg-surface-container-high transition-colors rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-secondary">near_me</span>
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Maps</span>
+</button>
+</div>
+<button class="w-full py-4 bg-primary text-on-primary rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-on-primary-fixed-variant transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined">check_circle</span>
+<span>Accept & Confirm Pickup</span>
+</button>
+</div>
+</div>
+<!-- Delivery Card 3 -->
+<div class="animate-card bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden hover:shadow-md transition-all duration-300" style="animation-delay: 0.2s">
+<div class="p-6">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary border-2 border-white shadow-sm">MK</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Meera Khan</h4>
+<p class="text-body-sm text-on-surface-variant">+91 90000-12345</p>
+</div>
+</div>
+<span class="bg-on-tertiary-container/10 text-on-tertiary-container px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Scheduled</span>
+</div>
+<div class="flex items-start gap-2 mb-6 text-on-surface-variant bg-surface-container-low p-3 rounded-xl">
+<span class="material-symbols-outlined text-[20px] mt-0.5">location_on</span>
+<div class="text-body-sm">
+<p class="font-semibold text-on-surface">Sunshine Villa, Block C</p>
+<p>Approx. 4.9 KM from store</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 mb-6">
+<button class="flex flex-col items-center justify-center gap-1 p-3 bg-surface-container hover:bg-surface-container-high transition-colors rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary">call</span>
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Call</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-3 bg-surface-container hover:bg-surface-container-high transition-colors rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-secondary">near_me</span>
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Maps</span>
+</button>
+</div>
+<button class="w-full py-4 bg-primary text-on-primary rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-on-primary-fixed-variant transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined">check_circle</span>
+<span>Accept & Confirm Pickup</span>
+</button>
+</div>
+</div>
+<!-- Card 4 (Bento Variation) -->
+<div class="animate-card glass-panel rounded-2xl p-6 flex flex-col justify-between overflow-hidden relative min-h-[300px]" style="animation-delay: 0.3s">
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<span class="font-label-bold text-label-bold text-primary uppercase">Performance Insight</span>
+</div>
+<h4 class="font-title-md text-title-md mb-2">Efficiency Up 12%</h4>
+<p class="text-body-sm text-on-surface-variant">Your average delivery time is now 18 mins. Great work!</p>
+</div>
+<div class="mt-4 flex items-end justify-between">
+<div class="flex gap-1">
+<div class="w-4 h-12 bg-primary/20 rounded-t-sm"></div>
+<div class="w-4 h-16 bg-primary/40 rounded-t-sm"></div>
+<div class="w-4 h-10 bg-primary/60 rounded-t-sm"></div>
+<div class="w-4 h-20 bg-primary rounded-t-sm"></div>
+</div>
+<button class="text-primary font-label-bold text-label-bold flex items-center gap-1 hover:underline">
+                            View Stats <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<!-- Background abstract shape -->
+<div class="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+</div>
+<!-- Delivery Card 5 -->
+<div class="animate-card bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden hover:shadow-md transition-all duration-300" style="animation-delay: 0.4s">
+<div class="p-6">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary border-2 border-white shadow-sm">AV</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Arjun Varma</h4>
+<p class="text-body-sm text-on-surface-variant">+91 88888-99999</p>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-2 mb-6 text-on-surface-variant bg-surface-container-low p-3 rounded-xl">
+<span class="material-symbols-outlined text-[20px] mt-0.5">location_on</span>
+<div class="text-body-sm">
+<p class="font-semibold text-on-surface">Green Valley, Lane 12</p>
+<p>Approx. 3.1 KM from store</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 mb-6">
+<button class="flex flex-col items-center justify-center gap-1 p-3 bg-surface-container hover:bg-surface-container-high transition-colors rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary">call</span>
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Call</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-3 bg-surface-container hover:bg-surface-container-high transition-colors rounded-xl border border-outline-variant/20">
+<span class="material-symbols-outlined text-secondary">near_me</span>
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Maps</span>
+</button>
+</div>
+<button class="w-full py-4 bg-primary text-on-primary rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-on-primary-fixed-variant transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined">check_circle</span>
+<span>Accept & Confirm Pickup</span>
+</button>
+</div>
+</div>
+<!-- Card 6: Map Preview / CTA -->
+<div class="animate-card relative group rounded-2xl overflow-hidden shadow-sm h-full min-h-[300px]" style="animation-delay: 0.5s">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="A clean, minimalist 3D map illustration showing a modern urban street layout with soft green and white tones. Smooth, stylized city blocks with a single bright green delivery truck icon moving along a route. High-key lighting, professional aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDVG1pBtaEisVRU5VLGLbTPNwJRRTxuOGXq4YXcXWMXBhKeap2idJX5oFp-3to-Eaa6HEm_Lk8x8-93M6j-5OUblrBBlvzsubhib6qpWzd9Jjx91x2V5wn4DfuRtqb_7JS75QvSXMdmWg6Yq6QVA_R661MVEEntm4CozjnzOWsNxuh2Ham_srwcDqrCbGXud1HAnNkCYhUBwtIRhi2Q62RDSXJTXsM1ELEoRHYm8Uj0So4yV_6SYaRK')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-6">
+<p class="text-white/80 text-body-sm font-bold uppercase mb-1">Live Map</p>
+<h4 class="text-white font-title-md text-title-md mb-4">View All Active Couriers</h4>
+<button class="bg-white/20 backdrop-blur-md text-white border border-white/30 px-6 py-2 rounded-xl font-label-bold text-label-bold hover:bg-white/30 transition-all">
+                            Expand Full Map
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface-container-lowest shadow-[0px_-4px_20px_rgba(44,62,80,0.1)] rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2">
+<span class="material-symbols-outlined">package_2</span>
+<span class="font-label-bold text-[10px]">Packing</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1.5 shadow-sm">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-label-bold text-[10px]">Delivery</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-bold text-[10px]">Profile</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for Ticker
+        const tickerList = document.getElementById('ticker-list');
+        let index = 0;
+        setInterval(() => {
+            index = (index + 1) % 3;
+            tickerList.style.transform = `translateY(-${index * 40}px)`;
+        }, 3000);
+
+        // Active State Logic implementation for navs
+        // (Handled via static assignment for the requested "Delivery" tab)
+        
+        // Handle generic button clicks for interaction feel
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if(btn.innerText.includes('Accept')) {
+                    const card = btn.closest('.animate-card');
+                    btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> <span>Processing...</span>';
+                    btn.classList.add('opacity-80');
+                    setTimeout(() => {
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.95)';
+                        setTimeout(() => card.remove(), 300);
+                    }, 800);
+                }
+            });
+        });
+    </script>
+</body></html>

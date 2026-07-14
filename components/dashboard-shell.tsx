@@ -1,0 +1,114 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { Boxes, ClipboardList, LogOut, PackageCheck, ShieldCheck, Truck } from "lucide-react";
+import { logout } from "@/app/actions/auth";
+import type { Role } from "@/lib/users";
+
+const allNavItems = [
+  { href: "/admin/orders", label: "Orders Queue", icon: ClipboardList, roles: ["admin"] as Role[] },
+  { href: "/admin/inventory", label: "Inventory", icon: Boxes, roles: ["admin"] as Role[] },
+  { href: "/admin/users", label: "Staff & Users", icon: ShieldCheck, roles: ["admin"] as Role[] },
+  { href: "/staff/packing", label: "Packing Station", icon: PackageCheck, roles: ["staff"] as Role[] },
+  { href: "/delivery/dashboard", label: "Delivery Portal", icon: Truck, roles: ["delivery"] as Role[] },
+];
+
+type DashboardShellProps = {
+  currentPath: string;
+  currentRole: Role;
+  userName: string;
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+  action?: ReactNode;
+};
+
+export function DashboardShell({
+  currentPath,
+  currentRole,
+  userName,
+  title,
+  subtitle,
+  children,
+  action,
+}: DashboardShellProps) {
+  const navItems = allNavItems.filter((item) => item.roles.includes(currentRole));
+
+  return (
+    <div className="min-h-screen bg-brand-background text-brand-ink">
+      <div className="mx-auto grid min-h-screen max-w-[1600px] lg:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="flex flex-col gap-8 bg-brand-sidebar px-6 py-8 text-white shadow-focus">
+          <div className="space-y-3">
+            <div>
+              <h1 className="text-[2rem] font-bold tracking-tight text-brand-green-fixed">Bhagwandas Traders</h1>
+              <p className="text-sm text-brand-border/80">Admin Panel</p>
+            </div>
+          </div>
+
+          <nav aria-label="Dashboard navigation" className="space-y-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = currentPath === item.href;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-bold transition ${
+                    active
+                      ? "bg-brand-orange text-brand-ink"
+                      : "text-brand-border hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="mt-auto space-y-3">
+            <button className="w-full rounded-xl bg-brand-green-bright px-4 py-3 text-sm font-bold text-brand-ink">
+              + New Order
+            </button>
+            <div className="rounded-xl border border-white/10 bg-white/5 p-5">
+              <p className="text-sm font-semibold">Today&apos;s service window</p>
+              <p className="mt-2 text-sm text-brand-border">9:00 AM to 8:00 PM across the 5KM delivery radius.</p>
+            </div>
+            <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+              <p className="text-sm font-semibold">Signed in as {userName}</p>
+              <form action={logout}>
+                <button
+                  type="submit"
+                  aria-label="Log out"
+                  className="flex items-center gap-1 text-sm font-semibold text-brand-border hover:text-white"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Log out
+                </button>
+              </form>
+            </div>
+          </div>
+        </aside>
+
+        <div className="flex min-w-0 flex-col">
+          <header className="flex flex-col gap-4 border-b border-brand-border/60 bg-brand-panel px-5 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+            <div className="flex flex-1 items-center gap-4">
+              <label className="hidden w-full max-w-md items-center gap-3 rounded-full bg-brand-panel-soft px-4 py-2.5 lg:flex">
+                <span className="sr-only">Search dashboard</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 text-brand-outline fill-none stroke-current stroke-2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                <input className="w-full bg-transparent text-sm outline-none placeholder:text-brand-outline" placeholder="Search orders, inventory, or staff..." />
+              </label>
+              <div>
+              <h2 className="text-3xl font-semibold tracking-tight text-brand-ink">{title}</h2>
+              <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+              </div>
+            </div>
+            {action}
+          </header>
+
+          <main className="flex-1 p-4 lg:p-8">{children}</main>
+        </div>
+      </div>
+    </div>
+  );
+}

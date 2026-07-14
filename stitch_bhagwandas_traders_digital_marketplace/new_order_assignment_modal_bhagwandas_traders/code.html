@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workforce Central - New Order Assignment</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#f3fcf1",
+                    "on-primary-fixed": "#00210c",
+                    "tertiary": "#98472a",
+                    "surface-variant": "#dce5da",
+                    "secondary-fixed": "#ffdcc5",
+                    "primary-fixed": "#6bfe9c",
+                    "on-secondary-container": "#663100",
+                    "on-surface-variant": "#3d4a3e",
+                    "surface-dim": "#d4dcd2",
+                    "primary": "#006d37",
+                    "secondary-container": "#fc8f34",
+                    "background": "#f3fcf1",
+                    "secondary-fixed-dim": "#ffb783",
+                    "on-surface": "#161d17",
+                    "on-primary": "#ffffff",
+                    "tertiary-container": "#ff9875",
+                    "surface-container-low": "#eef6eb",
+                    "surface-container": "#e8f0e5",
+                    "outline": "#6c7b6d",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed-dim": "#4ae183",
+                    "on-tertiary": "#ffffff",
+                    "inverse-surface": "#2b322b",
+                    "tertiary-fixed-dim": "#ffb59d",
+                    "on-primary-container": "#005027",
+                    "inverse-primary": "#4ae183",
+                    "on-error-container": "#93000a",
+                    "error-container": "#ffdad6",
+                    "on-background": "#161d17",
+                    "primary-container": "#2ecc71",
+                    "surface-tint": "#006d37",
+                    "secondary": "#944a00",
+                    "on-tertiary-fixed-variant": "#793015",
+                    "on-secondary-fixed-variant": "#713700",
+                    "surface-container-highest": "#dce5da",
+                    "outline-variant": "#bbcbbb",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed": "#390c00",
+                    "surface": "#f3fcf1",
+                    "inverse-on-surface": "#ebf3e8",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed": "#ffdbd0",
+                    "on-secondary-fixed": "#301400",
+                    "on-primary-fixed-variant": "#005228",
+                    "surface-container-high": "#e2ebe0",
+                    "on-tertiary-container": "#772e14",
+                    "on-error": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "md": "16px",
+                    "gutter": "16px",
+                    "lg": "24px",
+                    "base": "4px",
+                    "container-margin-desktop": "64px",
+                    "xs": "4px",
+                    "container-margin-mobile": "16px",
+                    "xl": "40px"
+            },
+            "fontFamily": {
+                    "label-bold": ["Inter"],
+                    "price-display": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "title-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "display-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "price-display": ["20px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #bbcbbb;
+            border-radius: 10px;
+        }
+        .rider-card:hover {
+            border-color: #006d37;
+        }
+        .rider-selected {
+            border-color: #2ecc71 !important;
+            background-color: #eef6eb !important;
+        }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface antialiased overflow-hidden">
+<!-- Mock Dashboard Background (Simulating SCREEN_6) -->
+<div class="fixed inset-0 z-0 flex blur-sm opacity-50 grayscale-[0.2]">
+<!-- SideNav Simulation -->
+<aside class="hidden lg:flex flex-col h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/30">
+<div class="p-md text-primary font-black text-headline-lg-mobile">Workforce</div>
+<nav class="flex-1 p-md space-y-2">
+<div class="bg-primary-container text-on-primary-container p-md rounded-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined">delivery_dining</span> Delivery Portal
+                </div>
+<div class="text-on-surface-variant p-md flex items-center gap-2">
+<span class="material-symbols-outlined">package_2</span> Packing Station
+                </div>
+</nav>
+</aside>
+<main class="flex-1 overflow-hidden">
+<!-- TopBar Simulation -->
+<header class="h-16 bg-surface-container-lowest shadow-sm flex items-center justify-between px-md lg:px-container-margin-desktop">
+<div class="font-title-md text-primary">Delivery Management</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined">notifications</span>
+<div class="w-8 h-8 rounded-full bg-surface-variant"></div>
+</div>
+</header>
+<!-- Content Grid Simulation -->
+<div class="p-lg grid grid-cols-12 gap-lg">
+<div class="col-span-8 bg-surface-container-lowest h-96 rounded-xl shadow-sm"></div>
+<div class="col-span-4 bg-surface-container-lowest h-96 rounded-xl shadow-sm"></div>
+</div>
+</main>
+</div>
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 z-[100] bg-on-surface/40 backdrop-blur-sm flex items-center justify-center p-4">
+<!-- Assignment Modal -->
+<div class="bg-surface-container-lowest w-full max-w-2xl rounded-xl shadow-[0px_10px_30px_rgba(44,62,80,0.12)] flex flex-col max-h-[90vh] overflow-hidden transform transition-all animate-in fade-in zoom-in duration-300">
+<!-- Header -->
+<div class="flex items-center justify-between px-lg py-md border-b border-outline-variant/20">
+<h2 class="font-title-md text-title-md text-on-surface">Assign New Order</h2>
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors group">
+<span class="material-symbols-outlined text-outline group-hover:text-on-surface">close</span>
+</button>
+</div>
+<!-- Modal Content (Scrollable Area) -->
+<div class="flex-1 overflow-y-auto custom-scrollbar">
+<!-- Section 1: Order Details Summary -->
+<section class="p-lg">
+<div class="flex items-center gap-2 mb-md">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">assignment</span>
+<h3 class="font-label-bold text-label-bold uppercase tracking-wider text-outline">Order Details</h3>
+</div>
+<div class="bg-surface-container-low rounded-lg p-md grid grid-cols-1 md:grid-cols-3 gap-md border border-outline-variant/20">
+<div>
+<p class="font-label-bold text-label-bold text-outline mb-xs">Order ID</p>
+<p class="font-title-md text-body-lg font-bold text-on-surface">#BT-90512</p>
+</div>
+<div>
+<p class="font-label-bold text-label-bold text-outline mb-xs">Customer Name</p>
+<p class="font-title-md text-body-lg font-semibold text-on-surface">Suresh Kumar</p>
+</div>
+<div>
+<p class="font-label-bold text-label-bold text-outline mb-xs">Delivery Address</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-tight">Sector 45, Gurgaon, Near Huda City Center</p>
+</div>
+</div>
+</section>
+<!-- Section 2: Available Riders List -->
+<section class="px-lg pb-lg">
+<div class="flex items-center justify-between mb-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">pedal_bike</span>
+<h3 class="font-label-bold text-label-bold uppercase tracking-wider text-outline">Available Riders</h3>
+</div>
+<span class="text-label-bold text-primary px-2 py-1 bg-primary-container/20 rounded-full">4 Nearby</span>
+</div>
+<div class="space-y-sm">
+<!-- Rider Row 1 -->
+<label class="rider-card relative flex items-center justify-between p-md border border-outline-variant rounded-lg cursor-pointer transition-all hover:bg-surface-bright group bg-surface-container-lowest">
+<input checked="" class="hidden peer" name="rider_selection" type="radio"/>
+<div class="flex items-center gap-md">
+<div class="relative">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Professional headshot of a smiling male delivery executive wearing a green uniform polo shirt. The lighting is soft and natural, emphasizing a friendly and reliable appearance for a workforce management platform. Minimalist studio background with a slight emerald tint to match the brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWZMc_f2FQtEix-vSy5q-B7Iax-3pxi5KpZ0pNZTbugq-HBXrnf0hh8Ma3Z97gVw4Ox7HRT80d3pGDlS1tsyultfX0He--eywNBomXFAho3Q1R3UmNCd7b1Dg7xQgv9bO2H4Vqt2hH2_NywelDS887QF1jAY1f9tUUy9r7TKLyK0lQ4adAxFRskfBkydFJT3QgRzLJtD233UvU8EAyOln0qXIn77nIJ2AoWojp0wJP1iUXe9-Df2KA"/>
+</div>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-surface-container-lowest"></div>
+</div>
+<div>
+<h4 class="font-body-lg font-bold text-on-surface">Rajesh Kumar</h4>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-[10px] font-bold uppercase text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                            Online &amp; Available
+                                        </span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">near_me</span>
+<span class="font-label-bold text-label-bold">0.5 KM away</span>
+</div>
+<div class="font-body-sm text-body-sm text-outline">0 active orders</div>
+</div>
+<!-- Selection Ring Overlay -->
+<div class="absolute inset-0 rounded-lg border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary-container/5 transition-all"></div>
+</label>
+<!-- Rider Row 2 -->
+<label class="rider-card relative flex items-center justify-between p-md border border-outline-variant rounded-lg cursor-pointer transition-all hover:bg-surface-bright group bg-surface-container-lowest">
+<input class="hidden peer" name="rider_selection" type="radio"/>
+<div class="flex items-center gap-md">
+<div class="relative">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="A portrait of a male delivery professional in a clean mint green workforce uniform. He looks attentive and ready for assignment. The shot is high-contrast with a clean white canvas aesthetic, reflecting a premium grocery and logistics service provider. Vibrant orange accents subtly integrated in the background lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhkjW0DjIKUozCXeO2R_fWtl25KVVsmoRA2spDm-IDCCWtvS7Vs7r5Hen4aok5UVovo0NYF9HmP8FVPPpxsh4HQFOjpC5JBezyvwcHFVpcvPp-Y4h-Dx4g-jPU2ReBeJT4pVvQUlD__k2uHeJ9H5-V1wgtPk45CFi2t4ioGFTv8yeUt2Zc6n0b8ZVXdsLHbyWHbJ2TDT86HefI9Yd16N8eJAGdOvtHg3TpLJ2LOgWjw2bF-dkrZNLU"/>
+</div>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-surface-container-lowest"></div>
+</div>
+<div>
+<h4 class="font-body-lg font-bold text-on-surface">Anil Verma</h4>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-[10px] font-bold uppercase text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                            Online &amp; Available
+                                        </span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">near_me</span>
+<span class="font-label-bold text-label-bold">1.2 KM away</span>
+</div>
+<div class="font-body-sm text-body-sm text-outline">0 active orders</div>
+</div>
+<div class="absolute inset-0 rounded-lg border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary-container/5 transition-all"></div>
+</label>
+<!-- Rider Row 3 -->
+<label class="rider-card relative flex items-center justify-between p-md border border-outline-variant rounded-lg cursor-pointer transition-all hover:bg-surface-bright group bg-surface-container-lowest">
+<input class="hidden peer" name="rider_selection" type="radio"/>
+<div class="flex items-center gap-md">
+<div class="relative">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Close up photography of a delivery rider with a friendly expression. He is wearing a modern workforce jacket in emerald green. The image is crisp with soft bokeh, showing a bright urban daylight environment in the background. High-end utility and professional service vibes for a digital workforce dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzH9l5c6LxaNf0z_bE0wDiqtqlyM4n4OJymNkZQ1XE6JX7aoTmnzNN7XdKIAS8hpGwVqHg8VyVq034PsubwdkUaqW5qIFzLLqKgqPfYvz9BZF6c-gII7e3OH78dbwQ61WFQlxzzCXmZfcg9Glp93O-R-5MNjtkU61EpMF4qXm4B-IOC-9cVtu9hlw-CZBpMo3OvSTufVqSeFFR4ZiDbPj80-AkBljwcSUH8QrbqqLAF5okcyTzAUxc"/>
+</div>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-surface-container-lowest"></div>
+</div>
+<div>
+<h4 class="font-body-lg font-bold text-on-surface">Mohit Singh</h4>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-[10px] font-bold uppercase text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                            Online &amp; Available
+                                        </span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">near_me</span>
+<span class="font-label-bold text-label-bold">1.8 KM away</span>
+</div>
+<div class="font-body-sm text-body-sm text-outline">1 active order</div>
+</div>
+<div class="absolute inset-0 rounded-lg border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary-container/5 transition-all"></div>
+</label>
+<!-- Rider Row 4 -->
+<label class="rider-card relative flex items-center justify-between p-md border border-outline-variant rounded-lg cursor-pointer transition-all hover:bg-surface-bright group bg-surface-container-lowest opacity-75">
+<input class="hidden peer" name="rider_selection" type="radio"/>
+<div class="flex items-center gap-md">
+<div class="relative">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Professional profile photo of a female delivery partner for an organic grocery brand. She is wearing a green branded uniform. Soft lighting, high-quality resolution, minimalist background. The mood is reliable, fresh, and energetic, matching the Organic Vitality design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF7BcgoKluHDW6glqA-URDPedpXmI0YEg0phz0BRN_Eh1g9tMtu9RcCOdyU_RBy-yVxlezO715sMlHM0PwcYW6xXJFkpeBS2Kln_vjjFhaGba1dQRBKIxOm_pVNbmpMoBv4p8u-HZZ8DTRw1545APzwIyM_Km6yxaQ8pE6ewzYsPTw1r1pc18GlIRw4XPvNKt3710Q3pXwVpj3QqUOCpD64MqwODzI-S6mUkYQlmZFCj8eCKtE7vlM"/>
+</div>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-surface-container-lowest"></div>
+</div>
+<div>
+<h4 class="font-body-lg font-bold text-on-surface">Priya Sharma</h4>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-[10px] font-bold uppercase text-primary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                            Online &amp; Available
+                                        </span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">near_me</span>
+<span class="font-label-bold text-label-bold">2.4 KM away</span>
+</div>
+<div class="font-body-sm text-body-sm text-outline">0 active orders</div>
+</div>
+<div class="absolute inset-0 rounded-lg border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary-container/5 transition-all"></div>
+</label>
+</div>
+</section>
+</div>
+<!-- Footer Actions -->
+<div class="px-lg py-md border-t border-outline-variant/20 bg-surface-container-lowest flex items-center justify-between gap-md">
+<button class="flex-1 py-3 px-4 font-label-bold text-primary border border-primary rounded-lg hover:bg-primary-container/10 transition-all active:scale-95 duration-150">
+                    Cancel
+                </button>
+<button class="flex-[2] py-3 px-4 font-label-bold text-on-primary bg-primary-container rounded-lg shadow-[0px_4px_12px_rgba(46,204,113,0.3)] hover:brightness-105 transition-all active:scale-95 duration-150 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">verified</span>
+                    Confirm Assignment
+                </button>
+</div>
+</div>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Close modal interaction (simulated)
+            const closeBtn = document.querySelector('button .material-symbols-outlined[content="close"]')?.parentElement;
+            if (closeBtn) {
+                closeBtn.onclick = () => {
+                    document.querySelector('.fixed.inset-0.z-\\[100\\]').style.display = 'none';
+                };
+            }
+
+            // Confirm button interaction (simulated)
+            const confirmBtn = document.querySelector('button:contains("Confirm")');
+            // Using a more robust selector since contains isn't native
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                if (btn.innerText.includes('Confirm Assignment')) {
+                    btn.addEventListener('click', function() {
+                        this.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> Processing...`;
+                        this.classList.add('pointer-events-none', 'opacity-80');
+                        
+                        setTimeout(() => {
+                            this.innerHTML = `<span class="material-symbols-outlined">check_circle</span> Order Assigned!`;
+                            this.style.backgroundColor = '#006d37';
+                            setTimeout(() => {
+                                document.querySelector('.fixed.inset-0.z-\\[100\\]').style.display = 'none';
+                            }, 1000);
+                        }, 1500);
+                    });
+                }
+                
+                if (btn.innerText.includes('Cancel')) {
+                    btn.addEventListener('click', () => {
+                        document.querySelector('.fixed.inset-0.z-\\[100\\]').style.display = 'none';
+                    });
+                }
+            });
+        });
+    </script>
+</body></html>

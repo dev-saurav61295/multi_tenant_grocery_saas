@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login - Bhagwandas Traders</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#6bfe9c",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#301400",
+                    "on-background": "#161d17",
+                    "secondary": "#944a00",
+                    "inverse-surface": "#2b322b",
+                    "on-tertiary-fixed-variant": "#793015",
+                    "primary-fixed-dim": "#4ae183",
+                    "surface-container": "#e8f0e5",
+                    "tertiary": "#98472a",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-low": "#eef6eb",
+                    "secondary-fixed": "#ffdcc5",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#ebf3e8",
+                    "surface-tint": "#006d37",
+                    "surface-container-high": "#e2ebe0",
+                    "tertiary-fixed": "#ffdbd0",
+                    "primary-container": "#2ecc71",
+                    "surface-bright": "#f3fcf1",
+                    "on-primary-fixed": "#00210c",
+                    "surface": "#f3fcf1",
+                    "on-tertiary-container": "#772e14",
+                    "on-primary-container": "#005027",
+                    "on-tertiary-fixed": "#390c00",
+                    "secondary-fixed-dim": "#ffb783",
+                    "background": "#f3fcf1",
+                    "outline": "#6c7b6d",
+                    "on-secondary-fixed-variant": "#713700",
+                    "on-primary-fixed-variant": "#005228",
+                    "surface-dim": "#d4dcd2",
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#dce5da",
+                    "on-secondary-container": "#663100",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#4ae183",
+                    "on-surface": "#161d17",
+                    "error-container": "#ffdad6",
+                    "tertiary-container": "#ff9875",
+                    "primary": "#006d37",
+                    "secondary-container": "#fc8f34",
+                    "surface-container-highest": "#dce5da",
+                    "on-primary": "#ffffff",
+                    "on-surface-variant": "#3d4a3e",
+                    "tertiary-fixed-dim": "#ffb59d",
+                    "outline-variant": "#bbcbbb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-margin-desktop": "64px",
+                    "lg": "24px",
+                    "xl": "40px",
+                    "sm": "8px",
+                    "md": "16px",
+                    "base": "4px",
+                    "gutter": "16px",
+                    "xs": "4px",
+                    "container-margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "price-display": ["Inter"],
+                    "title-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "label-bold": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "price-display": ["20px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3fcf1;
+        }
+        .login-card-shadow {
+            box-shadow: 0px 4px 20px rgba(44, 62, 80, 0.05);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .input-focus-ring:focus {
+            outline: none;
+            border-color: #006d37;
+            box-shadow: 0 0 0 2px rgba(0, 109, 55, 0.1);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-surface">
+<!-- Hero/Brand Header (Simplified for Login Focus) -->
+<header class="w-full py-lg px-container-margin-mobile md:px-container-margin-desktop flex justify-center">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-primary tracking-tight">Bhagwandas Traders</h1>
+</header>
+<main class="flex-grow flex items-center justify-center px-container-margin-mobile">
+<!-- Login Container -->
+<div class="w-full max-w-[440px] bg-surface-container-lowest p-xl rounded-xl login-card-shadow border border-outline-variant/30">
+<div class="text-center mb-xl">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-on-surface mb-xs">Welcome Back</h2>
+<p class="font-body-sm text-on-surface-variant">Access your premium local groceries</p>
+</div>
+<!-- Login Form -->
+<form class="space-y-md">
+<!-- Phone Number -->
+<div>
+<label class="block font-label-bold text-on-surface-variant mb-xs ml-base" for="phone">Phone Number</label>
+<div class="relative flex items-center">
+<span class="absolute left-md font-body-lg text-on-surface-variant">+91</span>
+<input class="w-full pl-[52px] pr-md py-md rounded-lg border border-outline-variant bg-surface input-focus-ring font-body-lg text-on-surface transition-all" id="phone" placeholder="98765 43210" required="" type="tel"/>
+</div>
+</div>
+<!-- Password -->
+<div>
+<div class="flex justify-between items-center mb-xs px-base">
+<label class="block font-label-bold text-on-surface-variant" for="password">Password</label>
+<a class="font-label-bold text-secondary hover:underline" href="#">Forgot Password?</a>
+</div>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-md text-on-surface-variant">lock</span>
+<input class="w-full pl-[48px] pr-[48px] py-md rounded-lg border border-outline-variant bg-surface input-focus-ring font-body-lg text-on-surface transition-all" id="password" placeholder="••••••••" required="" type="password"/>
+<button class="absolute right-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center px-base">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary transition-all" id="remember" type="checkbox"/>
+<label class="ml-sm font-body-sm text-on-surface-variant select-none" for="remember">Remember me for 30 days</label>
+</div>
+<!-- Login Action -->
+<button class="w-full py-md bg-primary-container text-on-primary-container font-title-md rounded-lg hover:brightness-95 active:scale-[0.98] transition-all flex justify-center items-center gap-sm shadow-sm" type="submit">
+                    Login
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="relative my-xl">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-outline-variant"></div>
+</div>
+<div class="relative flex justify-center text-body-sm">
+<span class="bg-surface-container-lowest px-md text-on-surface-variant">Or continue with</span>
+</div>
+</div>
+<!-- Social/Secondary Actions -->
+<div class="space-y-md">
+<!-- WhatsApp Login -->
+<button class="w-full py-md border border-primary text-primary font-title-md rounded-lg hover:bg-primary-container/10 active:scale-[0.98] transition-all flex justify-center items-center gap-sm">
+<span class="material-symbols-outlined">chat</span>
+                    Continue with WhatsApp
+                </button>
+<!-- Create Account -->
+<div class="text-center pt-md">
+<p class="font-body-sm text-on-surface-variant mb-sm">New to Bhagwandas Traders?</p>
+<button class="w-full py-md bg-surface-container-high text-on-surface font-title-md rounded-lg hover:bg-surface-container-highest active:scale-[0.98] transition-all">
+                        Create an Account
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer - From Shared Components -->
+<footer class="w-full mt-auto border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex flex-col md:flex-row justify-between items-center gap-md px-container-margin-mobile md:px-container-margin-desktop py-xl w-full max-w-7xl mx-auto">
+<div class="flex flex-col items-center md:items-start">
+<span class="font-title-md text-title-md text-primary mb-xs">Bhagwandas Traders</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-center md:text-left">© 2024 Bhagwandas Traders. Premium Local Groceries.</p>
+</div>
+<nav class="flex flex-wrap justify-center gap-md">
+<a class="font-body-sm text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" href="#">About Us</a>
+<a class="font-body-sm text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" href="#">Delivery Policy</a>
+<a class="font-body-sm text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" href="#">Privacy</a>
+<a class="font-body-sm text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" href="#">Terms</a>
+<a class="font-body-sm text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" href="#">Contact</a>
+</nav>
+</div>
+</footer>
+<!-- Background Decoration -->
+<div class="fixed top-0 right-0 -z-10 opacity-20 pointer-events-none overflow-hidden h-screen w-screen">
+<div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-fixed rounded-full blur-[100px]"></div>
+<div class="absolute top-1/2 -left-24 w-64 h-64 bg-secondary-fixed rounded-full blur-[80px]"></div>
+</div>
+<script>
+        // Simple micro-interaction for password toggle
+        document.querySelector('button[type="button"]').addEventListener('click', function() {
+            const input = document.getElementById('password');
+            const icon = this.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        });
+
+        // Form submission prevents default for demo
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Login attempted with:', document.getElementById('phone').value);
+        });
+    </script>
+</body></html>
