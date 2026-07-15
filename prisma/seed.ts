@@ -25,11 +25,6 @@ type DemoProduct = {
   imageUrl?: string;
 };
 
-/** Deterministic demo photo per product id — picsum.photos "seed" images are stable across requests. */
-function demoImageUrl(productId: string) {
-  return `https://picsum.photos/seed/${productId}/480/480`;
-}
-
 type DemoOrder = {
   username: string;
   phone: string;
@@ -63,14 +58,11 @@ const stores = [
       { username: "suhani_gupta", email: "suhani.gupta@example.com", password: "password123", name: "Suhani Gupta", role: "customer" as const },
     ] satisfies DemoUser[],
     products: [
-      { id: "amul-milk", name: "Amul Gold Milk", brand: "Amul", size: "1L Pouch", price: 72, category: "Dairy", description: "Fresh toned milk for everyday delivery.", comboEligible: false, stock: 84 },
-      { id: "banana-combo", name: "Robusta Banana Combo", brand: "Local Farm", size: "1 Dozen", price: 65, category: "Fruits", description: "Popular family bundle eligible for combo pricing.", comboEligible: true, stock: 24 },
-      { id: "atta", name: "Aashirvaad Atta", brand: "Aashirvaad", size: "5 KG", price: 289, category: "Staples", description: "Chakki fresh whole wheat flour.", comboEligible: false, stock: 21 },
-      { id: "salt", name: "Tata Salt", brand: "Tata", size: "1 KG", price: 30, category: "Staples", description: "Vacuum evaporated iodised salt.", comboEligible: false, stock: 66 },
-      { id: "oil", name: "Fortune Sunlite Oil", brand: "Fortune", size: "1 Litre", price: 160, category: "Cooking", description: "Daily cooking sunflower oil.", comboEligible: false, stock: 39 },
-      { id: "rice", name: "India Gate Basmati Rice", brand: "India Gate", size: "5 KG", price: 499, category: "Staples", description: "Long grain basmati for everyday meals.", comboEligible: false, stock: 18 },
-      { id: "tomato", name: "Fresh Tomato", brand: "Mandi Select", size: "1 KG", price: 42, category: "Vegetables", description: "Sorted grade A tomatoes.", comboEligible: false, stock: 57 },
-      { id: "biscuits", name: "Parle-G Family Pack", brand: "Parle", size: "800 G", price: 95, category: "Snacks", description: "Fast moving essentials for monthly baskets.", comboEligible: false, stock: 40 },
+      { id: "farm-fresh-milk", name: "Farm Fresh Milk", brand: "Farm Fresh", size: "1 Litre - Pouch", price: 62, category: "Dairy", description: "Fresh toned milk for everyday delivery.", comboEligible: true, stock: 84, imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuADc04G1Ci40gQVB_dhb-xUEotQv-K--G4vSC0i9DYJCnxlfeg1wSxsVBBS7DycUYO2Ka6nfv7W3TAYm1X5JKBE8WucL9g2WYwrRHXTkMy2UTumtkBk1UzNMxau3OfnHR3JGvXmJuh0EAE6_jGHtW8VKPwb5tk0mDNBYKj3TrtO3lT0cgb433e771-9XE7ZOvc_Q1Erj-rWSnVnCFiJvyuiVSTRPJbNn0p3aPDzvKUP1qYD5Xkqj6tG" },
+      { id: "organic-eggs", name: "Organic Brown Eggs", brand: "Farm Fresh", size: "Pack of 6", price: 95, category: "Dairy", description: "Certified organic, farm fresh brown eggs.", comboEligible: false, stock: 60, imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuAqrnztMlrgsCso41NSgp0SyhtYyd5EdBe9x8O97g6kvTvT-oENnfpHJX-khApsupH2zW-QXZX2E0WsRdX0wYeCRm3eGlf5eOfulx9tWboTJ1AVtykT4VKs73DZCv7-recPMLtx1wE2bx_sBCOQztOmmsds7-79VzclTPNyidiKNExWM6JPI8DjhRnQ7W7muaAEyZse6r8SxPIU5-mCIUoqvpmGDvZejq_fqSEO60e1GFZr6XWUpVKj" },
+      { id: "royal-gala-apples", name: "Royal Gala Apples", brand: "Organic Farms", size: "1 kg - Approx 6-7 pcs", price: 180, category: "Fruits", description: "Crisp, organically grown Royal Gala apples.", comboEligible: false, stock: 45, imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCtHG_SI_mIKEHbOSdRffhfMkQL595n4KtmFZuHcohbGZmyPqESMcBkjKuuMh3UhRQQLvEepZ1cIhXn_MIclsWkVQZVKF0ogKzvx5ZGyoMbY4SZeWaifxjAiD_1z_RlqDwy0QmMi8HJ5Sl0L-1oeaP453Dns2Fodxm1uwpNNoWPVxUBFJGMouxoW7RrIJrYmibgCOf2lPUq1Rh2fTItjSoH0BT3qz__ob86rh6lLgovSPFYR2MlVmyB" },
+      { id: "multigrain-bread", name: "Multigrain Bread", brand: "Fresh Bakery", size: "400g - Sliced", price: 45, category: "Bakery", description: "Freshly baked multigrain sliced bread.", comboEligible: false, stock: 30, imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuC58B500lt7pRnXWKi82uu1JxMSW9vASXdC6nQdZgUbO1JADPbYgZQNN4u8DZErOkh86RuuzVpcYjHuLQtwQFioOQ294dBic6nL3w55srKZflOmp_M8l9OhdAd1z9mPm5bOh9mzaRxUIXEMsg_cTXL-IOZcFzRtXYiaSAFbvIWazvxtzZhYL431tVFtsHDDEHXwJhBEmf45GrmPc2W_gX2ctqlF5e93tf9mCy2Lglr8sNndg9L8RIUA" },
+      { id: "alphonso-mangoes", name: "Alphonso Mangoes", brand: "Ratnagiri Farms", size: "Pack of 2", price: 240, category: "Fruits", description: "Limited season Alphonso mangoes.", comboEligible: false, stock: 20, imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuBu4HpSmyoauF26uUMDYc86PeOe2tNmzu74JJ9KS-8WgJj4uRzjILP7gwSDxttnBqY1Dqf_1CmnwNTw3yq5jtz-f4Gz9vy3ckgvx40rH6xGFsdNe8JB4cizoNAYgjxuSnl6ehtK6QVZV57_q4VKfy32Cj2xMWp0JjxjXqQMG28FqNXQ2nbbqDmtny11I7QsmzWSI2qIjc9L0G7mRZpZGX7Iqm33DpfyGGiH8KBEhKMh9Y0cM2LcUYko" },
     ] satisfies DemoProduct[],
     orders: [
       {
@@ -79,9 +71,8 @@ const stores = [
         address: "12/4 Civil Lines, Near Green Park Gate",
         status: "pending_verification",
         items: [
-          { productId: "amul-milk", quantity: 2 },
-          { productId: "banana-combo", quantity: 3 },
-          { productId: "atta", quantity: 1 },
+          { productId: "farm-fresh-milk", quantity: 3 },
+          { productId: "organic-eggs", quantity: 1 },
         ],
       },
       {
@@ -90,9 +81,8 @@ const stores = [
         address: "88 Station Road, Opposite Old Post Office",
         status: "verified",
         items: [
-          { productId: "oil", quantity: 2 },
-          { productId: "salt", quantity: 1 },
-          { productId: "tomato", quantity: 2 },
+          { productId: "royal-gala-apples", quantity: 2 },
+          { productId: "multigrain-bread", quantity: 2 },
         ],
       },
       {
@@ -101,9 +91,9 @@ const stores = [
         address: "14 Collectorate Road, Near District Court",
         status: "packing",
         items: [
-          { productId: "rice", quantity: 1 },
-          { productId: "biscuits", quantity: 2 },
-          { productId: "amul-milk", quantity: 1 },
+          { productId: "alphonso-mangoes", quantity: 1 },
+          { productId: "farm-fresh-milk", quantity: 1 },
+          { productId: "organic-eggs", quantity: 2 },
         ],
       },
       {
@@ -114,9 +104,8 @@ const stores = [
         distanceKm: 4.7,
         eta: "24 mins",
         items: [
-          { productId: "banana-combo", quantity: 3 },
-          { productId: "atta", quantity: 1 },
-          { productId: "salt", quantity: 1 },
+          { productId: "multigrain-bread", quantity: 2 },
+          { productId: "royal-gala-apples", quantity: 1 },
         ],
       },
       {
@@ -126,8 +115,8 @@ const stores = [
         status: "delivered",
         createdAt: yesterday,
         items: [
-          { productId: "tomato", quantity: 2 },
-          { productId: "biscuits", quantity: 1 },
+          { productId: "alphonso-mangoes", quantity: 1 },
+          { productId: "organic-eggs", quantity: 1 },
         ],
       },
     ] satisfies DemoOrder[],
@@ -148,10 +137,10 @@ const stores = [
       { username: "iman_ali", email: "iman.ali@example.com", password: "password123", name: "Iman Ali", role: "customer" as const },
     ] satisfies DemoUser[],
     products: [
-      { id: "fme-milk", name: "Fresh Mart Milk", brand: "Farm Fresh", size: "1L Pouch", price: 68, category: "Dairy", description: "Daily milk supply for local households.", comboEligible: false, stock: 55 },
-      { id: "fme-bread", name: "Soft White Bread", brand: "Fresh Mart", size: "400 G", price: 42, category: "Bakery", description: "Soft bread for breakfast and snacks.", comboEligible: false, stock: 32 },
-      { id: "fme-rice", name: "Golden Grain Rice", brand: "Fresh Mart", size: "5 KG", price: 469, category: "Staples", description: "Household staple with consistent quality.", comboEligible: false, stock: 26 },
-      { id: "fme-fruit-pack", name: "Seasonal Fruit Pack", brand: "Fresh Mart", size: "1 Pack", price: 149, category: "Fruits", description: "Assorted seasonal fruit bundle.", comboEligible: true, stock: 18 },
+      { id: "fme-milk", name: "Fresh Mart Milk", brand: "Farm Fresh", size: "1L Pouch", price: 68, category: "Dairy", description: "Daily milk supply for local households.", comboEligible: false, stock: 55, imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Oat_milk_glass_and_bottles.jpg/500px-Oat_milk_glass_and_bottles.jpg" },
+      { id: "fme-bread", name: "Soft White Bread", brand: "Fresh Mart", size: "400 G", price: 42, category: "Bakery", description: "Soft bread for breakfast and snacks.", comboEligible: false, stock: 32, imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Fresh_made_bread_05.jpg/500px-Fresh_made_bread_05.jpg" },
+      { id: "fme-rice", name: "Golden Grain Rice", brand: "Fresh Mart", size: "5 KG", price: 469, category: "Staples", description: "Household staple with consistent quality.", comboEligible: false, stock: 26, imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Uncooked_ST25_rice_on_bamboo_surface.jpg/500px-Uncooked_ST25_rice_on_bamboo_surface.jpg" },
+      { id: "fme-fruit-pack", name: "Seasonal Fruit Pack", brand: "Fresh Mart", size: "1 Pack", price: 149, category: "Fruits", description: "Assorted seasonal fruit bundle.", comboEligible: true, stock: 18, imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/DFC_2197_A_colorful_assortment_of_fresh_fruits_and_vegetables_-_apples_mango_dragon_fruit_kiwis_limes_bananas_and_more_-_arranged_on_a_wooden_crate.jpg/500px-DFC_2197_A_colorful_assortment_of_fresh_fruits_and_vegetables_-_apples_mango_dragon_fruit_kiwis_limes_bananas_and_more_-_arranged_on_a_wooden_crate.jpg" },
     ] satisfies DemoProduct[],
     orders: [
       {
@@ -253,7 +242,7 @@ async function seedProducts(store: (typeof stores)[number]) {
   const storeRecord = await prisma.store.findUniqueOrThrow({ where: { slug: store.slug } });
 
   for (const product of store.products as DemoProduct[]) {
-    const data = { ...product, imageUrl: product.imageUrl ?? demoImageUrl(product.id), storeId: storeRecord.id };
+    const data = { ...product, storeId: storeRecord.id };
     await prisma.product.upsert({
       where: { id: product.id },
       update: data,
