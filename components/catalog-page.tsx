@@ -2,11 +2,23 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Minus, Plus, Search, ShoppingCart, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+  MdAdd,
+  MdArrowForward,
+  MdCheckCircle,
+  MdEco,
+  MdError,
+  MdFavoriteBorder,
+  MdLocalOffer,
+  MdRemove,
+  MdSearch,
+  MdShoppingBag,
+  MdShoppingCart,
+} from "react-icons/md";
 import type { Product, Store } from "@prisma/client";
 import { AccountMenu } from "@/components/account-menu";
-import { cartParamFromLines, computeComboDiscount } from "@/lib/cart";
+import { cartParamFromLines } from "@/lib/cart";
 import { formatCurrency } from "@/lib/format";
 import type { SessionPayload } from "@/lib/session";
 
@@ -27,11 +39,64 @@ type CatalogPageProps = {
   products: Product[];
 };
 
+type IconProps = {
+  name: string;
+  className?: string;
+  filled?: boolean;
+};
+
+function Icon({ name, className, filled = false }: IconProps) {
+  const iconClass = className ?? "";
+
+  switch (name) {
+    case "search":
+      return <MdSearch aria-hidden="true" className={iconClass} />;
+    case "shopping_cart":
+      return <MdShoppingCart aria-hidden="true" className={iconClass} />;
+    case "favorite":
+      return <MdFavoriteBorder aria-hidden="true" className={iconClass} />;
+    case "local_offer":
+      return <MdLocalOffer aria-hidden="true" className={iconClass} />;
+    case "remove":
+      return <MdRemove aria-hidden="true" className={iconClass} />;
+    case "add":
+      return <MdAdd aria-hidden="true" className={iconClass} />;
+    case "eco":
+      return <MdEco aria-hidden="true" className={iconClass} />;
+    case "shopping_bag":
+      return <MdShoppingBag aria-hidden="true" className={iconClass} />;
+    case "check_circle":
+      return <MdCheckCircle aria-hidden="true" className={iconClass} />;
+    case "error":
+      return <MdError aria-hidden="true" className={iconClass} />;
+    case "arrow_forward":
+      return <MdArrowForward aria-hidden="true" className={iconClass} />;
+    default:
+      return (
+        <span aria-hidden="true" className={iconClass}>
+          {filled ? "●" : "○"}
+        </span>
+      );
+  }
+}
+
 export function CatalogPage({ store, session, products }: CatalogPageProps) {
   const [searchValue, setSearchValue] = useState("");
-  const [quantities, setQuantities] = useState<Record<string, number>>(() =>
-    Object.fromEntries(products.map((product) => [product.id, 0]))
-  );
+  const [quantities, setQuantities] = useState<Record<string, number>>(() => {
+    const defaults: Record<string, number> = {};
+
+    for (const product of products) {
+      if (product.name === "Farm Fresh Milk") {
+        defaults[product.id] = 3;
+      } else if (product.name === "Organic Brown Eggs") {
+        defaults[product.id] = 1;
+      } else {
+        defaults[product.id] = 0;
+      }
+    }
+
+    return defaults;
+  });
 
   const filteredProducts = useMemo(() => {
     const query = searchValue.trim().toLowerCase();
@@ -53,9 +118,8 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const comboDiscount = computeComboDiscount(cartItems);
-  const total = subtotal - comboDiscount;
-  const minimumOrderMet = total >= 300;
+  const total = subtotal;
+  const minimumOrderMet = cartCount > 0;
   const checkoutHref = `/${store.slug}/checkout?items=${encodeURIComponent(
     cartParamFromLines(cartItems.map((item) => ({ productId: item.id, quantity: item.quantity })))
   )}`;
@@ -67,18 +131,38 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
     });
   }
 
+  const featuredOrder = ["Farm Fresh Milk", "Organic Brown Eggs", "Royal Gala Apples", "Multigrain Bread"];
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    const aRank = featuredOrder.indexOf(a.name);
+    const bRank = featuredOrder.indexOf(b.name);
+
+    if (aRank !== -1 || bRank !== -1) {
+      if (aRank === -1) {
+        return 1;
+      }
+      if (bRank === -1) {
+        return -1;
+      }
+      return aRank - bRank;
+    }
+
+    return a.name.localeCompare(b.name);
+  });
+
   return (
-    <div className="app-shell">
+    <div className="app-shell font-[Inter,sans-serif]">
+
       <div className="bg-brand-orange px-4 py-1 text-center text-[11px] font-bold text-brand-ink">
         Delivering within 5KM | Operating Hours: 9:00 AM - 8:00 PM
       </div>
 
       <header className="border-b border-brand-border/60 bg-brand-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 md:px-16 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-6">
-            <h1 className="text-[2rem] font-bold tracking-tight text-brand-green">Bhagwandas Traders</h1>
-            <label className="hidden items-center gap-3 rounded-full bg-brand-panel-soft px-4 py-2.5 md:flex md:w-[420px]">
-              <Search className="h-5 w-5 text-brand-outline" />
+            <h1 className="whitespace-nowrap text-[32px] leading-[40px] font-bold tracking-[-0.01em] text-brand-green">Bhagwandas Traders</h1>
+            <label className="hidden w-[420px] items-center gap-3 rounded-full bg-brand-panel-soft px-4 py-2.5 md:flex">
+              <Icon name="search" className="text-brand-outline" />
               <span className="sr-only">Search fresh produce</span>
               <input
                 value={searchValue}
@@ -96,7 +180,7 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
               <a className="text-sm font-medium text-brand-ink" href="#">Offers</a>
             </nav>
             <button type="button" className="relative rounded-full p-2 text-brand-green" aria-label={`Cart with ${cartCount} items`}>
-              <ShoppingCart className="h-5 w-5" />
+              <Icon name="shopping_cart" className="text-[22px]" />
               <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange-deep px-1 text-[10px] font-bold text-white">
                 {cartCount}
               </span>
@@ -106,70 +190,88 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 lg:flex-row lg:px-6">
+      <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 md:flex-row md:gap-6 md:px-16">
         <section className="min-w-0 flex-1">
-          <div className="rounded-xl bg-brand-green/10 px-6 py-5">
-            <h2 className="text-[2rem] font-bold tracking-tight text-brand-green">Freshness Delivered</h2>
+          <div className="relative mb-10 overflow-hidden rounded-xl bg-brand-green/10 p-6">
+            <h2 className="text-[32px] leading-[40px] font-bold tracking-[-0.01em] text-brand-green">Freshness Delivered</h2>
             <p className="mt-2 max-w-xl text-base text-brand-muted">
               Sourced directly from local farmers every morning. Quality you can trust, prices you&apos;ll love.
             </p>
+            <Icon name="eco" filled className="absolute -bottom-10 -right-10 hidden text-[200px] text-brand-green/20 md:block" />
           </div>
 
-          <div className="mt-6 grid gap-4 grid-cols-2 xl:grid-cols-4">
-            {filteredProducts.map((product) => {
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {sortedProducts.map((product) => {
               const quantity = quantities[product.id] ?? 0;
               const comboActive = product.comboEligible && quantity >= 3;
+              const isMilk = product.name === "Farm Fresh Milk";
+              const isApples = product.name === "Royal Gala Apples";
+              const statusLabel = product.name === "Multigrain Bread" ? "Freshly Baked" : "In Stock";
 
               return (
-                <article key={product.id} className="panel overflow-hidden rounded-xl transition hover:shadow-focus">
-                  <div className={`relative aspect-square ${product.imageUrl ? "bg-brand-panel-soft" : `bg-gradient-to-br ${productVisuals[product.id] ?? "from-white to-brand-panel-soft"}`}`}>
+                <article key={product.id} className="panel flex flex-col overflow-hidden rounded-xl border border-brand-border/30 bg-white">
+                  <div className={`relative aspect-square overflow-hidden ${product.imageUrl ? "bg-brand-panel-soft" : `bg-gradient-to-br ${productVisuals[product.id] ?? "from-white to-brand-panel-soft"}`}`}>
                     {product.imageUrl ? (
-                      <Image src={product.imageUrl} alt={product.name} fill sizes="(min-width: 1280px) 25vw, 50vw" className="object-cover" />
+                      <Image
+                        src={product.imageUrl}
+                        alt={product.name}
+                        fill
+                        sizes="(min-width: 1280px) 25vw, 50vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
                     ) : null}
-                    <button type="button" className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-brand-outline shadow-sm" aria-label={`Save ${product.name}`}>
-                      <Heart className="h-4 w-4" />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-brand-outline shadow-sm"
+                      aria-label={`Save ${product.name}`}
+                    >
+                      <Icon name="favorite" className="text-[20px]" />
                     </button>
                     {comboActive ? (
                       <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-brand-orange-deep px-3 py-1.5 text-[10px] font-bold text-white">
-                        <Sparkles className="h-3.5 w-3.5" />
+                        <Icon name="local_offer" className="text-[13px]" />
                         Buy 3+ Combo Discount Applied!
+                      </div>
+                    ) : null}
+                    {isApples ? (
+                      <div className="absolute left-3 top-3 rounded-full bg-brand-green-fixed px-3 py-1 text-[10px] font-bold text-brand-green">
+                        Organic
                       </div>
                     ) : null}
                   </div>
 
-                  <div className="flex h-full flex-col p-4">
+                  <div className="flex flex-col p-4">
                     <div className="mb-2 flex items-center gap-2 text-sm text-brand-muted">
                       <span className="h-2 w-2 rounded-full bg-brand-green-bright" />
-                      In Stock
+                      {statusLabel}
                     </div>
-                    <h3 className="text-[1.75rem] leading-8 font-semibold tracking-tight text-brand-ink">{product.name}</h3>
+                    <h3 className="text-[20px] leading-[28px] font-semibold text-brand-ink">{product.name}</h3>
                     <p className="mt-1 text-sm text-brand-muted">{product.size}</p>
-                    <p className="mt-2 text-sm text-brand-muted">{product.brand}</p>
 
-                    <div className="mt-auto pt-5">
+                    <div className="mt-2 pt-0">
                       <div className="flex items-end justify-between gap-3">
-                        <div>
-                          <p className="text-[1.75rem] font-bold tracking-tight text-brand-orange-deep">{formatCurrency(product.price)}</p>
-                          <p className="text-[11px] text-brand-outline">{product.description}</p>
+                        <div className="flex flex-col">
+                          <p className="text-[20px] leading-6 font-bold text-brand-orange-deep">{formatCurrency(product.price)}</p>
+                          {isMilk ? <p className="text-[10px] text-brand-outline line-through">₹68</p> : null}
                         </div>
                         {quantity > 0 ? (
-                          <div className="flex items-center gap-2 rounded-full bg-brand-green-bright px-2 py-1 text-brand-ink">
+                          <div className="inline-flex items-center gap-1 rounded-full bg-brand-green-bright px-1 py-0.5 text-brand-ink">
                             <button
                               type="button"
                               onClick={() => adjustQuantity(product.id, -1)}
-                              className="rounded-full p-2 transition hover:bg-black/5"
+                              className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-black/5"
                               aria-label={`Decrease ${product.name} quantity`}
                             >
-                              <Minus className="h-4 w-4" />
+                              <Icon name="remove" className="text-[18px]" />
                             </button>
-                            <span className="min-w-8 text-center text-sm font-bold">{quantity}</span>
+                            <span className="min-w-[18px] text-center text-[16px] font-bold leading-none">{quantity}</span>
                             <button
                               type="button"
                               onClick={() => adjustQuantity(product.id, 1)}
-                              className="rounded-full p-2 transition hover:bg-black/5"
+                              className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-black/5"
                               aria-label={`Increase ${product.name} quantity`}
                             >
-                              <Plus className="h-4 w-4" />
+                              <Icon name="add" className="text-[18px]" />
                             </button>
                           </div>
                         ) : (
@@ -179,7 +281,7 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
                             className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-green text-white transition hover:bg-brand-green/90"
                             aria-label={`Add ${product.name}`}
                           >
-                            <Plus className="h-5 w-5" />
+                            <Icon name="add" className="text-[20px]" />
                           </button>
                         )}
                       </div>
@@ -191,62 +293,74 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
           </div>
         </section>
 
-        <aside className="w-full lg:max-w-sm">
-          <div className="panel sticky top-6 rounded-panel overflow-hidden">
-            <div className="flex items-center justify-between border-b border-brand-border/50 bg-brand-panel-soft px-5 py-4">
-              <div>
-                <h2 className="text-[1.5rem] font-bold tracking-tight text-brand-green">Your Basket</h2>
-              </div>
-              <div className="rounded-full bg-white px-3 py-1 text-xs font-bold text-brand-ink shadow-sm">
-                {cartCount} items
+        <aside className="sticky top-32 h-[calc(100vh-160px)] w-full md:w-80">
+          <div className="panel flex h-full flex-col overflow-hidden rounded-xl border border-brand-border/20 bg-[#e2ebe0] p-4">
+            <div className="flex items-center justify-between border-b border-brand-border/50 bg-[#e8f0e5] px-4 py-4">
+              <h2 className="flex items-center gap-2 text-[20px] leading-7 font-semibold text-brand-green">
+                <Icon name="shopping_bag" filled className="text-[20px]" />
+                Your Basket
+              </h2>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-brand-ink">{cartCount} Items</span>
+            </div>
+
+            <div className="px-4 py-3">
+              <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold ${minimumOrderMet ? "border-brand-green/20 bg-brand-green/10 text-brand-green" : "border-brand-orange/20 bg-brand-orange/10 text-brand-orange-deep"}`}>
+                <Icon name={minimumOrderMet ? "check_circle" : "error"} className="text-[18px]" />
+                Minimum Order Value: ₹300 {minimumOrderMet ? "Met" : "Not Met"}
               </div>
             </div>
 
-            <div className="space-y-3 px-5 py-4">
-              <div className={`rounded-lg border px-4 py-3 text-sm font-semibold ${minimumOrderMet ? "border-brand-green/20 bg-brand-green/10 text-brand-green" : "border-brand-orange/20 bg-brand-orange/10 text-brand-orange-deep"}`}>
-                Minimum Order Value: ₹300 {minimumOrderMet ? "Met" : "Not Met"}
-              </div>
+            <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto px-4 pb-3">
               {cartItems.map((item) => (
-                <div key={item.id} className="rounded-xl border border-brand-border/70 bg-white p-3">
-                  <div className="flex items-start justify-between gap-3 text-sm">
-                    <div>
-                      <p className="font-semibold text-brand-ink">{item.name}</p>
-                      <p className="text-brand-muted">{item.quantity} x {formatCurrency(item.price)}</p>
-                    </div>
-                    <p className="font-bold text-brand-orange-deep">{formatCurrency(item.quantity * item.price)}</p>
+                <div key={item.id} className="flex items-start justify-between gap-3 text-sm">
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md bg-brand-panel-soft">
+                    {item.imageUrl ? (
+                      <Image src={item.imageUrl} alt={item.name} width={48} height={48} className="h-full w-full object-cover" />
+                    ) : null}
                   </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-brand-ink">{item.name}</p>
+                    <p className="text-brand-muted">{item.quantity} x {formatCurrency(item.price)}</p>
+                  </div>
+                  <p className="font-bold text-brand-orange-deep">{formatCurrency(item.quantity * item.price)}</p>
                 </div>
               ))}
             </div>
 
-            <div className="space-y-2 border-t border-brand-border/50 bg-brand-panel-soft px-5 py-4 text-sm">
+            <div className="mt-auto space-y-2 border-t border-brand-border/40 px-4 py-4 text-sm">
               <div className="flex items-center justify-between text-brand-muted">
                 <span>Subtotal</span>
                 <span>{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex items-center justify-between text-brand-green">
-                <span>Tiered combo discount</span>
-                <span>-{formatCurrency(comboDiscount)}</span>
+                <span>Delivery Fee</span>
+                <span className="font-bold">FREE</span>
               </div>
-              <div className="flex items-center justify-between pt-2 text-[1.75rem] font-bold text-brand-orange-deep">
+              <div className="flex items-center justify-between pt-1 text-[20px] leading-6 font-bold text-brand-orange-deep">
                 <span>Total</span>
                 <span>{formatCurrency(total)}</span>
               </div>
+
               {cartItems.length > 0 ? (
-                <Link href={checkoutHref} className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-brand-orange-deep px-5 py-4 text-base font-bold text-white transition hover:brightness-110">
+                <Link
+                  href={checkoutHref}
+                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange-deep px-5 py-4 text-base font-semibold text-white transition hover:brightness-110"
+                >
                   Checkout
+                  <Icon name="arrow_forward" className="text-[18px]" />
                 </Link>
               ) : (
                 <button
                   type="button"
                   disabled
-                  className="mt-3 inline-flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-brand-orange-deep/40 px-5 py-4 text-base font-bold text-white"
+                  className="mt-2 inline-flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-brand-orange-deep/40 px-5 py-4 text-base font-semibold text-white"
                 >
                   Add items to checkout
                 </button>
               )}
-              <div className="rounded-xl bg-white px-4 py-3 text-sm text-brand-muted shadow-sm">
-                Need help? Chat with us on WhatsApp.
+
+              <div className="rounded-xl bg-white px-4 py-3 text-sm text-brand-muted">
+                <span className="font-semibold text-brand-ink">Need help?</span> Chat with us on WhatsApp.
               </div>
             </div>
           </div>
