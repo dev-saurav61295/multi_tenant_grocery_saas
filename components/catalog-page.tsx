@@ -86,13 +86,7 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
     const defaults: Record<string, number> = {};
 
     for (const product of products) {
-      if (product.name === "Farm Fresh Milk") {
-        defaults[product.id] = 3;
-      } else if (product.name === "Organic Brown Eggs") {
-        defaults[product.id] = 1;
-      } else {
-        defaults[product.id] = 0;
-      }
+      defaults[product.id] = 0;
     }
 
     return defaults;
