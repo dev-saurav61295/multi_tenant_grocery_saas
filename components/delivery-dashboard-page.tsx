@@ -8,6 +8,7 @@ import type { Prisma, Store } from "@prisma/client";
 import { acceptPickup } from "@/app/actions/orders";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { formatCurrency } from "@/lib/format";
+import { useStoreEvents } from "@/lib/use-store-events";
 import type { Role } from "@/lib/users";
 
 type OrderWithItems = Prisma.OrderGetPayload<{
@@ -24,6 +25,7 @@ type DeliveryDashboardPageProps = {
 
 export function DeliveryDashboardPage({ store, currentRole, userName, orders, completedToday }: DeliveryDashboardPageProps) {
   const router = useRouter();
+  useStoreEvents(store.id);
   const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
   const [isPending, startTransition] = useTransition();
 

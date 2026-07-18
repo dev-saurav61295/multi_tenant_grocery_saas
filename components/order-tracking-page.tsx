@@ -5,6 +5,7 @@ import { AccountMenu } from "@/components/account-menu";
 import { formatCurrency } from "@/lib/format";
 import { orderStatusLabels } from "@/lib/order-status";
 import type { SessionPayload } from "@/lib/session";
+import { StoreEventsRefresher } from "@/lib/use-store-events";
 import type { Store } from "@prisma/client";
 
 type OrderWithItems = Prisma.OrderGetPayload<{
@@ -23,6 +24,7 @@ export function OrderTrackingPage({ store, order, session }: OrderTrackingPagePr
 
   return (
     <div className="app-shell pb-12">
+      <StoreEventsRefresher storeId={store.id} />
       <div className="bg-brand-orange px-4 py-1 text-center text-[11px] font-bold text-brand-ink">
         Delivering within 5KM | Operating Hours: 9:00 AM - 8:00 PM
       </div>

@@ -8,6 +8,7 @@ import type { Prisma, Store } from "@prisma/client";
 import { dispatchOrder } from "@/app/actions/orders";
 import { toggleBreak } from "@/app/actions/staff";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { useStoreEvents } from "@/lib/use-store-events";
 import type { Role } from "@/lib/users";
 
 type OrderWithItems = Prisma.OrderGetPayload<{
@@ -31,6 +32,7 @@ function timeAgo(date: Date, now: number) {
 
 export function StaffPackingPage({ store, currentRole, userName, orders, onBreak }: StaffPackingPageProps) {
   const router = useRouter();
+  useStoreEvents(store.id);
   const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
   const [checkedItems, setCheckedItems] = useState<Record<string, string[]>>({});
   const [flaggedItems, setFlaggedItems] = useState<Record<string, string[]>>({});

@@ -8,6 +8,7 @@ import { savePrivateUpload } from "@/lib/storage";
 import { parseCartParam } from "@/lib/cart";
 import { priceCart } from "@/lib/pricing";
 import { sendMail } from "@/lib/mail";
+import { publishStoreEvent } from "@/lib/realtime";
 import { orderConfirmationEmail } from "@/lib/emails/order-confirmation-email";
 import { orderOutForDeliveryEmail } from "@/lib/emails/order-out-for-delivery-email";
 import { orderDeliveredEmail } from "@/lib/emails/order-delivered-email";
@@ -161,6 +162,8 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
     console.error("Failed to send order confirmation email", error);
   }
 
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId: createdOrderId } });
+
   redirect(`/${session.storeSlug}/order/${displayId}`);
 }
 
@@ -171,6 +174,8 @@ export async function verifyOrder(orderId: string) {
     where: { id: orderId, storeId: session.storeId },
     data: { status: "packing", verifiedAt: new Date() },
   });
+
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId } });
 
   revalidatePath(`/${session.storeSlug}/admin/orders`);
   revalidatePath(`/${session.storeSlug}/staff/packing`);
@@ -184,6 +189,8 @@ export async function assignRider(orderId: string, riderId: string) {
     data: { riderId },
   });
 
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId } });
+
   revalidatePath(`/${session.storeSlug}/admin/orders`);
   revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
 }
@@ -195,6 +202,8 @@ export async function acceptPickup(orderId: string) {
     where: { id: orderId, storeId: session.storeId, riderId: session.id },
     data: { acceptedAt: new Date() },
   });
+
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId } });
 
   revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
 }
@@ -229,6 +238,8 @@ export async function dispatchOrder(orderId: string) {
     type: "order_out_for_delivery",
   });
 
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId } });
+
   revalidatePath(`/${session.storeSlug}/staff/packing`);
   revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
 }
@@ -260,6 +271,8 @@ export async function completeDelivery(orderId: string) {
     fromName: updated.store.name,
     type: "order_delivered",
   });
+
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId } });
 
   revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
 }
