@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CreditCard, ImageUp, Sparkles, X } from "lucide-react";
+import { CreditCard, ImageUp, Sparkles, Truck, X } from "lucide-react";
 import { useActionState, useRef, useState } from "react";
 import type { Store } from "@prisma/client";
 import { AccountMenu } from "@/components/account-menu";
@@ -21,6 +21,7 @@ type CheckoutPageProps = {
 export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }: CheckoutPageProps) {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"upi" | "cod">("upi");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [state, formAction, pending] = useActionState(placeOrder, undefined);
 
@@ -57,6 +58,7 @@ export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }
 
       <form action={formAction}>
         <input type="hidden" name="items" value={itemsParam} />
+        <input type="hidden" name="paymentMethod" value={paymentMethod} />
 
         <div className="px-4 py-6 lg:px-6 lg:py-8">
           <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -135,82 +137,125 @@ export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }
             </section>
 
             <section className="rounded-xl bg-white p-6 shadow-focus lg:p-8">
-              <div className="text-center">
-                <h2 className="text-[1.8rem] font-bold text-brand-ink">Scan to Pay</h2>
-                <p className="mt-2 text-sm text-brand-muted">Complete payment via any UPI app</p>
-              </div>
-
-              <div className="mt-6 grid place-items-center rounded-xl bg-brand-panel-soft p-6">
-                <div className="grid h-72 w-full max-w-xs place-items-center rounded-xl bg-brand-panel-alt">
-                  {qrCodeDataUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={qrCodeDataUrl} alt="Scan to pay via UPI" className="h-52 w-52 rounded-2xl bg-white p-4 shadow-card" />
-                  ) : (
-                    <div className="grid h-52 w-52 place-items-center rounded-2xl bg-white p-4 text-center text-sm text-brand-muted shadow-card">
-                      QR unavailable — pay via UPI ID below.
-                    </div>
-                  )}
-                  <div className="text-center">
-                    <p className="inline-flex rounded-full bg-brand-orange-deep px-3 py-1 text-[11px] font-bold text-white">
-                      {store.upiId ?? "UPI not configured"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <label
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  setIsDragging(true);
-                }}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  setIsDragging(false);
-                  const dropped = event.dataTransfer.files?.[0];
-                  if (dropped) {
-                    setSelectedFile(dropped);
-                  }
-                }}
-                className={`mt-6 flex cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${
-                  isDragging ? "border-brand-green bg-brand-green/10" : "border-brand-orange bg-brand-orange/5 hover:bg-brand-orange/10"
-                }`}
-              >
-                <div className="rounded-full bg-brand-orange p-4 text-white shadow-card">
-                  <ImageUp className="h-7 w-7" />
-                </div>
-                <div>
-                  <p className="text-lg font-semibold text-brand-ink">Upload Payment Screenshot</p>
-                  <p className="mt-1 text-sm text-brand-muted">Drag and drop, or click to browse. JPG, PNG or PDF accepted for manual verification.</p>
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  name="paymentProof"
-                  accept="image/*,.pdf"
-                  className="sr-only"
-                  onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
-                />
-              </label>
-
-              {proofFile ? (
-                <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-brand-border bg-white px-4 py-3 text-sm">
-                  <span className="truncate text-brand-ink">{proofFile.name}</span>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-brand-ink">Select Payment Method</h2>
+                <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-brand-panel-soft p-1">
                   <button
                     type="button"
-                    onClick={() => setSelectedFile(null)}
-                    aria-label="Remove selected file"
-                    className="rounded-full p-1 text-brand-muted hover:bg-brand-panel-soft hover:text-brand-ink"
+                    onClick={() => setPaymentMethod("upi")}
+                    className={`rounded-md py-2.5 text-sm font-semibold transition ${paymentMethod === "upi" ? "bg-white text-brand-green shadow-sm" : "text-brand-muted hover:text-brand-ink"}`}
                   >
-                    <X className="h-4 w-4" />
+                    UPI Transfer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("cod")}
+                    className={`rounded-md py-2.5 text-sm font-semibold transition ${paymentMethod === "cod" ? "bg-white text-brand-green shadow-sm" : "text-brand-muted hover:text-brand-ink"}`}
+                  >
+                    Pay on Delivery
                   </button>
                 </div>
+              </div>
+
+              {paymentMethod === "upi" ? (
+                <>
+                  <div className="text-center">
+                    <h2 className="text-[1.8rem] font-bold text-brand-ink">Scan to Pay</h2>
+                    <p className="mt-2 text-sm text-brand-muted">Complete payment via any UPI app</p>
+                  </div>
+
+                  <div className="mt-6 grid place-items-center rounded-xl bg-brand-panel-soft p-6">
+                    <div className="grid h-72 w-full max-w-xs place-items-center rounded-xl bg-brand-panel-alt">
+                      {qrCodeDataUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={qrCodeDataUrl} alt="Scan to pay via UPI" className="h-52 w-52 rounded-2xl bg-white p-4 shadow-card" />
+                      ) : (
+                        <div className="grid h-52 w-52 place-items-center rounded-2xl bg-white p-4 text-center text-sm text-brand-muted shadow-card">
+                          QR unavailable — pay via UPI ID below.
+                        </div>
+                      )}
+                      <div className="text-center">
+                        <p className="inline-flex rounded-full bg-brand-orange-deep px-3 py-1 text-[11px] font-bold text-white">
+                          {store.upiId ?? "UPI not configured"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <label
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      setIsDragging(false);
+                      const dropped = event.dataTransfer.files?.[0];
+                      if (dropped) {
+                        setSelectedFile(dropped);
+                      }
+                    }}
+                    className={`mt-6 flex cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${
+                      isDragging ? "border-brand-green bg-brand-green/10" : "border-brand-orange bg-brand-orange/5 hover:bg-brand-orange/10"
+                    }`}
+                  >
+                    <div className="rounded-full bg-brand-orange p-4 text-white shadow-card">
+                      <ImageUp className="h-7 w-7" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-semibold text-brand-ink">Upload Payment Screenshot</p>
+                      <p className="mt-1 text-sm text-brand-muted">Drag and drop, or click to browse. JPG, PNG or PDF accepted for manual verification.</p>
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      name="paymentProof"
+                      accept="image/*,.pdf"
+                      className="sr-only"
+                      onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
+                    />
+                  </label>
+
+                  {proofFile ? (
+                    <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-brand-border bg-white px-4 py-3 text-sm">
+                      <span className="truncate text-brand-ink">{proofFile.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFile(null)}
+                        aria-label="Remove selected file"
+                        className="rounded-full p-1 text-brand-muted hover:bg-brand-panel-soft hover:text-brand-ink"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-4 rounded-xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-muted">
+                      No screenshot uploaded yet
+                    </div>
+                  )}
+                  <p className="mt-4 text-center text-sm italic text-brand-muted">Verification usually takes 5-10 minutes.</p>
+                </>
               ) : (
-                <div className="mt-4 rounded-xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-muted">
-                  No screenshot uploaded yet
+                <div className="rounded-xl border border-brand-green/20 bg-brand-green/5 p-6 text-center space-y-4">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-green/10 text-brand-green">
+                    <Truck className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-brand-ink">Pay on Delivery Selected</h3>
+                    <p className="mt-2 text-sm text-brand-muted">
+                      You will pay the delivery rider directly via cash or UPI when your order is delivered to your address.
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-white p-4 border border-brand-border/60 text-left text-sm space-y-2">
+                    <p className="font-semibold text-brand-ink">Please ensure:</p>
+                    <ul className="list-disc list-inside text-brand-muted space-y-1">
+                      <li>You are available at the provided delivery address.</li>
+                      <li>Your contact number is reachable for rider coordination.</li>
+                    </ul>
+                  </div>
                 </div>
               )}
-              <p className="mt-4 text-center text-sm italic text-brand-muted">Verification usually takes 5-10 minutes.</p>
             </section>
           </div>
 
@@ -224,7 +269,9 @@ export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }
           <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-3 md:flex-row md:items-center md:justify-between lg:px-6">
             <div className="hidden md:block">
               <p className="text-sm font-bold text-brand-ink">Confirming order for: {formatCurrency(cart.total)}</p>
-              <p className="text-sm text-brand-muted">Payment verification will start immediately.</p>
+              <p className="text-sm text-brand-muted">
+                {paymentMethod === "cod" ? "Order goes directly to packing team once verified." : "Payment verification will start immediately."}
+              </p>
             </div>
             <button
               type="submit"
@@ -232,7 +279,7 @@ export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }
               className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-5 py-4 text-base font-bold text-white transition hover:brightness-110 disabled:opacity-60 md:w-auto md:min-w-[320px]"
             >
               <CreditCard className="h-5 w-5" />
-              {pending ? "Submitting..." : "Submit Order for Verification"}
+              {pending ? "Submitting..." : paymentMethod === "cod" ? "Place Pay on Delivery Order" : "Submit Order for Verification"}
             </button>
           </div>
         </footer>

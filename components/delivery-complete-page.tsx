@@ -123,25 +123,32 @@ export function DeliveryCompletePage({ store, order, currentRole, userName }: De
                 </div>
                 <div className="text-right text-sm text-brand-muted">
                   <p>Payment Method</p>
-                  <p className="font-bold text-brand-ink">Digital QR Transfer</p>
+                  <p className="font-bold text-brand-ink">{order.paymentMethod === "cod" ? "Pay on Delivery" : "Digital QR Transfer"}</p>
                 </div>
               </div>
 
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-muted">Verified Payment Proof</p>
-                <div className="mt-4 overflow-hidden rounded-xl border-2 border-brand-green-bright bg-brand-panel-alt p-3">
-                  {order.paymentProofUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={`/api/files/${store.id}/${order.paymentProofUrl}`}
-                      alt="Payment proof screenshot"
-                      className="aspect-[4/3] w-full rounded-xl object-cover"
-                    />
-                  ) : (
-                    <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-brand-panel-soft to-brand-green-fixed/20" />
-                  )}
+              {order.paymentMethod !== "cod" ? (
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-muted">Verified Payment Proof</p>
+                  <div className="mt-4 overflow-hidden rounded-xl border-2 border-brand-green-bright bg-brand-panel-alt p-3">
+                    {order.paymentProofUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={`/api/files/${store.id}/${order.paymentProofUrl}`}
+                        alt="Payment proof screenshot"
+                        className="aspect-[4/3] w-full rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-brand-panel-soft to-brand-green-fixed/20" />
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="rounded-xl border border-brand-orange/20 bg-brand-orange/5 p-4 text-sm text-brand-muted">
+                  <p className="font-bold text-brand-orange-deep">Pay on Delivery Order</p>
+                  <p className="mt-1">Please collect <span className="font-bold text-brand-ink">{formatCurrency(order.total)}</span> from the customer in Cash or via UPI upon delivery.</p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-8 bg-brand-panel-soft/40 p-6 lg:p-8">

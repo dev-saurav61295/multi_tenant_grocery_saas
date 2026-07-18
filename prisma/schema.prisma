@@ -99,6 +99,7 @@ model Order {
   priority       String      @default("Standard")
   screenshotName String?
   paymentProofUrl String?
+  paymentMethod  String      @default("upi")
   riderId        String?
   rider          User?       @relation("OrderRider", fields: [riderId], references: [id])
   acceptedAt     DateTime?

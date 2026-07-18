@@ -10,7 +10,16 @@ import { findUserByCredentials, findUserByEmail, findUserByUsername, registerCus
 import { buildAppUrl, sendMail } from "@/lib/mail";
 import { registrationWelcomeEmail } from "@/lib/emails/registration-welcome-email";
 
-export type AuthState = { error: string } | undefined;
+export type AuthState = {
+  error?: string;
+  fieldErrors?: {
+    name?: string;
+    username?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  };
+} | undefined;
 
 export async function login(storeId: string, _state: AuthState, formData: FormData): Promise<AuthState> {
   const username = String(formData.get("username") ?? "").trim();
@@ -38,21 +47,75 @@ export async function register(storeId: string, _state: AuthState, formData: For
   const username = String(formData.get("username") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
-  if (!name || !username || !email || !password) {
-    return { error: "Please fill in every field." };
+  const fieldErrors: NonNullable<AuthState>["fieldErrors"] = {};
+
+  if (!name) {
+    fieldErrors.name = "Full Name is required.";
+  } else if (name.length < 2) {
+    fieldErrors.name = "Full Name must be at least 2 characters.";
+  } else if (!/^[a-zA-Z\s'-]+$/.test(name)) {
+    fieldErrors.name = "Full Name can only contain letters, spaces, hyphens, and apostrophes.";
   }
 
-  if (!email.includes("@")) {
-    return { error: "Enter a valid email address." };
+  if (!username) {
+    fieldErrors.username = "Username is required.";
+  } else if (username.length < 3) {
+    fieldErrors.username = "Username must be at least 3 characters.";
+  } else if (!/^[a-zA-Z0-9_.]+$/.test(username)) {
+    fieldErrors.username = "Username can only contain alphanumeric characters, underscores, and periods.";
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email) {
+    fieldErrors.email = "Email address is required.";
+  } else if (!emailRegex.test(email)) {
+    fieldErrors.email = "Please enter a valid email address.";
+  }
+
+  // Password Policy: Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+  if (!password) {
+    fieldErrors.password = "Password is required.";
+  } else {
+    const passwordChecks = [];
+    if (password.length < 8) {
+      passwordChecks.push("at least 8 characters");
+    }
+    if (!/[A-Z]/.test(password)) {
+      passwordChecks.push("one uppercase letter");
+    }
+    if (!/[a-z]/.test(password)) {
+      passwordChecks.push("one lowercase letter");
+    }
+    if (!/\d/.test(password)) {
+      passwordChecks.push("one number");
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      passwordChecks.push("one special character");
+    }
+
+    if (passwordChecks.length > 0) {
+      fieldErrors.password = "Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character.";
+    }
+  }
+
+  if (!confirmPassword) {
+    fieldErrors.confirmPassword = "Confirm Password is required.";
+  } else if (password !== confirmPassword) {
+    fieldErrors.confirmPassword = "Passwords do not match.";
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return { fieldErrors };
   }
 
   if (await findUserByUsername(storeId, username)) {
-    return { error: "That username is already taken." };
+    return { fieldErrors: { username: "That username is already taken." } };
   }
 
   if (await findUserByEmail(storeId, email)) {
-    return { error: "That email is already in use." };
+    return { fieldErrors: { email: "That email is already in use." } };
   }
 
   const emailVerifyToken = randomBytes(32).toString("hex");

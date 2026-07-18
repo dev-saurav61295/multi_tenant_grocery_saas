@@ -185,7 +185,7 @@ export function AdminOrdersPage({ store, currentRole, userName, orders, riders }
 
             <div className="mt-5 space-y-3 text-sm">
               <div className="flex items-center justify-between border-b border-brand-border/50 pb-2"><span className="text-brand-muted">Declared Value</span><span className="font-bold text-brand-ink">{formatCurrency(selectedOrder.total)}</span></div>
-              <div className="flex items-center justify-between border-b border-brand-border/50 pb-2"><span className="text-brand-muted">Transfer Mode</span><span className="font-bold text-brand-ink">GPay (UPI)</span></div>
+              <div className="flex items-center justify-between border-b border-brand-border/50 pb-2"><span className="text-brand-muted">Transfer Mode</span><span className="font-bold text-brand-ink">{selectedOrder.paymentMethod === "cod" ? "Pay on Delivery" : "GPay (UPI)"}</span></div>
               <div className="flex items-center justify-between border-b border-brand-border/50 pb-2"><span className="text-brand-muted">Date Submitted</span><span className="font-bold text-brand-ink">{selectedOrder.createdAt.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</span></div>
               <div className="flex items-center justify-between border-b border-brand-border/50 pb-2"><span className="text-brand-muted">Address</span><span className="font-bold text-brand-ink text-right">{selectedOrder.address}</span></div>
             </div>
@@ -219,7 +219,9 @@ export function AdminOrdersPage({ store, currentRole, userName, orders, riders }
               className="mt-6 inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-5 py-4 text-base font-bold text-white transition hover:brightness-110 disabled:opacity-50"
             >
               <CheckCircle2 className="h-5 w-5" />
-              {selectedOrder.status === "pending_verification" ? "Approve & Verify Payment" : "Already Verified"}
+              {selectedOrder.status === "pending_verification" 
+                ? (selectedOrder.paymentMethod === "cod" ? "Approve & Confirm Order" : "Approve & Verify Payment")
+                : "Already Verified"}
             </button>
             <button type="button" className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-brand-panel-soft px-5 py-4 text-sm font-bold text-red-600">
               Flag as Invalid / Suspicious

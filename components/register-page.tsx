@@ -12,6 +12,9 @@ type RegisterPageProps = {
 
 export function RegisterPage({ store }: RegisterPageProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const boundRegister = register.bind(null, store.id);
   const [state, formAction, pending] = useActionState(boundRegister, undefined);
 
@@ -40,7 +43,7 @@ export function RegisterPage({ store }: RegisterPageProps) {
           <form action={formAction} className="space-y-5">
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-brand-muted">Full Name</span>
-              <div className="flex items-center gap-3 rounded-lg border border-brand-border/70 bg-white px-4 py-3 shadow-sm">
+              <div className={`flex items-center gap-3 rounded-lg border bg-white px-4 py-3 shadow-sm ${state?.fieldErrors?.name ? 'border-red-500 ring-1 ring-red-500' : 'border-brand-border/70'}`}>
                 <UserRound className="h-5 w-5 text-brand-outline" />
                 <input
                   type="text"
@@ -50,12 +53,15 @@ export function RegisterPage({ store }: RegisterPageProps) {
                   required
                 />
               </div>
+              {state?.fieldErrors?.name ? (
+                <p className="mt-1.5 text-xs text-red-500 font-semibold">{state.fieldErrors.name}</p>
+              ) : null}
             </label>
 
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-brand-muted">Username</span>
-              <div className="flex items-center gap-3 rounded-lg border border-brand-border/70 bg-white px-4 py-3 shadow-sm">
-                <Mail className="h-5 w-5 text-brand-outline" />
+              <div className={`flex items-center gap-3 rounded-lg border bg-white px-4 py-3 shadow-sm ${state?.fieldErrors?.username ? 'border-red-500 ring-1 ring-red-500' : 'border-brand-border/70'}`}>
+                <UserRound className="h-5 w-5 text-brand-outline" />
                 <input
                   type="text"
                   name="username"
@@ -64,11 +70,14 @@ export function RegisterPage({ store }: RegisterPageProps) {
                   required
                 />
               </div>
+              {state?.fieldErrors?.username ? (
+                <p className="mt-1.5 text-xs text-red-500 font-semibold">{state.fieldErrors.username}</p>
+              ) : null}
             </label>
 
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-brand-muted">Email</span>
-              <div className="flex items-center gap-3 rounded-lg border border-brand-border/70 bg-white px-4 py-3 shadow-sm">
+              <div className={`flex items-center gap-3 rounded-lg border bg-white px-4 py-3 shadow-sm ${state?.fieldErrors?.email ? 'border-red-500 ring-1 ring-red-500' : 'border-brand-border/70'}`}>
                 <Mail className="h-5 w-5 text-brand-outline" />
                 <input
                   type="email"
@@ -78,15 +87,20 @@ export function RegisterPage({ store }: RegisterPageProps) {
                   required
                 />
               </div>
+              {state?.fieldErrors?.email ? (
+                <p className="mt-1.5 text-xs text-red-500 font-semibold">{state.fieldErrors.email}</p>
+              ) : null}
             </label>
 
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-brand-muted">Password</span>
-              <div className="flex items-center gap-3 rounded-lg border border-brand-border/70 bg-white px-4 py-3 shadow-sm">
+              <div className={`flex items-center gap-3 rounded-lg border bg-white px-4 py-3 shadow-sm ${state?.fieldErrors?.password ? 'border-red-500 ring-1 ring-red-500' : 'border-brand-border/70'}`}>
                 <LockKeyhole className="h-5 w-5 text-brand-outline" />
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-transparent outline-none placeholder:text-brand-outline"
                   placeholder="Create a password"
                   required
@@ -95,6 +109,65 @@ export function RegisterPage({ store }: RegisterPageProps) {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+              {state?.fieldErrors?.password ? (
+                <p className="mt-1.5 text-xs text-red-500 font-semibold">{state.fieldErrors.password}</p>
+              ) : null}
+
+              {password.length > 0 && (
+                <div className="mt-2.5 rounded-lg border border-brand-border/40 bg-brand-panel-soft p-3 text-xs space-y-1.5">
+                  <p className="font-semibold text-brand-ink mb-1">Password Requirements:</p>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-brand-muted">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 rounded-full ${password.length >= 8 ? 'bg-brand-green-bright' : 'bg-brand-outline'}`} />
+                      <span className={password.length >= 8 ? 'text-brand-green font-bold' : ''}>8+ characters</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 rounded-full ${/[A-Z]/.test(password) ? 'bg-brand-green-bright' : 'bg-brand-outline'}`} />
+                      <span className={/[A-Z]/.test(password) ? 'text-brand-green font-bold' : ''}>One uppercase</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 rounded-full ${/[a-z]/.test(password) ? 'bg-brand-green-bright' : 'bg-brand-outline'}`} />
+                      <span className={/[a-z]/.test(password) ? 'text-brand-green font-bold' : ''}>One lowercase</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 rounded-full ${/\d/.test(password) ? 'bg-brand-green-bright' : 'bg-brand-outline'}`} />
+                      <span className={/\d/.test(password) ? 'text-brand-green font-bold' : ''}>One number</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 col-span-2">
+                      <span className={`h-1.5 w-1.5 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'bg-brand-green-bright' : 'bg-brand-outline'}`} />
+                      <span className={/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'text-brand-green font-bold' : ''}>One special char (e.g. !@#$)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-brand-muted">Confirm Password</span>
+              <div className={`flex items-center gap-3 rounded-lg border bg-white px-4 py-3 shadow-sm ${state?.fieldErrors?.confirmPassword ? 'border-red-500 ring-1 ring-red-500' : 'border-brand-border/70'}`}>
+                <LockKeyhole className="h-5 w-5 text-brand-outline" />
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full bg-transparent outline-none placeholder:text-brand-outline"
+                  placeholder="Confirm your password"
+                  required
+                />
+                <button type="button" onClick={() => setShowConfirmPassword((current) => !current)} className="text-brand-outline">
+                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+              {confirmPassword.length > 0 && password !== confirmPassword && (
+                <p className="mt-1.5 text-xs text-red-500 font-semibold">Passwords do not match.</p>
+              )}
+              {confirmPassword.length > 0 && password === confirmPassword && (
+                <p className="mt-1.5 text-xs text-brand-green font-semibold">Passwords match!</p>
+              )}
+              {state?.fieldErrors?.confirmPassword ? (
+                <p className="mt-1.5 text-xs text-red-500 font-semibold">{state.fieldErrors.confirmPassword}</p>
+              ) : null}
             </label>
 
             {state?.error ? (

@@ -240,7 +240,7 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
                     ) : null}
                   </div>
 
-                  <div className="flex flex-col p-4">
+                  <div className="flex flex-col p-4 flex-1">
                     <div className="mb-2 flex items-center gap-2 text-sm text-brand-muted">
                       <span className="h-2 w-2 rounded-full bg-brand-green-bright" />
                       {statusLabel}
@@ -248,7 +248,7 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
                     <h3 className="text-[20px] leading-[28px] font-semibold text-brand-ink">{product.name}</h3>
                     <p className="mt-1 text-sm text-brand-muted">{product.size}</p>
 
-                    <div className="mt-2 pt-0">
+                    <div className="mt-auto pt-3">
                       <div className="flex items-end justify-between gap-3">
                         <div className="flex flex-col">
                           <p className="text-[20px] leading-6 font-bold text-brand-orange-deep">{formatCurrency(product.price)}</p>

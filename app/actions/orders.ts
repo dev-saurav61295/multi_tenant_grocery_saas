@@ -34,10 +34,15 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
 
   const phone = String(formData.get("phone") ?? "").trim();
   const address = String(formData.get("address") ?? "").trim();
+  const paymentMethod = String(formData.get("paymentMethod") ?? "upi").trim().toLowerCase();
   const paymentProofFile = formData.get("paymentProof");
   const hasPaymentProof = paymentProofFile instanceof File && paymentProofFile.size > 0;
   const screenshotName = hasPaymentProof ? paymentProofFile.name : null;
   const lines = parseCartParam(String(formData.get("items") ?? ""));
+
+  if (paymentMethod === "upi" && !hasPaymentProof) {
+    return { error: "Please upload your payment screenshot for UPI verification." };
+  }
 
   if (!/^[+]?[\d\s-]{10,15}$/.test(phone)) {
     return { error: "Enter a valid phone number." };
@@ -86,8 +91,9 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
           subtotal: priced.subtotal,
           comboDiscount: priced.comboDiscount,
           total: priced.total,
-          screenshotName,
-          paymentProofUrl,
+          screenshotName: paymentMethod === "cod" ? null : screenshotName,
+          paymentProofUrl: paymentMethod === "cod" ? null : paymentProofUrl,
+          paymentMethod,
           displayId: "",
           items: {
             create: priced.lines.map((line) => ({
