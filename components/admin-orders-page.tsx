@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Download, Filter, Search, Truck, X } from "lucide-react";
+import { SlideToConfirm } from "@/components/slide-to-confirm";
 import { useState, useTransition } from "react";
 import type { Prisma, Store } from "@prisma/client";
 import { verifyOrder } from "@/app/actions/orders";
@@ -219,17 +220,32 @@ export function AdminOrdersPage({ store, currentRole, userName, orders, riders }
               </div>
             ) : null}
 
+            {/* Desktop button */}
             <button
               type="button"
               onClick={approveSelectedOrder}
               disabled={isPending || selectedOrder.status !== "pending_verification"}
-              className="mt-6 inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-5 py-4 text-base font-bold text-white transition hover:brightness-110 disabled:opacity-50"
+              className="mt-6 hidden w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-5 py-4 text-base font-bold text-white transition hover:brightness-110 disabled:opacity-50 lg:inline-flex"
             >
               <CheckCircle2 className="h-5 w-5" />
               {selectedOrder.status === "pending_verification" 
                 ? (selectedOrder.paymentMethod === "cod" ? "Approve & Confirm Order" : "Approve & Verify Payment")
                 : "Already Verified"}
             </button>
+            {/* Mobile/Tablet slider */}
+            <div className="mt-6 lg:hidden">
+              <SlideToConfirm
+                label={
+                  selectedOrder.status === "pending_verification"
+                    ? (selectedOrder.paymentMethod === "cod" ? "Slide to Confirm Order" : "Slide to Verify Payment")
+                    : "Already Verified"
+                }
+                onConfirm={approveSelectedOrder}
+                disabled={isPending || selectedOrder.status !== "pending_verification"}
+                pending={isPending}
+                icon={<CheckCircle2 className="h-6 w-6 text-brand-green" />}
+              />
+            </div>
             <button type="button" className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-brand-panel-soft px-5 py-4 text-sm font-bold text-red-600">
               Flag as Invalid / Suspicious
             </button>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, CheckCircle2, Clock3, Coffee, Printer } from "lucide-react";
+import { SlideToConfirm } from "@/components/slide-to-confirm";
 import { useEffect, useState, useTransition } from "react";
 import type { Prisma, Store } from "@prisma/client";
 import { dispatchOrder } from "@/app/actions/orders";
@@ -214,15 +215,26 @@ export function StaffPackingPage({ store, currentRole, userName, orders, onBreak
           </div>
 
           <div className="mt-auto flex items-center gap-4 border-t border-brand-border/50 px-6 py-5">
+            {/* Desktop button */}
             <button
               type="button"
               onClick={markComplete}
               disabled={!allChecked || isPending}
-              className="inline-flex flex-1 items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-lg font-bold text-white transition hover:brightness-110 disabled:opacity-50"
+              className="hidden flex-1 items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-lg font-bold text-white transition hover:brightness-110 disabled:opacity-50 lg:inline-flex"
             >
               <CheckCircle2 className="h-5 w-5" />
               {isPending ? "Dispatching..." : "Mark Packing Complete & Dispatch"}
             </button>
+            {/* Mobile/Tablet slider */}
+            <div className="flex-1 lg:hidden">
+              <SlideToConfirm
+                label={isPending ? "Dispatching..." : "Slide to Dispatch"}
+                onConfirm={markComplete}
+                disabled={!allChecked}
+                pending={isPending}
+                icon={<CheckCircle2 className="h-6 w-6 text-brand-green" />}
+              />
+            </div>
             <button type="button" className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-panel-alt text-brand-ink">
               <Printer className="h-5 w-5" />
             </button>

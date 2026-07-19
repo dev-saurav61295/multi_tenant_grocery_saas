@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CheckCircle2, CheckSquare, MapPinned } from "lucide-react";
+import { SlideToConfirm } from "@/components/slide-to-confirm";
 import { useState, useTransition } from "react";
 import type { Prisma, Store } from "@prisma/client";
 import { completeDelivery } from "@/app/actions/orders";
@@ -182,15 +183,26 @@ export function DeliveryCompletePage({ store, order, currentRole, userName }: De
               {error ? <p className="text-sm font-semibold text-red-600">{error}</p> : null}
 
               <div>
+                {/* Desktop button */}
                 <button
                   type="button"
                   disabled={!allChecked || isPending}
                   onClick={confirmDropOff}
-                  className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="hidden w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 lg:inline-flex"
                 >
                   <CheckSquare className="h-6 w-6" />
                   {isPending ? "Finalizing..." : "Confirm Drop-off & Finalize Order"}
                 </button>
+                {/* Mobile/Tablet slider */}
+                <div className="lg:hidden">
+                  <SlideToConfirm
+                    label={isPending ? "Finalizing..." : "Slide to Finalize"}
+                    onConfirm={confirmDropOff}
+                    disabled={!allChecked}
+                    pending={isPending}
+                    icon={<CheckSquare className="h-6 w-6 text-brand-green" />}
+                  />
+                </div>
                 <p className="mt-2 text-center text-xs text-brand-muted">This action will notify the customer and close the active manifest.</p>
               </div>
             </div>

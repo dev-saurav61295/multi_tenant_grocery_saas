@@ -118,9 +118,85 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(226, 232, 240, 0.5);
         }
+
+        /* Loader Styles */
+        @keyframes soft-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.85; }
+        }
+        .animate-soft-pulse {
+            animation: soft-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes indeterminate-progress {
+            0% { left: -35%; right: 100%; }
+            60% { left: 100%; right: -90%; }
+            100% { left: 100%; right: -90%; }
+        }
+        .progress-bar-moving {
+            animation: indeterminate-progress 1.8s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+        }
+
+        .bg-radial-gradient {
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fbf8 100%);
+        }
+        
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
     </style>
 </head>
 <body class="bg-background text-on-background">
+<!-- Loader Overlay -->
+<div id="loader-overlay" class="fixed inset-0 z-[100] h-screen w-full flex flex-col items-center justify-center bg-radial-gradient px-gutter bg-surface-container-lowest font-body-lg text-on-surface antialiased overflow-hidden transition-opacity duration-700 ease-in-out">
+  <!-- Subtle background texture -->
+  <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#006d37 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
+  <!-- Central Brand Content -->
+  <div class="relative z-10 flex flex-col items-center text-center">
+    <!-- Logo Icon Container -->
+    <div class="mb-xl animate-soft-pulse">
+      <div class="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center rounded-[2rem] bg-surface shadow-[0px_10px_30px_rgba(0,109,55,0.08)]">
+        <span class="material-symbols-outlined text-primary text-[48px] md:text-[64px] fill-icon" data-icon="storefront">storefront</span>
+        <!-- Decorative floating ring -->
+        <div class="absolute inset-0 border-2 border-primary-container/20 rounded-[2rem] animate-ping opacity-20" style="animation-duration: 3s;"></div>
+      </div>
+    </div>
+    <!-- Brand Identity -->
+    <div class="mb-lg space-y-xs">
+      <h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface tracking-tight">
+          Bhagwandas Traders
+      </h1>
+      <p class="font-label-bold text-label-bold text-outline uppercase tracking-[0.2em]">
+          Premium Admin Ecosystem
+      </p>
+    </div>
+    <!-- Custom Indeterminate Progress Section -->
+    <div class="w-64 space-y-md">
+      <div class="relative h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
+        <div class="absolute top-0 bottom-0 bg-primary-container progress-bar-moving rounded-full"></div>
+      </div>
+      <p class="font-title-md text-title-md text-on-surface-variant animate-pulse">
+          Loading Dashboard...
+      </p>
+    </div>
+  </div>
+  <!-- Footer / Status Message -->
+  <footer class="absolute bottom-12 w-full text-center px-gutter">
+    <div class="flex items-center justify-center gap-sm">
+      <span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings: 'wght' 700;">lock</span>
+      <p class="font-body-sm text-body-sm text-outline transition-opacity duration-300" id="loader-status-text">
+          Verifying secure connection to Bhagwandas Traders...
+      </p>
+    </div>
+    <!-- Connection Pulse Dots -->
+    <div class="flex justify-center gap-xs mt-sm">
+      <div class="w-1.5 h-1.5 rounded-full bg-primary-container opacity-40"></div>
+      <div class="w-1.5 h-1.5 rounded-full bg-primary-container opacity-70"></div>
+      <div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+    </div>
+  </footer>
+</div>
+
 <!-- SideNavBar Shell -->
 <nav class="fixed left-0 top-0 h-full flex flex-col z-50 docked w-64 bg-inverse-surface dark:bg-surface-container-lowest shadow-lg">
 <div class="p-lg">
@@ -483,6 +559,38 @@
                 const text = row.innerText.toLowerCase();
                 row.style.display = text.includes(val) ? '' : 'none';
             });
+        });
+
+        // Loader logic
+        const loaderOverlay = document.getElementById('loader-overlay');
+        const loaderStatusText = document.getElementById('loader-status-text');
+        const statuses = [
+            "Verifying secure connection to Bhagwandas Traders...",
+            "Encrypting administrative session data...",
+            "Synchronizing inventory global states...",
+            "Fetching latest merchant analytics...",
+            "Finalizing dashboard components..."
+        ];
+        
+        let statusIndex = 0;
+        const statusInterval = setInterval(() => {
+            statusIndex = (statusIndex + 1) % statuses.length;
+            loaderStatusText.classList.add('opacity-0');
+            setTimeout(() => {
+                loaderStatusText.innerText = statuses[statusIndex];
+                loaderStatusText.classList.remove('opacity-0');
+            }, 300);
+        }, 1200);
+
+        // Hide loader after a simulated delay
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                loaderOverlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    loaderOverlay.remove();
+                    clearInterval(statusInterval);
+                }, 700); // matches transition duration
+            }, 1800); // 1.8 seconds loading screen minimum
         });
     </script>
 </body></html>

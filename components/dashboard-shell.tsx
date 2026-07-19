@@ -104,11 +104,6 @@ export function DashboardShell({
         <div className="flex min-w-0 flex-col">
           <header className="flex flex-col gap-4 border-b border-brand-border/60 bg-brand-panel px-5 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-8">
             <div className="flex flex-1 items-center gap-4">
-              <label className="hidden w-full max-w-md items-center gap-3 rounded-full bg-brand-panel-soft px-4 py-2.5 lg:flex">
-                <span className="sr-only">Search dashboard</span>
-                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 text-brand-outline fill-none stroke-current stroke-2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-                <input className="w-full bg-transparent text-sm outline-none placeholder:text-brand-outline" placeholder="Search orders, inventory, or staff..." />
-              </label>
               <div>
               <h2 className="text-3xl font-semibold tracking-tight text-brand-ink">{title}</h2>
               <p className="mt-1 text-sm text-slate-500">{subtitle}</p>

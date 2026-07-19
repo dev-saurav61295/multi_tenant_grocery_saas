@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, CheckSquare, MapPinned, Phone, Truck } from "lucide-react";
+import { SlideToConfirm } from "@/components/slide-to-confirm";
 import { useMemo, useState, useTransition } from "react";
 import type { Prisma, Store } from "@prisma/client";
 import { acceptPickup } from "@/app/actions/orders";
@@ -242,23 +243,48 @@ export function DeliveryDashboardPage({ store, currentRole, userName, orders, co
                 </div>
 
                 {selectedOrder.acceptedAt ? (
-                  <Link
-                    href={`/${store.slug}/delivery/complete/${selectedOrder.id}`}
-                    className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110"
-                  >
-                    <CheckSquare className="h-6 w-6" />
-                    Confirm Drop-off & Finalize Order
-                  </Link>
+                  <>
+                    {/* Desktop link */}
+                    <Link
+                      href={`/${store.slug}/delivery/complete/${selectedOrder.id}`}
+                      className="hidden w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110 lg:inline-flex"
+                    >
+                      <CheckSquare className="h-6 w-6" />
+                      Confirm Drop-off & Finalize Order
+                    </Link>
+                    {/* Mobile/Tablet slider */}
+                    <div className="lg:hidden">
+                      <SlideToConfirm
+                        label="Slide to Confirm Drop-off"
+                        onConfirm={() => router.push(`/${store.slug}/delivery/complete/${selectedOrder.id}`)}
+                        icon={<CheckSquare className="h-6 w-6 text-brand-green" />}
+                      />
+                    </div>
+                  </>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={acceptSelectedPickup}
-                    disabled={isPending}
-                    className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-orange-deep px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110 disabled:opacity-60"
-                  >
-                    <CheckCircle2 className="h-6 w-6" />
-                    {isPending ? "Accepting..." : "Accept & Confirm Pickup"}
-                  </button>
+                  <>
+                    {/* Desktop button */}
+                    <button
+                      type="button"
+                      onClick={acceptSelectedPickup}
+                      disabled={isPending}
+                      className="hidden w-full items-center justify-center gap-3 rounded-xl bg-brand-orange-deep px-6 py-5 text-[1.55rem] font-bold text-white transition hover:brightness-110 disabled:opacity-60 lg:inline-flex"
+                    >
+                      <CheckCircle2 className="h-6 w-6" />
+                      {isPending ? "Accepting..." : "Accept & Confirm Pickup"}
+                    </button>
+                    {/* Mobile/Tablet slider */}
+                    <div className="lg:hidden">
+                      <SlideToConfirm
+                        label={isPending ? "Accepting..." : "Slide to Accept Pickup"}
+                        onConfirm={acceptSelectedPickup}
+                        disabled={isPending}
+                        pending={isPending}
+                        variant="orange"
+                        icon={<CheckCircle2 className="h-6 w-6 text-brand-orange-deep" />}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             </div>

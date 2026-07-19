@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CreditCard, ImageUp, Sparkles, Truck, X } from "lucide-react";
+import { SlideToConfirm } from "@/components/slide-to-confirm";
 import { useActionState, useRef, useState } from "react";
 import type { Store } from "@prisma/client";
 import { AccountMenu } from "@/components/account-menu";
@@ -23,6 +24,7 @@ export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }
   const [isDragging, setIsDragging] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "cod">("upi");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(placeOrder, undefined);
 
   function setSelectedFile(next: File | null) {
@@ -56,7 +58,7 @@ export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }
         </div>
       </nav>
 
-      <form action={formAction}>
+      <form ref={formRef} action={formAction}>
         <input type="hidden" name="items" value={itemsParam} />
         <input type="hidden" name="paymentMethod" value={paymentMethod} />
 
@@ -273,14 +275,25 @@ export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }
                 {paymentMethod === "cod" ? "Order goes directly to packing team once verified." : "Payment verification will start immediately."}
               </p>
             </div>
+            {/* Desktop button */}
             <button
               type="submit"
               disabled={pending}
-              className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-5 py-4 text-base font-bold text-white transition hover:brightness-110 disabled:opacity-60 md:w-auto md:min-w-[320px]"
+              className="hidden w-full items-center justify-center gap-3 rounded-xl bg-brand-green px-5 py-4 text-base font-bold text-white transition hover:brightness-110 disabled:opacity-60 md:w-auto md:min-w-[320px] lg:inline-flex"
             >
               <CreditCard className="h-5 w-5" />
               {pending ? "Submitting..." : paymentMethod === "cod" ? "Place Pay on Delivery Order" : "Submit Order for Verification"}
             </button>
+            {/* Mobile/Tablet slider */}
+            <div className="w-full lg:hidden">
+              <SlideToConfirm
+                label={pending ? "Submitting..." : paymentMethod === "cod" ? "Slide to Place Order" : "Slide to Submit Order"}
+                onConfirm={() => formRef.current?.requestSubmit()}
+                disabled={pending}
+                pending={pending}
+                icon={<CreditCard className="h-6 w-6 text-brand-green" />}
+              />
+            </div>
           </div>
         </footer>
       </form>
