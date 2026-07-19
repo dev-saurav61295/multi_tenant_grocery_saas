@@ -19,7 +19,34 @@ function readSession(request: NextRequest): SessionPayload | null {
 }
 
 export default function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
+
+  // 1. Extract hostname from request headers (or nextUrl.hostname)
+  // Strip port if present (e.g., localhost:3000 -> localhost)
+  const hostHeader = request.headers.get("host") || request.nextUrl.hostname;
+  const hostname = hostHeader.split(":")[0].toLowerCase();
+
+  // 2. Custom Tenant Domain Routing
+  // If request comes from custom domain bhagwandas.shop or www.bhagwandas.shop,
+  // silently rewrite to /bhagwandas-traders/[...path] without changing browser bar URL
+  const isCustomDomain = hostname === "bhagwandas.shop" || hostname === "www.bhagwandas.shop";
+
+  if (isCustomDomain) {
+    // Avoid double-rewriting if pathname already starts with /bhagwandas-traders
+    if (!pathname.startsWith("/bhagwandas-traders")) {
+      const rewriteUrl = new URL(
+        `/bhagwandas-traders${pathname === "/" ? "" : pathname}${search}`,
+        request.url
+      );
+
+      // Perform silent rewrite while preserving headers and underlying routing
+      const response = NextResponse.rewrite(rewriteUrl);
+      response.headers.set("x-tenant-slug", "bhagwandas-traders");
+      return response;
+    }
+  }
+
+  // 3. Standard Path-Based Tenant & Role Access Control
   const segments = pathname.split("/").filter(Boolean);
   const urlStoreSlug = segments[0];
   const session = readSession(request);
@@ -56,5 +83,10 @@ export default function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
+  // Matcher configuration:
+  // Exclude API routes (/api/*), Next.js internal static assets (/_next/static/*, /_next/image/*),
+  // PWA/metadata files (favicon.ico, manifest.webmanifest, sw.js, offline), and common static asset extensions
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon\\.ico|manifest\\.webmanifest|sw\\.js|offline|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf|eot)$).*)",
+  ],
 };
