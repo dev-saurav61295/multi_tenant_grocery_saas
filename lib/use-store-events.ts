@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { ORDERS_CHANGED_EVENT, storeChannelName, type StoreEventPayload } from "@/lib/store-channel";
+import { markSilentRefresh } from "@/components/GlobalLoaderProvider";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -50,13 +51,19 @@ export function useStoreEvents(storeId: string, onEvent?: (event: StoreEventPayl
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
-      debounceRef.current = setTimeout(() => router.refresh(), REFRESH_DEBOUNCE_MS);
+      debounceRef.current = setTimeout(() => {
+        markSilentRefresh();
+        router.refresh();
+      }, REFRESH_DEBOUNCE_MS);
     };
 
     const client = getBrowserClient();
 
     if (!client) {
-      const interval = setInterval(() => router.refresh(), POLL_FALLBACK_MS);
+      const interval = setInterval(() => {
+        markSilentRefresh();
+        router.refresh();
+      }, POLL_FALLBACK_MS);
       return () => clearInterval(interval);
     }
 

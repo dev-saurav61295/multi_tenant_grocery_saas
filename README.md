@@ -88,7 +88,26 @@ npm run start       # serve the production build
 npm run lint        # ESLint
 npm run db:migrate  # apply Prisma migrations + auto-seed
 npm run db:seed     # (re-)seed demo data
+npm run db:reset-tenant <slug> # wipe orders, products & non-admin users for a store slug
 ```
+
+## Tenant Data Management
+
+If you want to reset all operational data for a specific store slug (e.g., `bhagwandas-traders`) while keeping the store shell and all admin accounts (`admin_user`) intact, use the reset utility script:
+
+```bash
+# Reset demo store locally
+npm run db:reset-tenant bhagwandas-traders
+
+# Reset against your live Vercel production database
+DATABASE_URL="postgres://..." DIRECT_URL="postgres://..." npm run db:reset-tenant bhagwandas-traders
+```
+
+This script runs inside a safe database transaction and purges:
+- All orders & line items (`OrderItem`, `Order`)
+- All products & categories (`Product`, `Category`)
+- All email notification audit logs (`EmailLog`)
+- All customer, staff, and delivery rider accounts tied to the store (`User`), while **preserving any user with `role === "admin"` or `username === "admin_user"`**.
 
 ## Validation
 

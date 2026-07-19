@@ -20,6 +20,21 @@ export function useGlobalLoader() {
   return context;
 }
 
+let silentRefreshActive = false;
+
+/**
+ * Opt-out for background data refreshes (e.g. realtime-triggered router.refresh())
+ * that shouldn't block the screen with the full-page loader. Call immediately
+ * before the refresh; the flag self-clears on the next tick, once the refresh's
+ * underlying fetch has had a chance to dispatch.
+ */
+export function markSilentRefresh() {
+  silentRefreshActive = true;
+  setTimeout(() => {
+    silentRefreshActive = false;
+  }, 0);
+}
+
 function isPrefetchRequest(resource: RequestInfo | URL, init?: RequestInit): boolean {
   if (init?.headers) {
     const headers = new Headers(init.headers);
@@ -80,7 +95,8 @@ export function GlobalLoaderProvider({ children }: { children: ReactNode }) {
       const [resource, init] = args;
 
       // Do not trigger global loader for Next.js background prefetch requests
-      if (isPrefetchRequest(resource, init)) {
+      // or for refreshes explicitly marked silent (see markSilentRefresh)
+      if (isPrefetchRequest(resource, init) || silentRefreshActive) {
         return originalFetch(...args);
       }
 
@@ -101,9 +117,14 @@ export function GlobalLoaderProvider({ children }: { children: ReactNode }) {
     // Intercept XMLHttpRequest just in case any client scripts/axios use XHR
     const originalOpen = XMLHttpRequest.prototype.open;
     const originalSend = XMLHttpRequest.prototype.send;
+    const silentXhrRequests = new WeakSet<XMLHttpRequest>();
 
     XMLHttpRequest.prototype.open = function (...args: any[]) {
+      if (silentRefreshActive) {
+        silentXhrRequests.add(this);
+      }
       this.addEventListener("loadend", () => {
+        if (silentXhrRequests.delete(this)) return;
         activeRequests.current = Math.max(0, activeRequests.current - 1);
         if (activeRequests.current === 0 && !isNavigating.current) {
           setIsLoading(false);
@@ -113,8 +134,10 @@ export function GlobalLoaderProvider({ children }: { children: ReactNode }) {
     };
 
     XMLHttpRequest.prototype.send = function (...args: any[]) {
-      activeRequests.current += 1;
-      setIsLoading(true);
+      if (!silentXhrRequests.has(this)) {
+        activeRequests.current += 1;
+        setIsLoading(true);
+      }
       return originalSend.apply(this, args as any);
     };
 
