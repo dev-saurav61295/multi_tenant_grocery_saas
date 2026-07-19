@@ -18,7 +18,7 @@ export type PricedCart = {
 
 export async function priceCart(storeId: string, lines: CartLine[]): Promise<PricedCart> {
   const products = await prisma.product.findMany({
-    where: { storeId, id: { in: lines.map((line) => line.productId) } },
+    where: { storeId, active: true, id: { in: lines.map((line) => line.productId) } },
   });
 
   const productsById = new Map(products.map((product) => [product.id, product]));

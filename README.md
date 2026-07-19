@@ -66,7 +66,7 @@ Seeded into the `bhagwandas-traders` demo store, all with password `password123`
 - `/{store}/checkout` — bill, UPI QR + payment-proof upload or Pay on Delivery
 - `/{store}/order/{displayId}` — live order tracking
 - `/{store}/login`, `/{store}/register`, `/{store}/verify-email` — tenant-scoped auth
-- `/{store}/admin/orders` · `/inventory` · `/users` · `/settings` — admin dashboards
+- `/{store}/admin/orders` · `/inventory` · `/users` · `/settings` — admin dashboards (inventory covers add/edit/delete products, with archiving for products that have order history, and per-store category management)
 - `/{store}/staff/packing` — packing station
 - `/{store}/delivery/dashboard`, `/{store}/delivery/complete/{orderId}` — rider flow
 - `/signup` — public store onboarding (creates the store + first admin)

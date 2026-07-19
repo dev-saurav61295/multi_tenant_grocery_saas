@@ -17,7 +17,7 @@ export default async function StorePage({ params }: StorePageProps) {
   }
 
   const session = rawSession?.storeSlug === store.slug ? rawSession : null;
-  const products = await prisma.product.findMany({ where: { storeId: store.id }, orderBy: { name: "asc" } });
+  const products = await prisma.product.findMany({ where: { storeId: store.id, active: true }, orderBy: { name: "asc" } });
 
   return <CatalogPage store={store} session={session} products={products} />;
 }

@@ -70,6 +70,7 @@ model Product {
   comboEligible Boolean     @default(false)
   stock         Int         @default(0)
   imageUrl      String?
+  active        Boolean     @default(true)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -145,8 +146,21 @@ model Store {
   products   Product[]
   orders     Order[]
   emailLogs  EmailLog[]
+  categories Category[]
 
   @@map("stores")
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+  name      String
+  createdAt DateTime @default(now())
+
+  @@unique([storeId, name])
+  @@index([storeId])
+  @@map("categories")
 }
 
 model EmailLog {

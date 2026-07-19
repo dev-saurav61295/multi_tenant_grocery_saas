@@ -11,14 +11,15 @@ type InventoryPageProps = Readonly<{
 export default async function InventoryPage({ params }: InventoryPageProps) {
   const { store: storeSlug } = await params;
   const session = await verifySession();
-  const [store, products] = await Promise.all([
+  const [store, products, categories] = await Promise.all([
     getStoreBySlug(storeSlug),
     prisma.product.findMany({ where: { storeId: session.storeId }, orderBy: { name: "asc" } }),
+    prisma.category.findMany({ where: { storeId: session.storeId }, orderBy: { name: "asc" } }),
   ]);
 
   if (!store) {
     notFound();
   }
 
-  return <AdminInventoryPage store={store} currentRole={session.role} userName={session.name} products={products} />;
+  return <AdminInventoryPage store={store} currentRole={session.role} userName={session.name} products={products} categories={categories} />;
 }

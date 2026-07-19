@@ -251,6 +251,20 @@ async function seedProducts(store: (typeof stores)[number]) {
   }
 }
 
+async function seedCategories(store: (typeof stores)[number]) {
+  const storeRecord = await prisma.store.findUniqueOrThrow({ where: { slug: store.slug } });
+
+  const names = [...new Set((store.products as DemoProduct[]).map((product) => product.category))];
+
+  for (const name of names) {
+    await prisma.category.upsert({
+      where: { storeId_name: { storeId: storeRecord.id, name } },
+      update: {},
+      create: { storeId: storeRecord.id, name },
+    });
+  }
+}
+
 async function seedOrders(store: (typeof stores)[number]) {
   const storeRecord = await prisma.store.findUniqueOrThrow({ where: { slug: store.slug } });
 
@@ -330,6 +344,7 @@ async function main() {
   for (const store of stores) {
     await seedUsers(store);
     await seedProducts(store);
+    await seedCategories(store);
     await seedOrders(store);
   }
 }

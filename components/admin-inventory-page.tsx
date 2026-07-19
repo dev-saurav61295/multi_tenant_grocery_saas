@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { AlertTriangle, Boxes, Download, ImageUp, Plus, Search } from "lucide-react";
-import { useActionState, useMemo, useState } from "react";
-import type { Product, Store } from "@prisma/client";
-import { createProduct } from "@/app/actions/inventory";
+import { useRouter } from "next/navigation";
+import { AlertTriangle, Boxes, Check, Download, ImageUp, Pencil, Plus, RotateCcw, Search, Tags, Trash2, X } from "lucide-react";
+import { useActionState, useMemo, useState, useTransition } from "react";
+import type { Category, Product, Store } from "@prisma/client";
+import { createCategory, createProduct, deleteCategory, deleteProduct, restoreProduct, updateProduct } from "@/app/actions/inventory";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { downloadCsv } from "@/lib/csv-export";
 import { formatCurrency } from "@/lib/format";
@@ -15,14 +16,25 @@ type AdminInventoryPageProps = {
   currentRole: Role;
   userName: string;
   products: Product[];
+  categories: Category[];
 };
 
 const LOW_STOCK_THRESHOLD = 30;
 
-export function AdminInventoryPage({ store, currentRole, userName, products }: AdminInventoryPageProps) {
+export function AdminInventoryPage({ store, currentRole, userName, products, categories }: AdminInventoryPageProps) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
   const [state, formAction, pending] = useActionState(createProduct, undefined);
+  const [categoryState, categoryFormAction, categoryPending] = useActionState(createCategory, undefined);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editPrice, setEditPrice] = useState("");
+  const [editStock, setEditStock] = useState("");
+  const [rowMessage, setRowMessage] = useState<{ id: string; text: string; isError: boolean } | null>(null);
+  const [isRowPending, startRowTransition] = useTransition();
 
   const filteredItems = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -30,18 +42,83 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
       return products;
     }
     return products.filter((item) =>
-      [item.name, item.brand, item.size].some((value) => value.toLowerCase().includes(normalized))
+      [item.name, item.brand, item.size, item.category].some((value) => value.toLowerCase().includes(normalized))
     );
   }, [products, query]);
 
-  const lowStockCount = products.filter((item) => item.stock < LOW_STOCK_THRESHOLD).length;
+  const productCountByCategory = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const product of products) {
+      counts.set(product.category, (counts.get(product.category) ?? 0) + 1);
+    }
+    return counts;
+  }, [products]);
+
+  const lowStockCount = products.filter((item) => item.active && item.stock < LOW_STOCK_THRESHOLD).length;
 
   function exportInventory() {
     downloadCsv(
       `${store.slug}-inventory.csv`,
-      ["Product Name", "Brand", "Size", "Category", "Price", "Stock"],
-      filteredItems.map((item) => [item.name, item.brand, item.size, item.category, String(item.price), String(item.stock)])
+      ["Product Name", "Brand", "Size", "Category", "Price", "Stock", "Status"],
+      filteredItems.map((item) => [item.name, item.brand, item.size, item.category, String(item.price), String(item.stock), item.active ? "Active" : "Archived"])
     );
+  }
+
+  function beginEdit(item: Product) {
+    setEditingId(item.id);
+    setEditPrice(String(item.price));
+    setEditStock(String(item.stock));
+    setRowMessage(null);
+  }
+
+  function saveEdit(productId: string) {
+    const formData = new FormData();
+    formData.set("productId", productId);
+    formData.set("price", editPrice);
+    formData.set("stock", editStock);
+
+    startRowTransition(async () => {
+      const result = await updateProduct(undefined, formData);
+      if (result?.error) {
+        setRowMessage({ id: productId, text: result.error, isError: true });
+        return;
+      }
+      setEditingId(null);
+      setRowMessage(null);
+      router.refresh();
+    });
+  }
+
+  function removeProduct(item: Product) {
+    if (!window.confirm(`Delete "${item.name}"? If it has past orders it will be archived instead.`)) {
+      return;
+    }
+
+    startRowTransition(async () => {
+      const { archived } = await deleteProduct(item.id);
+      setRowMessage(
+        archived
+          ? { id: item.id, text: "This product appears in past orders, so it was archived instead of deleted.", isError: false }
+          : null
+      );
+      router.refresh();
+    });
+  }
+
+  function bringBack(item: Product) {
+    startRowTransition(async () => {
+      await restoreProduct(item.id);
+      setRowMessage(null);
+      router.refresh();
+    });
+  }
+
+  function removeCategory(category: Category) {
+    startRowTransition(async () => {
+      const result = await deleteCategory(category.id);
+      setCategoryError(result?.error ?? null);
+      router.refresh();
+    });
   }
 
   return (
@@ -61,6 +138,14 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
           </button>
           <button
             type="button"
+            onClick={() => setShowCategories((current) => !current)}
+            className="inline-flex items-center gap-2 rounded-lg border border-brand-border bg-brand-panel-soft px-5 py-3 text-sm font-bold text-brand-ink"
+          >
+            <Tags className="h-4 w-4" />
+            Manage Categories
+          </button>
+          <button
+            type="button"
             onClick={() => setShowForm((current) => !current)}
             className="inline-flex items-center gap-2 rounded-lg bg-brand-orange-deep px-5 py-3 text-sm font-bold text-white"
           >
@@ -77,7 +162,7 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search inventory, brands, or SKU..."
+              placeholder="Search inventory, brands, categories..."
               className="w-full bg-transparent text-sm outline-none placeholder:text-brand-outline"
             />
           </label>
@@ -108,6 +193,51 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
           </div>
         </section>
 
+        {showCategories ? (
+          <section className="panel rounded-xl p-5">
+            <h2 className="text-lg font-bold text-brand-ink">Categories</h2>
+            <p className="mt-1 text-sm text-brand-muted">Products pick their category from this list. A category in use can&apos;t be removed.</p>
+
+            <form action={categoryFormAction} className="mt-4 flex max-w-md items-center gap-3">
+              <input
+                name="name"
+                required
+                placeholder="New category name"
+                className="w-full rounded-lg border border-brand-border bg-white px-4 py-2.5 text-sm outline-none"
+              />
+              <button type="submit" disabled={categoryPending} className="shrink-0 rounded-lg bg-brand-green px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60">
+                {categoryPending ? "Adding..." : "Add"}
+              </button>
+            </form>
+
+            {categoryState?.error ? <p className="mt-2 text-sm font-semibold text-red-600">{categoryState.error}</p> : null}
+            {categoryError ? <p className="mt-2 text-sm font-semibold text-red-600">{categoryError}</p> : null}
+
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {categories.map((category) => {
+                const count = productCountByCategory.get(category.name) ?? 0;
+                return (
+                  <li key={category.id} className="flex items-center gap-2 rounded-full border border-brand-border/60 bg-brand-panel-soft px-4 py-2 text-sm font-semibold text-brand-ink">
+                    {category.name}
+                    <span className="text-xs font-bold text-brand-muted">{count}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeCategory(category)}
+                      disabled={count > 0 || isRowPending}
+                      title={count > 0 ? "In use by products — reassign them first" : "Remove category"}
+                      aria-label={`Remove category ${category.name}`}
+                      className="rounded-full p-0.5 text-brand-muted enabled:hover:text-red-600 disabled:opacity-30"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </li>
+                );
+              })}
+              {categories.length === 0 ? <li className="text-sm text-brand-muted">No categories yet — add your first one above.</li> : null}
+            </ul>
+          </section>
+        ) : null}
+
         {showForm ? (
           <section className="panel rounded-xl p-5">
             <form action={formAction}>
@@ -126,7 +256,14 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
                 </label>
                 <label className="block">
                   <span className="mb-2 block text-sm font-semibold text-brand-ink">Category</span>
-                  <input name="category" required className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none" />
+                  <select name="category" required defaultValue="" className="w-full rounded-lg border border-brand-border bg-white px-4 py-3 outline-none">
+                    <option value="" disabled>
+                      {categories.length === 0 ? "No categories — add one first" : "Select a category"}
+                    </option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.name}>{category.name}</option>
+                    ))}
+                  </select>
                 </label>
                 <label className="block">
                   <span className="mb-2 block text-sm font-semibold text-brand-ink">Base Price</span>
@@ -167,41 +304,143 @@ export function AdminInventoryPage({ store, currentRole, userName, products }: A
                 <tr>
                   <th className="px-5 py-4"></th>
                   <th className="px-5 py-4">Product Name & Brand</th>
+                  <th className="px-5 py-4">Category</th>
                   <th className="px-5 py-4">Variant Size</th>
                   <th className="px-5 py-4">Base Price</th>
                   <th className="px-5 py-4">Stock Level</th>
+                  <th className="px-5 py-4">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => (
-                  <tr key={item.id} className="border-b border-brand-border/50 text-sm hover:bg-brand-panel-soft/60">
-                    <td className="px-5 py-4">
-                      <div className="relative h-10 w-10 overflow-hidden rounded-md border border-brand-border/60 bg-brand-panel-soft">
-                        {item.imageUrl ? (
-                          <Image src={item.imageUrl} alt={item.name} fill sizes="40px" className="object-cover" />
+                {filteredItems.map((item) => {
+                  const isEditing = editingId === item.id;
+                  return (
+                    <tr key={item.id} className={`border-b border-brand-border/50 text-sm hover:bg-brand-panel-soft/60 ${item.active ? "" : "opacity-60"}`}>
+                      <td className="px-5 py-4">
+                        <div className="relative h-10 w-10 overflow-hidden rounded-md border border-brand-border/60 bg-brand-panel-soft">
+                          {item.imageUrl ? (
+                            <Image src={item.imageUrl} alt={item.name} fill sizes="40px" className="object-cover" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-brand-outline">
+                              <Boxes className="h-4 w-4" />
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <p className="text-[1.15rem] font-semibold text-brand-ink">
+                          {item.name}
+                          {!item.active ? <span className="ml-2 rounded-full bg-brand-panel-high px-2.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wider text-brand-muted">Archived</span> : null}
+                        </p>
+                        <p className="text-brand-muted">{item.brand}</p>
+                        {rowMessage?.id === item.id ? (
+                          <p className={`mt-1 text-xs font-semibold ${rowMessage.isError ? "text-red-600" : "text-brand-orange-deep"}`}>{rowMessage.text}</p>
+                        ) : null}
+                      </td>
+                      <td className="px-5 py-4"><span className="rounded-md bg-brand-green/10 px-3 py-1 text-xs font-bold text-brand-green">{item.category}</span></td>
+                      <td className="px-5 py-4"><span className="rounded-md bg-brand-panel-soft px-3 py-1 text-xs font-bold text-brand-ink">{item.size}</span></td>
+                      <td className="px-5 py-4">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            value={editPrice}
+                            onChange={(event) => setEditPrice(event.target.value)}
+                            className="w-24 rounded-lg border border-brand-border bg-white px-3 py-2 text-sm outline-none"
+                            aria-label={`Price for ${item.name}`}
+                          />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-brand-outline">
-                            <Boxes className="h-4 w-4" />
+                          <span className="text-[1.3rem] font-bold text-brand-orange-deep">{formatCurrency(item.price)}</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={editStock}
+                            onChange={(event) => setEditStock(event.target.value)}
+                            className="w-24 rounded-lg border border-brand-border bg-white px-3 py-2 text-sm outline-none"
+                            aria-label={`Stock for ${item.name}`}
+                          />
+                        ) : (
+                          <div className="flex items-center gap-3">
+                            <div className="w-24 overflow-hidden rounded-full bg-brand-panel-high">
+                              <div className={`h-2 rounded-full ${item.stock < LOW_STOCK_THRESHOLD ? "bg-brand-orange-deep" : "bg-brand-green"}`} style={{ width: `${Math.min(item.stock, 100)}%` }} />
+                            </div>
+                            <span className="text-xs font-bold text-brand-ink">{item.stock} Units</span>
                           </div>
                         )}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <p className="text-[1.15rem] font-semibold text-brand-ink">{item.name}</p>
-                      <p className="text-brand-muted">{item.brand}</p>
-                    </td>
-                    <td className="px-5 py-4"><span className="rounded-md bg-brand-panel-soft px-3 py-1 text-xs font-bold text-brand-ink">{item.size}</span></td>
-                    <td className="px-5 py-4 text-[1.3rem] font-bold text-brand-orange-deep">{formatCurrency(item.price)}</td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-24 overflow-hidden rounded-full bg-brand-panel-high">
-                          <div className={`h-2 rounded-full ${item.stock < LOW_STOCK_THRESHOLD ? "bg-brand-orange-deep" : "bg-brand-green"}`} style={{ width: `${Math.min(item.stock, 100)}%` }} />
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-1.5">
+                          {isEditing ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => saveEdit(item.id)}
+                                disabled={isRowPending}
+                                title="Save changes"
+                                aria-label={`Save ${item.name}`}
+                                className="rounded-lg bg-brand-green p-2 text-white disabled:opacity-60"
+                              >
+                                <Check className="h-4 w-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { setEditingId(null); setRowMessage(null); }}
+                                disabled={isRowPending}
+                                title="Cancel"
+                                aria-label={`Cancel editing ${item.name}`}
+                                className="rounded-lg border border-brand-border p-2 text-brand-muted"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => beginEdit(item)}
+                                disabled={isRowPending}
+                                title="Edit price & stock"
+                                aria-label={`Edit ${item.name}`}
+                                className="rounded-lg border border-brand-border p-2 text-brand-ink hover:bg-brand-panel-soft"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                              {item.active ? (
+                                <button
+                                  type="button"
+                                  onClick={() => removeProduct(item)}
+                                  disabled={isRowPending}
+                                  title="Delete (archives if the product has past orders)"
+                                  aria-label={`Delete ${item.name}`}
+                                  className="rounded-lg border border-brand-border p-2 text-brand-muted hover:border-red-300 hover:text-red-600"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => bringBack(item)}
+                                  disabled={isRowPending}
+                                  title="Restore to catalog"
+                                  aria-label={`Restore ${item.name}`}
+                                  className="rounded-lg border border-brand-border p-2 text-brand-green hover:bg-brand-green/10"
+                                >
+                                  <RotateCcw className="h-4 w-4" />
+                                </button>
+                              )}
+                            </>
+                          )}
                         </div>
-                        <span className="text-xs font-bold text-brand-ink">{item.stock} Units</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
