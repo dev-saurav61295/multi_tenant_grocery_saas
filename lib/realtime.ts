@@ -1,5 +1,5 @@
 import "server-only";
-import { storeChannelName } from "@/lib/store-channel";
+import { storeChannelName, type StoreEventPayload } from "@/lib/store-channel";
 
 // Server-side publisher for realtime store events. Uses Supabase Realtime's
 // HTTP broadcast endpoint directly (no SDK, no socket) so it works in
@@ -8,7 +8,7 @@ import { storeChannelName } from "@/lib/store-channel";
 
 export type StoreEvent = {
   event: "orders-changed";
-  payload: { orderId: string };
+  payload: StoreEventPayload;
 };
 
 let warnedMissingConfig = false;

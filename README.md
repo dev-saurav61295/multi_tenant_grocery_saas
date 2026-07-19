@@ -75,6 +75,8 @@ Seeded into the `bhagwandas-traders` demo store, all with password `password123`
 
 Order mutations broadcast a lightweight event on a per-store Supabase Realtime channel; open dashboards (admin queue, packing station, rider manifest, customer order tracking) subscribe and re-fetch their server data automatically. Place an order in one browser and watch it appear on the admin queue in another within a second — no refresh.
 
+Dashboards also surface role-relevant events as toast notifications with a soft chime: admins are alerted to new orders and completed deliveries, packing staff to newly approved orders, and riders to assignments and pickups.
+
 The Supabase coupling is confined to `lib/realtime.ts` (publish) and `lib/use-store-events.ts` (subscribe), so the provider can be swapped without touching business logic.
 
 ## Commands

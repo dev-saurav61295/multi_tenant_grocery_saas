@@ -8,12 +8,17 @@ import type { Prisma, Store } from "@prisma/client";
 import { acceptPickup } from "@/app/actions/orders";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { formatCurrency } from "@/lib/format";
-import { useStoreEvents } from "@/lib/use-store-events";
+import { StoreNotifications } from "@/components/store-notifications";
 import type { Role } from "@/lib/users";
 
 type OrderWithItems = Prisma.OrderGetPayload<{
   include: { user: true; items: { include: { product: true } } };
 }>;
+
+const notificationMessages = {
+  assigned: (displayId: string) => `Order ${displayId} was assigned for delivery.`,
+  dispatched: (displayId: string) => `Order ${displayId} is ready for pickup.`,
+};
 
 type DeliveryDashboardPageProps = {
   store: Store;
@@ -25,7 +30,6 @@ type DeliveryDashboardPageProps = {
 
 export function DeliveryDashboardPage({ store, currentRole, userName, orders, completedToday }: DeliveryDashboardPageProps) {
   const router = useRouter();
-  useStoreEvents(store.id);
   const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
   const [isPending, startTransition] = useTransition();
 
@@ -56,6 +60,7 @@ export function DeliveryDashboardPage({ store, currentRole, userName, orders, co
         title="Finalize Delivery"
         subtitle="Review manifest details and confirm doorstep drop-off."
       >
+        <StoreNotifications storeId={store.id} messages={notificationMessages} />
         <div className="panel rounded-xl p-8 text-center text-brand-muted">No deliveries out for drop-off right now.</div>
       </DashboardShell>
     );
@@ -73,6 +78,7 @@ export function DeliveryDashboardPage({ store, currentRole, userName, orders, co
       title="Finalize Delivery"
       subtitle="Review manifest details and confirm doorstep drop-off."
     >
+      <StoreNotifications storeId={store.id} messages={notificationMessages} />
       <div className="space-y-6">
         <div className="text-sm font-bold text-brand-muted">
           Delivery Portal <span className="mx-2">›</span> <span className="text-brand-green">Confirmation</span>

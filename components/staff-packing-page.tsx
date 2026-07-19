@@ -8,12 +8,16 @@ import type { Prisma, Store } from "@prisma/client";
 import { dispatchOrder } from "@/app/actions/orders";
 import { toggleBreak } from "@/app/actions/staff";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { useStoreEvents } from "@/lib/use-store-events";
+import { StoreNotifications } from "@/components/store-notifications";
 import type { Role } from "@/lib/users";
 
 type OrderWithItems = Prisma.OrderGetPayload<{
   include: { user: true; items: { include: { product: true } } };
 }>;
+
+const notificationMessages = {
+  verified: (displayId: string) => `Order ${displayId} approved — ready to pack.`,
+};
 
 type StaffPackingPageProps = {
   store: Store;
@@ -32,7 +36,6 @@ function timeAgo(date: Date, now: number) {
 
 export function StaffPackingPage({ store, currentRole, userName, orders, onBreak }: StaffPackingPageProps) {
   const router = useRouter();
-  useStoreEvents(store.id);
   const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
   const [checkedItems, setCheckedItems] = useState<Record<string, string[]>>({});
   const [flaggedItems, setFlaggedItems] = useState<Record<string, string[]>>({});
@@ -59,6 +62,7 @@ export function StaffPackingPage({ store, currentRole, userName, orders, onBreak
         title="Packing Station Panel"
         subtitle="Manage the ready queue and complete packing with checklist precision."
       >
+        <StoreNotifications storeId={store.id} messages={notificationMessages} />
         <div className="panel rounded-xl p-8 text-center text-brand-muted">Nothing in the packing queue right now.</div>
       </DashboardShell>
     );
@@ -123,6 +127,7 @@ export function StaffPackingPage({ store, currentRole, userName, orders, onBreak
         </div>
       }
     >
+      <StoreNotifications storeId={store.id} messages={notificationMessages} />
       <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
         <section className="rounded-xl border border-brand-border/50 bg-brand-panel-soft/60">
           <div className="flex items-center justify-between border-b border-brand-border/50 bg-white/70 px-5 py-4">

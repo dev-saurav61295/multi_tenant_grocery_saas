@@ -10,12 +10,17 @@ import { RiderAssignmentModal, type RiderOption } from "@/components/rider-assig
 import { downloadCsv } from "@/lib/csv-export";
 import { formatCurrency } from "@/lib/format";
 import { orderStatusLabels } from "@/lib/order-status";
-import { useStoreEvents } from "@/lib/use-store-events";
+import { StoreNotifications } from "@/components/store-notifications";
 import type { Role } from "@/lib/users";
 
 type OrderWithDetails = Prisma.OrderGetPayload<{
   include: { user: true; items: { include: { product: true } }; rider: true };
 }>;
+
+const notificationMessages = {
+  placed: (displayId: string) => `New order ${displayId} received — awaiting verification.`,
+  delivered: (displayId: string) => `Order ${displayId} was delivered.`,
+};
 
 type AdminOrdersPageProps = {
   store: Store;
@@ -27,7 +32,6 @@ type AdminOrdersPageProps = {
 
 export function AdminOrdersPage({ store, currentRole, userName, orders, riders }: AdminOrdersPageProps) {
   const router = useRouter();
-  useStoreEvents(store.id);
   const [selectedOrderId, setSelectedOrderId] = useState(orders[0]?.id ?? "");
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -84,6 +88,7 @@ export function AdminOrdersPage({ store, currentRole, userName, orders, riders }
         </div>
       }
     >
+      <StoreNotifications storeId={store.id} messages={notificationMessages} />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <section className="panel overflow-hidden rounded-xl">
           <div className="border-b border-brand-border/60 bg-brand-panel-soft px-5 py-4">

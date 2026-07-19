@@ -5,3 +5,12 @@ export function storeChannelName(storeId: string): string {
 }
 
 export const ORDERS_CHANGED_EVENT = "orders-changed";
+
+export type StoreEventKind = "placed" | "verified" | "assigned" | "accepted" | "dispatched" | "delivered";
+
+// Doorbell metadata only — never put order details (customer, items, amounts) here.
+export type StoreEventPayload = {
+  orderId: string;
+  displayId: string;
+  kind: StoreEventKind;
+};

@@ -162,7 +162,7 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
     console.error("Failed to send order confirmation email", error);
   }
 
-  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId: createdOrderId } });
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId: createdOrderId, displayId, kind: "placed" } });
 
   redirect(`/${session.storeSlug}/order/${displayId}`);
 }
@@ -170,12 +170,12 @@ export async function placeOrder(_state: PlaceOrderState, formData: FormData): P
 export async function verifyOrder(orderId: string) {
   const session = await requireRole("admin");
 
-  await prisma.order.update({
+  const verified = await prisma.order.update({
     where: { id: orderId, storeId: session.storeId },
     data: { status: "packing", verifiedAt: new Date() },
   });
 
-  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId } });
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId, displayId: verified.displayId, kind: "verified" } });
 
   revalidatePath(`/${session.storeSlug}/admin/orders`);
   revalidatePath(`/${session.storeSlug}/staff/packing`);
@@ -184,12 +184,12 @@ export async function verifyOrder(orderId: string) {
 export async function assignRider(orderId: string, riderId: string) {
   const session = await requireRole("admin");
 
-  await prisma.order.update({
+  const assigned = await prisma.order.update({
     where: { id: orderId, storeId: session.storeId },
     data: { riderId },
   });
 
-  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId } });
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId, displayId: assigned.displayId, kind: "assigned" } });
 
   revalidatePath(`/${session.storeSlug}/admin/orders`);
   revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
@@ -198,12 +198,12 @@ export async function assignRider(orderId: string, riderId: string) {
 export async function acceptPickup(orderId: string) {
   const session = await requireRole("delivery");
 
-  await prisma.order.update({
+  const accepted = await prisma.order.update({
     where: { id: orderId, storeId: session.storeId, riderId: session.id },
     data: { acceptedAt: new Date() },
   });
 
-  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId } });
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId, displayId: accepted.displayId, kind: "accepted" } });
 
   revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
 }
@@ -238,7 +238,7 @@ export async function dispatchOrder(orderId: string) {
     type: "order_out_for_delivery",
   });
 
-  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId } });
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId, displayId: updated.displayId, kind: "dispatched" } });
 
   revalidatePath(`/${session.storeSlug}/staff/packing`);
   revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
@@ -272,7 +272,7 @@ export async function completeDelivery(orderId: string) {
     type: "order_delivered",
   });
 
-  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId } });
+  await publishStoreEvent(session.storeId, { event: "orders-changed", payload: { orderId, displayId: updated.displayId, kind: "delivered" } });
 
   revalidatePath(`/${session.storeSlug}/delivery/dashboard`);
 }

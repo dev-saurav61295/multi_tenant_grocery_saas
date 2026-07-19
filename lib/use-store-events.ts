@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { ORDERS_CHANGED_EVENT, storeChannelName } from "@/lib/store-channel";
+import { ORDERS_CHANGED_EVENT, storeChannelName, type StoreEventPayload } from "@/lib/store-channel";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -26,10 +26,23 @@ function getBrowserClient(): SupabaseClient | null {
  * this store's orders. Subscribes to the store's Supabase Realtime broadcast
  * channel (see lib/realtime.ts for the publisher); when Supabase env is not
  * configured, degrades to polling every 30s so dashboards still stay fresh.
+ *
+ * `onEvent` (optional) fires once per received event with its payload —
+ * used by <StoreNotifications> for toasts. It is held in a ref, so an inline
+ * closure is fine; changing it never resubscribes the channel. Not called in
+ * polling-fallback mode (there are no events to describe).
+ *
+ * Only mount ONE subscriber per page (hook or <StoreNotifications>, not
+ * both) — duplicate channels with the same name on one client conflict.
  */
-export function useStoreEvents(storeId: string) {
+export function useStoreEvents(storeId: string, onEvent?: (event: StoreEventPayload) => void) {
   const router = useRouter();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onEventRef = useRef(onEvent);
+
+  useEffect(() => {
+    onEventRef.current = onEvent;
+  }, [onEvent]);
 
   useEffect(() => {
     // Coalesce bursts of events (e.g. verify + assign) into one refresh.
@@ -49,7 +62,10 @@ export function useStoreEvents(storeId: string) {
 
     const channel = client
       .channel(storeChannelName(storeId))
-      .on("broadcast", { event: ORDERS_CHANGED_EVENT }, refresh)
+      .on("broadcast", { event: ORDERS_CHANGED_EVENT }, (message) => {
+        onEventRef.current?.(message.payload as StoreEventPayload);
+        refresh();
+      })
       .subscribe();
 
     return () => {
