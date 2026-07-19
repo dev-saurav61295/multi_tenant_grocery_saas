@@ -21,6 +21,7 @@ import { AccountMenu } from "@/components/account-menu";
 import { cartParamFromLines } from "@/lib/cart";
 import { formatCurrency } from "@/lib/format";
 import type { SessionPayload } from "@/lib/session";
+import { useGlobalLoader } from "@/components/GlobalLoaderProvider";
 
 const productVisuals: Record<string, string> = {
   "amul-milk": "from-white via-emerald-50 to-lime-100",
@@ -81,6 +82,7 @@ function Icon({ name, className, filled = false }: IconProps) {
 }
 
 export function CatalogPage({ store, session, products }: CatalogPageProps) {
+  const { showLoader } = useGlobalLoader();
   const [searchValue, setSearchValue] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
     const defaults: Record<string, number> = {};
@@ -338,6 +340,7 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
               {cartItems.length > 0 ? (
                 <Link
                   href={checkoutHref}
+                  onClick={() => showLoader()}
                   className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange-deep px-5 py-4 text-base font-semibold text-white transition hover:brightness-110"
                 >
                   Checkout

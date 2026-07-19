@@ -2,9 +2,10 @@
 
 import { AlertCircle, ArrowRight, Eye, EyeOff, LockKeyhole, Mail, MessageCircle, Store } from "lucide-react";
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useState, useEffect } from "react";
 import type { Store as PrismaStore } from "@prisma/client";
 import { login } from "@/app/actions/auth";
+import { useGlobalLoader } from "@/components/GlobalLoaderProvider";
 
 type LoginPageProps = {
   store: PrismaStore;
@@ -14,6 +15,18 @@ export function LoginPage({ store }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const boundLogin = login.bind(null, store.id);
   const [state, formAction, pending] = useActionState(boundLogin, undefined);
+  const { showLoader, hideLoader } = useGlobalLoader();
+
+  useEffect(() => {
+    if (pending) {
+      showLoader();
+    } else {
+      hideLoader();
+    }
+    
+    // Cleanup function to ensure loader is removed if component unmounts abruptly
+    return () => hideLoader();
+  }, [pending, showLoader, hideLoader]);
 
   return (
     <div className="app-shell relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">

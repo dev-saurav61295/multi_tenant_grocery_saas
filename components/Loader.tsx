@@ -28,7 +28,10 @@ export default function Loader() {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[100] h-screen w-full flex flex-col items-center justify-center bg-radial-gradient px-gutter bg-[#ffffff] font-sans text-[#161d17] antialiased overflow-hidden">
+    <div 
+      className="fixed inset-0 z-[100] h-screen w-full flex flex-col items-center justify-center px-4 font-sans text-[#161d17] antialiased overflow-hidden"
+      style={{ background: 'radial-gradient(circle at center, #ffffff 0%, #f8fbf8 100%)' }}
+    >
       {/* Subtle background texture */}
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
