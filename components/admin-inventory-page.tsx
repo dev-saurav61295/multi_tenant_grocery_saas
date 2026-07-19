@@ -33,6 +33,8 @@ export function AdminInventoryPage({ store, currentRole, userName, products, cat
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState("");
   const [editStock, setEditStock] = useState("");
+  const [editImage, setEditImage] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
   const [rowMessage, setRowMessage] = useState<{ id: string; text: string; isError: boolean } | null>(null);
   const [isRowPending, startRowTransition] = useTransition();
 
@@ -68,7 +70,24 @@ export function AdminInventoryPage({ store, currentRole, userName, products, cat
     setEditingId(item.id);
     setEditPrice(String(item.price));
     setEditStock(String(item.stock));
+    setEditImage(null);
+    setEditImagePreview(null);
     setRowMessage(null);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditImage(null);
+    setEditImagePreview(null);
+    setRowMessage(null);
+  }
+
+  function chooseEditImage(file: File | null) {
+    setEditImage(file);
+    setEditImagePreview((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return file ? URL.createObjectURL(file) : null;
+    });
   }
 
   function saveEdit(productId: string) {
@@ -76,6 +95,9 @@ export function AdminInventoryPage({ store, currentRole, userName, products, cat
     formData.set("productId", productId);
     formData.set("price", editPrice);
     formData.set("stock", editStock);
+    if (editImage) {
+      formData.set("image", editImage);
+    }
 
     startRowTransition(async () => {
       const result = await updateProduct(undefined, formData);
@@ -84,6 +106,8 @@ export function AdminInventoryPage({ store, currentRole, userName, products, cat
         return;
       }
       setEditingId(null);
+      setEditImage(null);
+      setEditImagePreview(null);
       setRowMessage(null);
       router.refresh();
     });
@@ -150,7 +174,7 @@ export function AdminInventoryPage({ store, currentRole, userName, products, cat
             className="inline-flex items-center gap-2 rounded-lg bg-brand-orange-deep px-5 py-3 text-sm font-bold text-white"
           >
             <Plus className="h-4 w-4" />
-            + Add New Product
+            Add New Product
           </button>
         </div>
       }
@@ -317,15 +341,40 @@ export function AdminInventoryPage({ store, currentRole, userName, products, cat
                   return (
                     <tr key={item.id} className={`border-b border-brand-border/50 text-sm hover:bg-brand-panel-soft/60 ${item.active ? "" : "opacity-60"}`}>
                       <td className="px-5 py-4">
-                        <div className="relative h-10 w-10 overflow-hidden rounded-md border border-brand-border/60 bg-brand-panel-soft">
-                          {item.imageUrl ? (
-                            <Image src={item.imageUrl} alt={item.name} fill sizes="40px" className="object-cover" />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-brand-outline">
-                              <Boxes className="h-4 w-4" />
+                        {isEditing ? (
+                          <label
+                            title="Change product photo"
+                            className="group relative block h-10 w-10 cursor-pointer overflow-hidden rounded-md border border-dashed border-brand-border bg-brand-panel-soft"
+                          >
+                            {editImagePreview || item.imageUrl ? (
+                              <Image src={editImagePreview ?? item.imageUrl ?? ""} alt={item.name} fill sizes="40px" className="object-cover" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-brand-outline">
+                                <Boxes className="h-4 w-4" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100">
+                              <ImageUp className="h-4 w-4" />
                             </div>
-                          )}
-                        </div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="sr-only"
+                              aria-label={`Change photo for ${item.name}`}
+                              onChange={(event) => chooseEditImage(event.target.files?.[0] ?? null)}
+                            />
+                          </label>
+                        ) : (
+                          <div className="relative h-10 w-10 overflow-hidden rounded-md border border-brand-border/60 bg-brand-panel-soft">
+                            {item.imageUrl ? (
+                              <Image src={item.imageUrl} alt={item.name} fill sizes="40px" className="object-cover" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-brand-outline">
+                                <Boxes className="h-4 w-4" />
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </td>
                       <td className="px-5 py-4">
                         <p className="text-[1.15rem] font-semibold text-brand-ink">
@@ -390,7 +439,7 @@ export function AdminInventoryPage({ store, currentRole, userName, products, cat
                               </button>
                               <button
                                 type="button"
-                                onClick={() => { setEditingId(null); setRowMessage(null); }}
+                                onClick={cancelEdit}
                                 disabled={isRowPending}
                                 title="Cancel"
                                 aria-label={`Cancel editing ${item.name}`}

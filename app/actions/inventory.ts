@@ -63,14 +63,17 @@ export async function updateProduct(_state: InventoryActionState, formData: Form
   const productId = String(formData.get("productId") ?? "");
   const price = Number(formData.get("price"));
   const stock = Number(formData.get("stock"));
+  const image = formData.get("image");
 
   if (!productId || !Number.isFinite(price) || price <= 0 || !Number.isFinite(stock) || stock < 0) {
     return { error: "Enter a valid price and stock level." };
   }
 
+  const imageUrl = image instanceof File && image.size > 0 ? await savePublicUpload(session.storeId, "products", image) : undefined;
+
   await prisma.product.update({
     where: { id: productId, storeId: session.storeId },
-    data: { price: Math.round(price), stock: Math.round(stock) },
+    data: { price: Math.round(price), stock: Math.round(stock), ...(imageUrl ? { imageUrl } : {}) },
   });
 
   revalidateInventory(session.storeSlug);
