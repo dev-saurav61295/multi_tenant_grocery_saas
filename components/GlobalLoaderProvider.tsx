@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Loader from "@/components/Loader";
 
@@ -20,21 +20,28 @@ export function useGlobalLoader() {
   return context;
 }
 
-export function GlobalLoaderProvider({ children }: { children: ReactNode }) {
-  const [isLoading, setIsLoading] = useState(false);
+function RouteChangeListener({ hideLoader }: { hideLoader: () => void }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    hideLoader();
+  }, [pathname, searchParams, hideLoader]);
+
+  return null;
+}
+
+export function GlobalLoaderProvider({ children }: { children: ReactNode }) {
+  const [isLoading, setIsLoading] = useState(false);
 
   const showLoader = () => setIsLoading(true);
   const hideLoader = () => setIsLoading(false);
 
-  // Automatically hide the loader when the route changes
-  useEffect(() => {
-    hideLoader();
-  }, [pathname, searchParams]);
-
   return (
     <GlobalLoaderContext.Provider value={{ showLoader, hideLoader, isLoading }}>
+      <Suspense fallback={null}>
+        <RouteChangeListener hideLoader={hideLoader} />
+      </Suspense>
       {children}
       {isLoading && <Loader />}
     </GlobalLoaderContext.Provider>
