@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, ShoppingCart } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { AccountMenu } from "@/components/account-menu";
 import type { SessionPayload } from "@/lib/session";
@@ -53,9 +54,9 @@ export function StorefrontShell({
 
           <div className="flex items-center gap-8 self-start lg:self-auto">
             <nav className="hidden items-center gap-6 lg:flex">
-              <a className="text-sm font-medium text-brand-ink hover:text-brand-orange-deep" href="#">Shop</a>
-              <a className="text-sm font-medium text-brand-muted hover:text-brand-orange-deep" href="#">Best Sellers</a>
-              <a className="text-sm font-medium text-brand-muted hover:text-brand-orange-deep" href="#">Offers</a>
+              <Link href={`/${storeSlug}`} className="text-sm font-medium text-brand-ink hover:text-brand-orange-deep">Shop</Link>
+              {session ? <Link href={`/${storeSlug}/orders`} className="text-sm font-medium text-brand-muted hover:text-brand-orange-deep">Orders</Link> : null}
+              {session ? <Link href={`/${storeSlug}/profile`} className="text-sm font-medium text-brand-muted hover:text-brand-orange-deep">Profile</Link> : null}
             </nav>
             <button
               type="button"

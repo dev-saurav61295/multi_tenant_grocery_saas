@@ -194,11 +194,7 @@ export function RegisterPage({ store }: RegisterPageProps) {
 
         <footer className="mt-8 text-center text-sm text-brand-muted">
           <p className="text-xs uppercase tracking-[0.28em]">Powered by <span className="font-bold text-brand-ink">FreshNeighbor SaaS</span></p>
-          <div className="mt-4 flex justify-center gap-4">
-            <a href="#">Support</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms</a>
-          </div>
+          <p className="mt-4">Customer support details are available from your store admin.</p>
         </footer>
       </section>
     </div>

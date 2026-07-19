@@ -156,7 +156,7 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
       <header className="border-b border-brand-border/60 bg-brand-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 md:px-16 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-6">
-            <h1 className="whitespace-nowrap text-[32px] leading-[40px] font-bold tracking-[-0.01em] text-brand-green">Bhagwandas Traders</h1>
+            <h1 className="whitespace-nowrap text-[32px] leading-[40px] font-bold tracking-[-0.01em] text-brand-green">{store.name}</h1>
             <label className="hidden w-[420px] items-center gap-3 rounded-full bg-brand-panel-soft px-4 py-2.5 md:flex">
               <Icon name="search" className="text-brand-outline" />
               <span className="sr-only">Search fresh produce</span>
@@ -171,9 +171,9 @@ export function CatalogPage({ store, session, products }: CatalogPageProps) {
 
           <div className="flex items-center gap-8 self-start md:self-auto">
             <nav className="hidden items-center gap-6 md:flex">
-              <a className="border-b-2 border-brand-green pb-1 text-sm font-bold text-brand-green" href="#">Shop</a>
-              <a className="text-sm font-medium text-brand-ink" href="#">Best Sellers</a>
-              <a className="text-sm font-medium text-brand-ink" href="#">Offers</a>
+              <Link href={`/${store.slug}`} className="border-b-2 border-brand-green pb-1 text-sm font-bold text-brand-green">Shop</Link>
+              {session ? <Link href={`/${store.slug}/orders`} className="text-sm font-medium text-brand-ink">Orders</Link> : null}
+              {session ? <Link href={`/${store.slug}/profile`} className="text-sm font-medium text-brand-ink">Profile</Link> : null}
             </nav>
             <button type="button" className="relative rounded-full p-2 text-brand-green" aria-label={`Cart with ${cartCount} items`}>
               <Icon name="shopping_cart" className="text-[22px]" />

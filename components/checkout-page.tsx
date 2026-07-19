@@ -49,8 +49,9 @@ export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }
           <Link href={`/${store.slug}`} className="text-[2rem] font-bold tracking-tight text-brand-green">{store.name}</Link>
           <div className="flex items-center gap-6">
             <div className="hidden items-center gap-6 md:flex">
-              <a className="text-sm text-brand-muted" href="#">Catalog</a>
-              <a className="text-sm text-brand-muted" href="#">Orders</a>
+              <Link href={`/${store.slug}`} className="text-sm text-brand-muted">Shop</Link>
+              <Link href={`/${store.slug}/orders`} className="text-sm text-brand-muted">Orders</Link>
+              <Link href={`/${store.slug}/profile`} className="text-sm text-brand-muted">Profile</Link>
               <span className="border-b-2 border-brand-green pb-1 text-sm font-bold text-brand-green">Checkout</span>
             </div>
             <AccountMenu storeSlug={store.slug} session={session} />
@@ -263,7 +264,7 @@ export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }
 
           <div className="mx-auto mt-4 max-w-7xl border-t border-brand-border/60 px-4 py-6 text-sm text-brand-muted lg:px-6">
             <p className="font-bold text-brand-ink">{store.name}</p>
-            <p className="mt-1">Need help with this order? Contact Support or review our Privacy Policy and Terms.</p>
+            <p className="mt-1">Need help with this order? Contact the store directly for assistance.</p>
           </div>
         </div>
 

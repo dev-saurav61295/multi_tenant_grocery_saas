@@ -31,7 +31,14 @@ export function OrderTrackingPage({ store, order, session }: OrderTrackingPagePr
       <nav className="border-b border-brand-border/60 bg-brand-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-6">
           <Link href={`/${store.slug}`} className="text-[2rem] font-bold tracking-tight text-brand-green">{store.name}</Link>
-          <AccountMenu storeSlug={store.slug} session={session} />
+          <div className="flex items-center gap-6">
+            <div className="hidden items-center gap-6 md:flex">
+              <Link href={`/${store.slug}`} className="text-sm font-medium text-brand-ink">Shop</Link>
+              <Link href={`/${store.slug}/orders`} className="text-sm font-medium text-brand-ink">Orders</Link>
+              <Link href={`/${store.slug}/profile`} className="text-sm font-medium text-brand-ink">Profile</Link>
+            </div>
+            <AccountMenu storeSlug={store.slug} session={session} />
+          </div>
         </div>
       </nav>
 

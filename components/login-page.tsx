@@ -68,7 +68,7 @@ export function LoginPage({ store }: LoginPageProps) {
             <label className="block">
               <div className="mb-2 flex items-center justify-between">
                 <span className="block text-sm font-semibold text-brand-muted">Password</span>
-                <a href="#" className="text-sm font-semibold text-brand-green">Forgot password?</a>
+                <span className="text-sm font-semibold text-brand-muted">Forgot password? Contact store support.</span>
               </div>
               <div className="flex items-center gap-3 rounded-lg border border-brand-border/70 bg-white px-4 py-3 shadow-sm">
                 <LockKeyhole className="h-5 w-5 text-brand-outline" />
@@ -133,11 +133,7 @@ export function LoginPage({ store }: LoginPageProps) {
 
         <footer className="mt-8 text-center text-sm text-brand-muted">
           <p className="text-xs uppercase tracking-[0.28em]">Powered by <span className="font-bold text-brand-ink">FreshNeighbor SaaS</span></p>
-          <div className="mt-4 flex justify-center gap-4">
-            <a href="#">Support</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms</a>
-          </div>
+          <p className="mt-4">Customer support details are available from your store admin.</p>
         </footer>
       </section>
     </div>
