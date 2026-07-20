@@ -46,7 +46,10 @@ function sanitizeSegments(relativePath: string) {
 /** Saves a publicly-servable upload (product photos, avatars) to Supabase Storage if configured, or under public/uploads as fallback. */
 export async function savePublicUpload(storeId: string, category: string, file: File): Promise<string> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const supabaseKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const bucket = process.env.SUPABASE_STORAGE_BUCKET || "bhagwan_das";
 
   if (supabaseUrl && supabaseKey) {
