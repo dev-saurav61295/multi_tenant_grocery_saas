@@ -2,7 +2,7 @@ import "server-only";
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { extname, join } from "path";
 import { randomUUID } from "crypto";
-import { createClient } from "@supabase/supabase-js";
+import { StorageClient } from "@supabase/storage-js";
 
 function getStorageRoot(): string {
   if (process.env.STORAGE_DIR) {
@@ -54,18 +54,24 @@ export async function savePublicUpload(storeId: string, category: string, file: 
 
   if (supabaseUrl && supabaseKey) {
     try {
-      const supabase = createClient(supabaseUrl, supabaseKey);
+      // Use the standalone Storage client (not createClient from @supabase/supabase-js) —
+      // the full client eagerly constructs a RealtimeClient, which throws on Node < 22
+      // (no native WebSocket), silently sending every upload to the filesystem fallback.
+      const storage = new StorageClient(`${supabaseUrl}/storage/v1`, {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+      });
       const filename = `${storeId}/${category}/${randomUUID()}${safeExt(file)}`;
       const buffer = Buffer.from(await file.arrayBuffer());
       const contentType = file.type || contentTypeForPath(filename);
 
-      const { error } = await supabase.storage.from(bucket).upload(filename, buffer, {
+      const { error } = await storage.from(bucket).upload(filename, buffer, {
         contentType,
         upsert: true,
       });
 
       if (!error) {
-        const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
+        const { data } = storage.from(bucket).getPublicUrl(filename);
         if (data?.publicUrl) {
           return data.publicUrl;
         }
