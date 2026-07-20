@@ -1,1 +1,1 @@
-export const RESERVED_STORE_SLUGS = ["signup", "api"] as const;
+export const RESERVED_STORE_SLUGS = ["signup", "api", "uploads"] as const;

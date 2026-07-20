@@ -32,8 +32,13 @@ export default function proxy(request: NextRequest) {
   const isCustomDomain = hostname === "bhagwandas.shop" || hostname === "www.bhagwandas.shop";
 
   if (isCustomDomain) {
-    // Avoid double-rewriting if pathname already starts with /bhagwandas-traders
-    if (!pathname.startsWith("/bhagwandas-traders")) {
+    // Avoid double-rewriting if pathname already starts with /bhagwandas-traders or system paths
+    if (
+      !pathname.startsWith("/bhagwandas-traders") &&
+      !pathname.startsWith("/api") &&
+      !pathname.startsWith("/uploads") &&
+      !pathname.startsWith("/signup")
+    ) {
       const rewriteUrl = new URL(
         `/bhagwandas-traders${pathname === "/" ? "" : pathname}${search}`,
         request.url
