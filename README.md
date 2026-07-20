@@ -71,6 +71,19 @@ Seeded into the `bhagwandas-traders` demo store, all with password `password123`
 - `/{store}/delivery/dashboard`, `/{store}/delivery/complete/{orderId}` — rider flow
 - `/signup` — public store onboarding (creates the store + first admin)
 
+## Single-Operator Mode (Admin Covers Packing & Delivery)
+
+For clients who are just starting out and don't yet have separate packing/delivery staff, `admin` is additionally allowed everywhere `staff` and `delivery` are — this is purely additive, nothing about the normal multi-role setup was removed:
+
+- `proxy.ts` lets `admin` sessions through the `/staff/*` and `/delivery/*` route gates (previously exact-role-only).
+- `dispatchOrder`, `acceptPickup`, `completeDelivery` (`app/actions/orders.ts`) and `toggleBreak` (`app/actions/staff.ts`) accept `"admin"` alongside their normal role.
+- The sidebar (`components/dashboard-shell.tsx`) shows "Packing Station" and "Delivery Portal" to admins too.
+- The admin orders page's rider picker (`app/[store]/admin/orders/page.tsx`) includes admin accounts, so an admin can assign an order to themselves and use the same accept/complete flow as a real rider.
+
+**Turning on real staff/delivery roles later needs zero code changes** — this was already fully supported before this change. From `/{store}/admin/users`, create a `staff` or `delivery` account; they log in and use the packing station / delivery portal exactly as designed. The admin's extra access doesn't need to be revoked for this to work correctly.
+
+**If you want to go back to strict role separation** (admin can no longer touch packing/delivery once real staff exist), revert the five call sites above — search the codebase for `"admin"` immediately following `requireRole("staff"`/`requireRole("delivery"`, the two `session?.role !== "admin"` additions in `proxy.ts`, the `roles: [..., "admin"]` entries in `dashboard-shell.tsx`, and the rider query's `role: { in: [...] }` in `admin/orders/page.tsx`.
+
 ## Realtime Updates
 
 Order mutations broadcast a lightweight event on a per-store Supabase Realtime channel; open dashboards (admin queue, packing station, rider manifest, customer order tracking) subscribe and re-fetch their server data automatically. Place an order in one browser and watch it appear on the admin queue in another within a second — no refresh.

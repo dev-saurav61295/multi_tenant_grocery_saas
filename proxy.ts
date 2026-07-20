@@ -76,11 +76,14 @@ export default function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${urlStoreSlug}/login`, request.nextUrl));
   }
 
-  if (segments[1] === "staff" && session?.role !== "staff") {
+  // Admin is also allowed into staff/delivery routes — the client currently only
+  // uses the Customer + Admin roles, with admin handling packing & delivery
+  // themselves until dedicated staff/delivery accounts are created (see README).
+  if (segments[1] === "staff" && session?.role !== "staff" && session?.role !== "admin") {
     return NextResponse.redirect(new URL(`/${urlStoreSlug}/login`, request.nextUrl));
   }
 
-  if (segments[1] === "delivery" && session?.role !== "delivery") {
+  if (segments[1] === "delivery" && session?.role !== "delivery" && session?.role !== "admin") {
     return NextResponse.redirect(new URL(`/${urlStoreSlug}/login`, request.nextUrl));
   }
 

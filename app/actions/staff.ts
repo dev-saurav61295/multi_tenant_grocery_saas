@@ -80,7 +80,7 @@ export async function createStaffAccount(_state: StaffActionState, formData: For
 }
 
 export async function toggleBreak() {
-  const session = await requireRole("staff");
+  const session = await requireRole("staff", "admin");
 
   const current = await prisma.user.findUniqueOrThrow({ where: { id: session.id }, select: { onBreak: true } });
 

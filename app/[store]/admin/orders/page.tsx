@@ -20,7 +20,9 @@ export default async function OrdersPage({ params }: OrdersPageProps) {
       take: 50,
     }),
     prisma.user.findMany({
-      where: { storeId: session.storeId, role: "delivery" },
+      // Includes admin so a self-fulfilling store (no dedicated delivery staff yet)
+      // can assign orders to themselves and use the same accept/complete flow.
+      where: { storeId: session.storeId, role: { in: ["delivery", "admin"] } },
       orderBy: { name: "asc" },
     }),
     prisma.order.groupBy({

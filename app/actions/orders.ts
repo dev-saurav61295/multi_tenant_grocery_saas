@@ -196,7 +196,7 @@ export async function assignRider(orderId: string, riderId: string) {
 }
 
 export async function acceptPickup(orderId: string) {
-  const session = await requireRole("delivery");
+  const session = await requireRole("delivery", "admin");
 
   const accepted = await prisma.order.update({
     where: { id: orderId, storeId: session.storeId, riderId: session.id },
@@ -209,7 +209,7 @@ export async function acceptPickup(orderId: string) {
 }
 
 export async function dispatchOrder(orderId: string) {
-  const session = await requireRole("staff");
+  const session = await requireRole("staff", "admin");
 
   const updated = await prisma.order.update({
     where: { id: orderId, storeId: session.storeId },
@@ -245,7 +245,7 @@ export async function dispatchOrder(orderId: string) {
 }
 
 export async function completeDelivery(orderId: string) {
-  const session = await requireRole("delivery");
+  const session = await requireRole("delivery", "admin");
 
   const updated = await prisma.order.update({
     where: { id: orderId, storeId: session.storeId },
