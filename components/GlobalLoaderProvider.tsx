@@ -64,151 +64,93 @@ function isPrefetchRequest(resource: RequestInfo | URL, init?: RequestInit): boo
 export function GlobalLoaderProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const activeRequests = useRef(0);
-  const isNavigating = useRef(false);
+  const navPending = useRef(false);
   const pathname = usePathname();
 
+  // Single source of truth for the overlay. Loader stays up while any tracked
+  // request is in flight OR a navigation is pending (showLoader → until the
+  // route actually changes). All setState is deferred out of the current call
+  // stack: a fetch can be dispatched by React mid-render/insertion-effect, and
+  // setState there is illegal ("useInsertionEffect must not schedule updates").
+  // The hide waits a paint (double rAF) so new content is on screen first.
+  const reconcile = useCallback(() => {
+    if (activeRequests.current > 0 || navPending.current) {
+      requestAnimationFrame(() => {
+        if (activeRequests.current > 0 || navPending.current) {
+          setIsLoading(true);
+        }
+      });
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (activeRequests.current === 0 && !navPending.current) {
+          setIsLoading(false);
+        }
+      });
+    });
+  }, []);
+
+  // Keep the loader up across an imminent navigation (login submit, a nav link
+  // click). Crucially it stays up until the destination route COMMITS — the
+  // pathname effect below — not merely until the triggering fetch ends. A
+  // Server Action redirect's fetch settles seconds before the new page renders
+  // (the navigation runs in a React transition; the old page stays mounted and
+  // pathname stays put until the transition commits), so releasing on fetch-end
+  // would flash the old page back. Nothing hides it on a timer.
   const showLoader = useCallback(() => {
-    setIsLoading(true);
-  }, []);
+    navPending.current = true;
+    reconcile();
+  }, [reconcile]);
 
+  // Release a navigation intent that will NOT result in a route change — e.g. a
+  // failed login returns an error instead of redirecting, so no pathname change
+  // is coming and the loader must be let go explicitly. Does not touch the
+  // request counter, so anything still fetching keeps the loader up.
   const hideLoader = useCallback(() => {
-    activeRequests.current = 0;
-    isNavigating.current = false;
-    setIsLoading(false);
-  }, []);
+    navPending.current = false;
+    reconcile();
+  }, [reconcile]);
 
-  // Automatically hide the loader when the route changes
+  // The destination route committed: the pending navigation is done. (Runs on
+  // mount too, where navPending is false — a harmless no-op that also clears any
+  // stray loader.)
   useEffect(() => {
-    isNavigating.current = false;
-    activeRequests.current = 0;
-    setIsLoading(false);
-  }, [pathname]);
+    navPending.current = false;
+    reconcile();
+  }, [pathname, reconcile]);
 
-  // Global interceptors for window.fetch, XHR, and anchor navigation clicks
+  // Next.js's router is itself built on fetch — RSC navigation payloads, Server
+  // Actions, and router.refresh() all go through window.fetch — so one fetch
+  // interceptor with a shared counter covers every same-page data update.
   useEffect(() => {
     const originalFetch = window.fetch;
-    const originalPushState = window.history.pushState;
-    const originalReplaceState = window.history.replaceState;
 
-    // Intercept fetch calls (API requests & Server Actions & RSC navigation data)
     window.fetch = async (...args) => {
       const [resource, init] = args;
 
-      // Do not trigger global loader for Next.js background prefetch requests
-      // or for refreshes explicitly marked silent (see markSilentRefresh)
+      // Skip Next.js's background prefetch requests and refreshes explicitly
+      // marked silent (see markSilentRefresh) — neither should block the screen.
       if (isPrefetchRequest(resource, init) || silentRefreshActive) {
         return originalFetch(...args);
       }
 
       activeRequests.current += 1;
-      setIsLoading(true);
+      reconcile();
 
       try {
-        const response = await originalFetch(...args);
-        return response;
+        return await originalFetch(...args);
       } finally {
         activeRequests.current = Math.max(0, activeRequests.current - 1);
-        if (activeRequests.current === 0 && !isNavigating.current) {
-          setIsLoading(false);
-        }
+        reconcile();
       }
     };
-
-    // Intercept XMLHttpRequest just in case any client scripts/axios use XHR
-    const originalOpen = XMLHttpRequest.prototype.open;
-    const originalSend = XMLHttpRequest.prototype.send;
-    const silentXhrRequests = new WeakSet<XMLHttpRequest>();
-
-    XMLHttpRequest.prototype.open = function (...args: any[]) {
-      if (silentRefreshActive) {
-        silentXhrRequests.add(this);
-      }
-      this.addEventListener("loadend", () => {
-        if (silentXhrRequests.delete(this)) return;
-        activeRequests.current = Math.max(0, activeRequests.current - 1);
-        if (activeRequests.current === 0 && !isNavigating.current) {
-          setIsLoading(false);
-        }
-      });
-      return originalOpen.apply(this, args as any);
-    };
-
-    XMLHttpRequest.prototype.send = function (...args: any[]) {
-      if (!silentXhrRequests.has(this)) {
-        activeRequests.current += 1;
-        setIsLoading(true);
-      }
-      return originalSend.apply(this, args as any);
-    };
-
-    // Intercept history transitions to reset loader cleanly on query/search params change
-    window.history.pushState = function (...args: any[]) {
-      const result = originalPushState.apply(this, args as any);
-      isNavigating.current = false;
-      activeRequests.current = 0;
-      setIsLoading(false);
-      return result;
-    };
-
-    window.history.replaceState = function (...args: any[]) {
-      const result = originalReplaceState.apply(this, args as any);
-      isNavigating.current = false;
-      activeRequests.current = 0;
-      setIsLoading(false);
-      return result;
-    };
-
-    // Intercept anchor clicks (`<Link>` / `<a href>`) to immediately show loader on menu/navigation click
-    const handleAnchorClick = (event: MouseEvent) => {
-      if (event.defaultPrevented || event.button !== 0) return;
-      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-
-      const target = event.target as HTMLElement | null;
-      const anchor = target?.closest("a");
-      if (!anchor) return;
-
-      const href = anchor.getAttribute("href");
-      if (
-        !href ||
-        href.startsWith("#") ||
-        href.startsWith("javascript:") ||
-        href.startsWith("mailto:") ||
-        href.startsWith("tel:")
-      ) {
-        return;
-      }
-
-      if (anchor.target === "_blank" || anchor.hasAttribute("download")) {
-        return;
-      }
-
-      try {
-        const targetUrl = new URL(anchor.href, window.location.href);
-        const currentUrl = new URL(window.location.href);
-
-        if (
-          targetUrl.origin === currentUrl.origin &&
-          (targetUrl.pathname !== currentUrl.pathname || targetUrl.search !== currentUrl.search)
-        ) {
-          isNavigating.current = true;
-          setIsLoading(true);
-        }
-      } catch {
-        // Ignore invalid URLs
-      }
-    };
-
-    document.addEventListener("click", handleAnchorClick, { capture: true });
 
     return () => {
       window.fetch = originalFetch;
-      XMLHttpRequest.prototype.open = originalOpen;
-      XMLHttpRequest.prototype.send = originalSend;
-      window.history.pushState = originalPushState;
-      window.history.replaceState = originalReplaceState;
-      document.removeEventListener("click", handleAnchorClick, { capture: true });
     };
-  }, []);
+  }, [reconcile]);
 
   return (
     <GlobalLoaderContext.Provider value={{ showLoader, hideLoader, isLoading }}>

@@ -2,8 +2,9 @@
 
 import { ArrowRight, LockKeyhole, Mail, Store, UserRound } from "lucide-react";
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { createStore } from "@/app/actions/store";
+import { useGlobalLoader } from "@/components/GlobalLoaderProvider";
 
 export function StoreSignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -11,6 +12,17 @@ export function StoreSignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [state, formAction, pending] = useActionState(createStore, undefined);
+  const { showLoader, hideLoader } = useGlobalLoader();
+
+  // Hold the loader from submit until the redirect's destination commits; on a
+  // validation failure no redirect is coming, so release it to show the errors.
+  useEffect(() => {
+    if (pending) {
+      showLoader();
+    } else if (state?.error || state?.fieldErrors) {
+      hideLoader();
+    }
+  }, [pending, state, showLoader, hideLoader]);
 
   return (
     <div className="app-shell relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">

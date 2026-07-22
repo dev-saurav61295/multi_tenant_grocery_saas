@@ -17,16 +17,17 @@ export function LoginPage({ store }: LoginPageProps) {
   const [state, formAction, pending] = useActionState(boundLogin, undefined);
   const { showLoader, hideLoader } = useGlobalLoader();
 
+  // Keep the loader up from submit until the dashboard route commits (the
+  // provider clears it on the pathname change). On a failed login the action
+  // returns an error instead of redirecting, so no route change is coming —
+  // release the loader explicitly so the error is shown.
   useEffect(() => {
     if (pending) {
       showLoader();
-    } else {
+    } else if (state?.error) {
       hideLoader();
     }
-    
-    // Cleanup function to ensure loader is removed if component unmounts abruptly
-    return () => hideLoader();
-  }, [pending, showLoader, hideLoader]);
+  }, [pending, state, showLoader, hideLoader]);
 
   return (
     <div className="app-shell relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">

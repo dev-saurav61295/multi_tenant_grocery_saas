@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { CreditCard, ImageUp, Sparkles, Truck, X } from "lucide-react";
 import { SlideToConfirm } from "@/components/slide-to-confirm";
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import type { Store } from "@prisma/client";
 import { AccountMenu } from "@/components/account-menu";
+import { useGlobalLoader } from "@/components/GlobalLoaderProvider";
 import { placeOrder } from "@/app/actions/orders";
 import { formatCurrency } from "@/lib/format";
 import type { PricedCart } from "@/lib/pricing";
@@ -26,6 +27,18 @@ export function CheckoutPage({ store, session, cart, itemsParam, qrCodeDataUrl }
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(placeOrder, undefined);
+  const { showLoader, hideLoader } = useGlobalLoader();
+
+  // Hold the loader from "place order" until the order-tracking route commits;
+  // if the order is rejected (out of stock, min value, etc.) no redirect is
+  // coming, so release it to show the error.
+  useEffect(() => {
+    if (pending) {
+      showLoader();
+    } else if (state?.error) {
+      hideLoader();
+    }
+  }, [pending, state, showLoader, hideLoader]);
 
   function setSelectedFile(next: File | null) {
     const input = fileInputRef.current;
